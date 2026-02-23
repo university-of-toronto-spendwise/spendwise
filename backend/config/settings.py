@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost', 'backend']
 # Application definition
 
 INSTALLED_APPS = [
+    'student_codes.apps.StudentCodesConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
