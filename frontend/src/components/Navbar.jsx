@@ -145,6 +145,7 @@ const TABS = [
   { label: "Spending", path: "/spending" },
   { label: "Bills", path: "/bills" },
   { label: "Student Codes", path: "/student-codes" },
+  { label: "Transactions", path: "/Transactions" },
 ];
 
 export default function Navbar() {
