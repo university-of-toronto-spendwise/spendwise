@@ -5,3 +5,5 @@ gunicorn
 django-environ
 django-cors-headers
 djangorestframework-simplejwt
+requests
+beautifulsoup4
