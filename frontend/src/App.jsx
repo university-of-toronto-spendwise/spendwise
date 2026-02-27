@@ -5,7 +5,7 @@ import Home from "./components/Home"
 import Scholarships from "./components/Scholarships"
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("userToken");
+  const token = sessionStorage.getItem("userToken");
   if (!token) return <Navigate to="/login" replace />;
   return children;
 };
