@@ -6,13 +6,13 @@ import Scholarships from "./components/Scholarships"
 import Transactions from "./components/Transactions"
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("userToken");
+  const token = sessionStorage.getItem("userToken");
   if (!token) return <Navigate to="/login" replace />;
   return children;
 };
 
 const PublicRoute = ({ children }) => {
-  const token = localStorage.getItem("userToken");
+  const token = sessionStorage.getItem("userToken");
   if (token) return <Navigate to="/home" replace />;
   return children;
 };
