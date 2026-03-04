@@ -1,4 +1,4 @@
-# Jan Buddies
+
 ## UofT SpendWise
 ​
 > _Note:_ This document is intended to be relatively short. Be concise and precise. Assume the reader has no prior knowledge of your application and is non-technical. 
@@ -39,12 +39,10 @@ SpendWise empowers students to discover funding, reduce living costs, and manage
 
 ## Instructions
 
-⚠️ **Note:** Due to time constraints and a mid-project pivot, we were unable to deploy the application publicly.  
-To test and access the application, please run it locally using the steps below.
 
 ## How to Use the Application
 
-After running the application locally, open:
+After running the application locally (see Development Environment Setup instructions below),  open:
 
 http://localhost:5174
 
@@ -209,13 +207,14 @@ Build and start services:
 Run in background:
 
 ```bash
-docker compose exec backend python manage.py ingest_awardexplorer
+
+docker compose up -d --build
 ```
 
 Run scholarship explorer migration:
 
 ```bash
-
+docker compose exec backend python manage.py ingest_awardexplorer
 
 ```
 
