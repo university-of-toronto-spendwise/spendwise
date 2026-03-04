@@ -50,7 +50,7 @@ http://localhost:5174
 
 ## 1. Login / Sign Up
 
-- Log in using the provided credentials, or
+- Log in using the provided credentials,
   email: admin5@gmail.com
   password: SPENDWISE1
 - Create a new account through the registration page.
