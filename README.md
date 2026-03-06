@@ -127,6 +127,12 @@ Currently:
 Discount codes can be accessed via:
 http://localhost:8000/admin
 
+First login through credentials:
+username: admin1
+password: SPENDWISE1
+
+<img width="631" height="316" alt="image" src="https://github.com/user-attachments/assets/179f0ca9-384d-47b1-bfa0-8915a07c2fd2" />
+
 Frontend integration is partially completed.
 
 <img width="909" height="431" alt="image" src="https://github.com/user-attachments/assets/3adccfcc-a0b5-4658-aae7-5f035dfdab1e" />
