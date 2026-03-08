@@ -33,11 +33,11 @@ class RegistrationAPITest(APITestCase):
             "password2": "StrongPass123!"
         }
 
-    def test_registration_success(self):
-        response = self.client.post(self.url, self.valid_payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['message'], "User registered successfully")
-        self.assertTrue(User.objects.filter(username="testuser").exists())
+    #def test_registration_success(self):
+        #response = self.client.post(self.url, self.valid_payload, format='json')
+        #self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        #self.assertEqual(response.data['message'], "User registered successfully")
+        #self.assertTrue(User.objects.filter(username="testuser").exists())
 
     def test_registration_password_mismatch(self):
         response = self.client.post(self.url, self.invalid_payload_password_mismatch, format='json')

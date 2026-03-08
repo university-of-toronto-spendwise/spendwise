@@ -1,30 +1,7 @@
-import { useMemo, useState } from "react";
+import React, {useState, useEffect} from "react"
 import Navbar from "./Navbar";
+ 
 
-// TEMP UNTIL WE LINK BANK ACCOUNT
-const TRANSACTIONS = [
-  { id: 1, date: "2026-02-25", merchant: "Metro", category: "Groceries", account: "Debit", amount: -74.21, note: "Weekly groceries" },
-  { id: 2, date: "2026-02-24", merchant: "Tim Hortons", category: "Food", account: "Credit", amount: -8.45, note: "Coffee + bagel" },
-  { id: 3, date: "2026-02-23", merchant: "OSAP Deposit", category: "Income", account: "Bank", amount: 3200.0, note: "Winter term funding" },
-  { id: 4, date: "2026-02-22", merchant: "Rogers", category: "Utilities", account: "Credit", amount: -55.0, note: "Phone bill" },
-  { id: 5, date: "2026-02-20", merchant: "Presto", category: "Transport", account: "Credit", amount: -25.0, note: "Transit top-up" },
-  { id: 6, date: "2026-02-18", merchant: "Amazon.ca", category: "Shopping", account: "Credit", amount: -39.99, note: "Desk organizer" },
-  { id: 7, date: "2026-02-16", merchant: "Part-time Payroll", category: "Income", account: "Bank", amount: 540.75, note: "Weekly shift payout" },
-  { id: 8, date: "2026-02-15", merchant: "Spotify", category: "Subscriptions", account: "Credit", amount: -5.99, note: "Student plan" },
-  { id: 9, date: "2026-02-12", merchant: "Shoppers Drug Mart", category: "Health", account: "Debit", amount: -22.13, note: "Pharmacy" },
-  { id: 10, date: "2026-02-10", merchant: "UofT Bookstore", category: "Education", account: "Credit", amount: -124.8, note: "Lab manual" },
-];
-
-const CANADIAN_BANKS = [
-  "RBC Royal Bank",
-  "TD Canada Trust",
-  "Scotiabank",
-  "CIBC",
-  "BMO",
-  "Tangerine",
-  "Simplii Financial",
-  "EQ Bank",
-];
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600;700;800&display=swap');
@@ -48,6 +25,19 @@ const styles = `
     min-height: 100vh;
     background: var(--off-white);
   }
+
+  .left-box {
+  position: fixed;
+  left: 20px;
+  top: 150px;
+  width: 220px;
+  background: white;
+  border: 1.5px solid #D0DBE8;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 0.9rem;
+  color: #002A5C;
+}
 
   .tx-body {
     max-width: 1200px;
@@ -296,196 +286,225 @@ const styles = `
   }
 `;
 
-const formatMoney = (n) =>
-  n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-const formatDate = (isoDate) =>
-  new Date(isoDate).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
+export default function Transactions1() {
 
-export default function Transactions() {
-  const [q, setQ] = useState("");
-  const [category, setCategory] = useState("All");
-  const [type, setType] = useState("All");
-  const [sortBy, setSortBy] = useState("Newest");
-  const [linkedAccounts, setLinkedAccounts] = useState([]);
-  const [showBankPicker, setShowBankPicker] = useState(false);
+    const [transactions, setTransactions] = useState([]);
+    const [monthly_saving_amount,  setMonthly_saving_amount] = useState(null);
+    const [total_Expenses_Amountt,  setTotal_Expenses_Amount] = useState(null);
+    const [monthly_saving_desc,  setMonthly_saving_desc] = useState(null);
 
-  const categories = useMemo(
-    () => ["All", ...new Set(TRANSACTIONS.map((t) => t.category))],
-    []
-  );
+    const today = new Date();
 
-  const handleLinkBank = (bankName) => {
-    setLinkedAccounts((prev) => {
-      const label = `TODO: Bank Account Linking (${bankName})`;
-      if (prev.includes(label)) return prev;
-      return [...prev, label];
-    });
-    setShowBankPicker(false);
+    const [month, setMonth] = useState(today.getMonth() + 1);
+    const [year, setYear] = useState(today.getFullYear());
+
+    const [loading, setLoading] = useState(false);
+
+
+
+    // functions
+    const fetchTranscactions = async () => {
+        try {
+        const response = await fetch(`http://localhost:8000/spending/monthly_transactions/?month=${month}&year=${year}`);
+        const result = await response.json();
+        setTransactions(result);
+        } catch (error) {
+        console.error(error);
+        } finally {
+        setLoading(false);
+        }
+    };
+
+    const fetchMonthlySavingAmount = async () => {
+        try {
+        const response = await fetch(`http://localhost:8000/spending/monthly_saving_amount/?month=${month}&year=${year}`);
+        const result = await response.json();
+        setMonthly_saving_amount(result);
+        } catch (error) {
+        console.error(error);
+        } finally {
+        setLoading(false);
+        }
+    };
+    
+    const fetchTotalExpensesAmount = async () => {
+        try {
+        const response = await fetch(`http://localhost:8000/spending/total_expenses_amount/?month=${month}&year=${year}`);
+        const result = await response.json();
+        setTotal_Expenses_Amount(result);
+        } catch (error) {
+        console.error(error);
+        } finally {
+        setLoading(false);
+        }
+    };
+
+    const fetchMonthlySavingDesc = async () => {
+        try {
+        const response = await fetch(`http://localhost:8000/spending/monthly_saving/?month=${month}&year=${year}`);
+        const result = await response.json();
+       setMonthly_saving_desc(result);
+        } catch (error) {
+        console.error(error);
+        } finally {
+        setLoading(false);
+        }
+    };
+
+   const fetchAllData = async () => {
+
+    if (!month || !year) {
+      alert("Please enter month and year");
+      return;
+    }
+
+    setLoading(true);
+
+    await fetchTransactions();
+    await fetchMonthlySavingAmount();
+    await fetchTotalExpensesAmount();
+    await fetchMonthlySavingDesc();
+
+    setLoading(false);
+  }
+
+    const formatDate = (date) => {
+    return new Date(date).toLocaleDateString();
+    };
+
+    const formatMoney = (num) => {
+    if (!num) return "0";
+    return Number(num).toLocaleString();
   };
 
-  const handleLinkCreditCard = () => {
-    setLinkedAccounts((prev) => {
-      const label = "Credit Card";
-      if (prev.includes(label)) return prev;
-      return [...prev, label];
-    });
-  };
 
-  const visible = useMemo(() => {
-    let list = [...TRANSACTIONS];
+    return (
+        <div className="tx-page">
+          <style>{styles}</style>
+          <Navbar />
 
-    if (q.trim()) {
-      const query = q.toLowerCase();
-      list = list.filter(
-        (t) =>
-          t.merchant.toLowerCase().includes(query) ||
-          t.note.toLowerCase().includes(query)
+    
+          <main className="tx-body">
+            <header className="tx-header">
+              <h1 className="tx-title">Transactions</h1>
+              <p className="tx-subtitle">Track every payment, transfer, and deposit in one place.</p>
+            </header>
+
+            <section className="tx-summary">
+             <div className="tx-summary-item">
+                <p>Total Monthly Expenses</p>
+                <h3>${formatMoney(total_Expenses_Amountt)}</h3>
+            </div>
+
+            <div className="tx-summary-item">
+                <p>Potential Saving</p>
+                <h3>${formatMoney(monthly_saving_amount)}</h3>
+            </div>
+            </section>
+
+            <section className="tx-spending">
+
+                <div className="left-box">
+
+                    <p><strong>Monthly Tips</strong></p>
+
+                    {monthly_saving_desc && monthly_saving_desc.map((t) => (
+
+                    <div key={t.name}>
+
+                        <p>
+                        You spent ${t.total} on {t.name}.
+                        </p>
+
+                        <p>
+                        You could save about ${t.per_saving} this month by reducing this expense.
+                        </p>
+
+                    </div>
+
+                    ))}
+
+                </div>
+
+            </section>
+    
+            <section className="tx-controls">
+              <input
+                className="tx-input"
+                type = "number"
+                placeholder="Month"
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+              />
+
+               <input
+                className="tx-input"
+                type = "number"
+                placeholder="Year"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+              />
+
+               <button className="tx-link-btn primary" onClick={fetchAllData}>
+               Load Data
+                </button>
+
+              <select className="tx-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+                {categories.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <select className="tx-select" value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="All">All Types</option>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+              </select>
+              <select className="tx-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                <option value="Newest">Newest first</option>
+                <option value="Oldest">Oldest first</option>
+                <option value="Highest">Highest amount</option>
+                <option value="Lowest">Lowest amount</option>
+              </select>
+            </section>
+    
+            <section className="tx-card">
+              {visible.length === 0 ? (
+                <div className="tx-empty">No transactions match your filters.</div>
+              ) : (
+                <table className="tx-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Amount</th>
+                      <th>Note</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((t) => (
+                      <tr key={t.id}>
+                        <td>{formatDate(t.date)}</td>
+                        <td>{t.name}</td>
+                        <td>{t.category}</td>
+                        <td className={`tx-amount ${t.amount >= 0 ? "in" : "out"}`}>
+                          {t.amount >= 0 ? "+" : "-"}${formatMoney(Math.abs(t.amount))}
+                        </td>
+                        <td>{t.note}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </section>
+          </main>
+        </div>
       );
     }
+    
+    // props are used for to take warning and u you can pass in header function and make the title for ir
 
-    if (category !== "All") {
-      list = list.filter((t) => t.category === category);
-    }
 
-    if (type !== "All") {
-      list = list.filter((t) => (type === "Income" ? t.amount > 0 : t.amount < 0));
-    }
 
-    if (sortBy === "Newest") list.sort((a, b) => new Date(b.date) - new Date(a.date));
-    if (sortBy === "Oldest") list.sort((a, b) => new Date(a.date) - new Date(b.date));
-    if (sortBy === "Highest") list.sort((a, b) => b.amount - a.amount);
-    if (sortBy === "Lowest") list.sort((a, b) => a.amount - b.amount);
 
-    return list;
-  }, [q, category, type, sortBy]);
-
-  const summary = useMemo(() => {
-    const income = visible.filter((t) => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
-    const expenses = visible.filter((t) => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    return { income, expenses, net: income - expenses };
-  }, [visible]);
-
-  return (
-    <div className="tx-page">
-      <style>{styles}</style>
-      <Navbar />
-
-      <main className="tx-body">
-        <header className="tx-header">
-          <h1 className="tx-title">Transactions</h1>
-          <p className="tx-subtitle">Track every payment, transfer, and deposit in one place.</p>
-        </header>
-
-        <section className="tx-summary">
-          <div className="tx-summary-item">
-            <p>Total Income</p>
-            <h3>${formatMoney(summary.income)}</h3>
-          </div>
-          <div className="tx-summary-item">
-            <p>Total Expenses</p>
-            <h3>${formatMoney(summary.expenses)}</h3>
-          </div>
-          <div className="tx-summary-item">
-            <p>Net Flow</p>
-            <h3>${formatMoney(summary.net)}</h3>
-          </div>
-        </section>
-
-        <section className="tx-link-card">
-          <div className="tx-link-left">
-            <h4>Linked Accounts</h4>
-            <p>Connect your bank account or credit card to auto-import transactions.</p>
-          </div>
-
-          <div className="tx-link-actions">
-            <button className="tx-link-btn" onClick={() => setShowBankPicker((v) => !v)}>
-              + Link Bank Account
-            </button>
-            <button className="tx-link-btn primary" onClick={handleLinkCreditCard}>
-              + Link Credit Card
-            </button>
-          </div>
-
-          {showBankPicker && (
-            <div className="tx-bank-list">
-              {CANADIAN_BANKS.map((bank) => (
-                <button key={bank} className="tx-bank-item" onClick={() => handleLinkBank(bank)}>
-                  {bank}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="tx-linked-list">
-            {linkedAccounts.length === 0 ? (
-              <span className="tx-linked-pill">No accounts linked yet</span>
-            ) : (
-              linkedAccounts.map((acc) => (
-                <span key={acc} className="tx-linked-pill">{acc}</span>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="tx-controls">
-          <input
-            className="tx-input"
-            placeholder="Search merchant or note..."
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <select className="tx-select" value={category} onChange={(e) => setCategory(e.target.value)}>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-          <select className="tx-select" value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="All">All Types</option>
-            <option value="Income">Income</option>
-            <option value="Expense">Expense</option>
-          </select>
-          <select className="tx-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="Newest">Newest first</option>
-            <option value="Oldest">Oldest first</option>
-            <option value="Highest">Highest amount</option>
-            <option value="Lowest">Lowest amount</option>
-          </select>
-        </section>
-
-        <section className="tx-card">
-          {visible.length === 0 ? (
-            <div className="tx-empty">No transactions match your filters.</div>
-          ) : (
-            <table className="tx-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Merchant</th>
-                  <th>Category</th>
-                  <th>Account</th>
-                  <th>Amount</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visible.map((t) => (
-                  <tr key={t.id}>
-                    <td>{formatDate(t.date)}</td>
-                    <td>{t.merchant}</td>
-                    <td>{t.category}</td>
-                    <td>{t.account}</td>
-                    <td className={`tx-amount ${t.amount >= 0 ? "in" : "out"}`}>
-                      {t.amount >= 0 ? "+" : "-"}${formatMoney(Math.abs(t.amount))}
-                    </td>
-                    <td>{t.note}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
-      </main>
-    </div>
-  );
-}
