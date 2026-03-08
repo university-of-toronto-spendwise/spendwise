@@ -384,6 +384,10 @@ function sanitizeCurrency(value) {
   return value === "" ? "" : Number(value).toFixed(2);
 }
 
+function isBlank(value) {
+  return value === null || value === undefined || String(value).trim() === "";
+}
+
 export default function Onboarding() {
   const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
@@ -434,12 +438,42 @@ export default function Onboarding() {
     setError("");
     setSuccess("");
 
+    if (isBlank(form.citizenship_status)) {
+      setError("Please select whether you are a domestic or international student.");
+      return;
+    }
+
+    if (isBlank(form.campus)) {
+      setError("Please select your campus.");
+      return;
+    }
+
+    if (isBlank(form.total_earnings)) {
+      setError("Please enter your total earnings.");
+      return;
+    }
+
+    if (isBlank(form.total_expenses)) {
+      setError("Please enter your total expenses.");
+      return;
+    }
+
+    if (isBlank(form.parental_support)) {
+      setError("Please enter your parental support amount. Use 0 if none.");
+      return;
+    }
+
+    if (isBlank(form.degree_type)) {
+      setError("Please select your degree type.");
+      return;
+    }
+
     if (!form.expected_graduation.trim()) {
       setError("Please share your expected degree completion timeline.");
       return;
     }
 
-    if (form.receives_scholarships_or_aid && !form.scholarship_aid_amount) {
+    if (form.receives_scholarships_or_aid && isBlank(form.scholarship_aid_amount)) {
       setError("Please enter how much scholarship or aid you receive.");
       return;
     }
