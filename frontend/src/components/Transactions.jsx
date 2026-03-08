@@ -301,12 +301,12 @@ export default function Transactions1() {
 
     const [loading, setLoading] = useState(false);
 
-
+    const [accountId, setAccountId] = useState("")
 
     // functions
-    const fetchTranscactions = async () => {
+    const fetchTransactions = async () => {
         try {
-        const response = await fetch(`http://localhost:8000/spending/monthly_transactions/?month=${month}&year=${year}`);
+        const response = await fetch(`http://localhost:8000/spending/monthly_transactions/?month=${month}&year=${year}&account_id=${accountId}`);
         const result = await response.json();
         setTransactions(result);
         } catch (error) {
@@ -320,7 +320,7 @@ export default function Transactions1() {
         try {
         const response = await fetch(`http://localhost:8000/spending/monthly_saving_amount/?month=${month}&year=${year}`);
         const result = await response.json();
-        setMonthly_saving_amount(result);
+        setMonthly_saving_amount(result.total_saving);
         } catch (error) {
         console.error(error);
         } finally {
@@ -332,7 +332,7 @@ export default function Transactions1() {
         try {
         const response = await fetch(`http://localhost:8000/spending/total_expenses_amount/?month=${month}&year=${year}`);
         const result = await response.json();
-        setTotal_Expenses_Amount(result);
+        setTotal_Expenses_Amount(result.total_Expenses_Amountt);
         } catch (error) {
         console.error(error);
         } finally {
@@ -361,10 +361,12 @@ export default function Transactions1() {
 
     setLoading(true);
 
-    await fetchTransactions();
-    await fetchMonthlySavingAmount();
-    await fetchTotalExpensesAmount();
-    await fetchMonthlySavingDesc();
+        await Promise.all([
+    fetchTransactions(),
+    fetchMonthlySavingAmount(),
+    fetchTotalExpensesAmount(),
+    fetchMonthlySavingDesc()
+    ]);
 
     setLoading(false);
   }
@@ -446,6 +448,14 @@ export default function Transactions1() {
                 onChange={(e) => setYear(e.target.value)}
               />
 
+                <input
+                className="tx-input"
+                type = "string"
+                placeholder="Accounts"
+                value={accountId}
+                onChange={(e) => setAccountId(e.target.value)}
+              />
+
                <button className="tx-link-btn primary" onClick={fetchAllData}>
                Load Data
                 </button>
@@ -476,7 +486,7 @@ export default function Transactions1() {
                   <thead>
                     <tr>
                       <th>Date</th>
-                      <th>Name</th>
+                      <th>MerchantName</th>
                       <th>Category</th>
                       <th>Amount</th>
                       <th>Note</th>
@@ -486,7 +496,7 @@ export default function Transactions1() {
                     {transactions.map((t) => (
                       <tr key={t.id}>
                         <td>{formatDate(t.date)}</td>
-                        <td>{t.name}</td>
+                        <td>{t.merchant_name}</td>
                         <td>{t.category}</td>
                         <td className={`tx-amount ${t.amount >= 0 ? "in" : "out"}`}>
                           {t.amount >= 0 ? "+" : "-"}${formatMoney(Math.abs(t.amount))}

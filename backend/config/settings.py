@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'accounts',
     'scholarships',
     'rest_framework',
-    'spending'
+    'spending',
     'corsheaders',
     'transactions',
 ]

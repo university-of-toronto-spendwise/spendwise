@@ -14,6 +14,7 @@ class SpendingViewset(viewsets.ViewSet):
 
         month = request.query_params.get("month")
         year = request.query_params.get("year")
+        account_id = request.query_params.get("account_id")
 
         if not month or not year:
             today = datetime.today()
@@ -26,21 +27,25 @@ class SpendingViewset(viewsets.ViewSet):
             date__year=year
         )
 
+        # filter by account if provided
+        if account_id:
+            qs = qs.filter(account_id=account_id)
+
         return qs
 
     @action(detail=False, methods=["get"])
     def monthly_transactions(self, request):
 
-        qs = self.get_month_transactions(request)
+            qs = self.get_month_transactions(request)
 
-        data = qs.values(
-            "merchant_name",
-            "amount",
-            "date",
-            "category"
-        )
+            data = qs.values(
+                "merchant_name",
+                "amount",
+                "date",
+                "category"
+            )
 
-        return Response(data)
+            return Response(data)
 
     @action(detail=False, methods=["get"])
     def monthly_spending(self, request):

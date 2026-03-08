@@ -48,6 +48,7 @@ Transaction object shape (what Plaid returns, what we serialize):
 
 import json
 from datetime import date, timedelta
+from transactions.models import Transaction
 
 import plaid
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
@@ -165,6 +166,23 @@ def serialize_account(acc) -> dict:
 
 
 # ── Views ─────────────────────────────────────────────────────────────────────
+
+for tx in Transaction:
+
+    Transaction.objects.update_or_create(
+        transaction_id=tx["transaction_id"],
+        defaults={
+            "user": request.user,
+            "item": item,
+            "account_id": tx["account_id"],
+            "merchant_name": tx["merchant_name"],
+            "name": tx["name"],
+            "amount": tx["amount"],
+            "date": tx["date"],
+            "category": ",".join(tx["category"]) if tx["category"] else "",
+            "pending": tx["pending"],
+        }
+    )
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CreateLinkTokenView(View):
