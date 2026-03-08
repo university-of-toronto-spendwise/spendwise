@@ -7,3 +7,4 @@ django-cors-headers
 djangorestframework-simplejwt
 requests
 beautifulsoup4
+plaid-python
