@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'scholarships',
     'rest_framework',
     'corsheaders',
+    'transactions',
 ]
 
 REST_FRAMEWORK = {
@@ -109,3 +110,6 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID', '')
+PLAID_SECRET = os.environ.get('PLAID_SECRET', '')
