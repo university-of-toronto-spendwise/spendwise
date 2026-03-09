@@ -4,7 +4,9 @@ import Login from "./components/Login"
 import Home from "./components/Home"
 import Scholarships from "./components/Scholarships"
 import Plaid from "./components/Plaid"
-
+//Import student codes route
+import StudentCodes from "./components/StudentCodes";
+import StudentCodeDetail from "./components/StudentCodeDetail";
 const ProtectedRoute = ({ children }) => {
   const token = sessionStorage.getItem("userToken");
   if (!token) return <Navigate to="/login" replace />;
@@ -27,6 +29,8 @@ export default function App() {
         <Route path="/scholarships" element={<ProtectedRoute><Scholarships /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute><Plaid /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/student-codes" element={<ProtectedRoute><StudentCodes /></ProtectedRoute>} />
+        <Route path="/student-codes/deal/:id" element={<ProtectedRoute><StudentCodeDetail /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )
