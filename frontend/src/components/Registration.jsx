@@ -273,7 +273,7 @@ export default function UofTSignup() {
     if (formData.password !== formData.password2) { setError("Passwords do not match."); return; }
     setError(""); setLoading(true);
     try {
-      const res = await fetch("http://0.0.0.0:8000/api/register/", {
+      const res = await fetch("http://localhost:8000/api/register/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

@@ -13,11 +13,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='plaiditem',
+            name='user',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+        ),
         migrations.CreateModel(
             name='Transaction',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('transaction_id', models.CharField(max_length=255, unique=True)),
+                ('transaction_id', models.CharField(max_length=255)),
                 ('account_id', models.CharField(max_length=255)),
                 ('merchant_name', models.CharField(blank=True, max_length=255, null=True)),
                 ('name', models.CharField(max_length=255)),
@@ -29,5 +34,9 @@ class Migration(migrations.Migration):
                 ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='transactions.plaiditem')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
+        ),
+        migrations.AddConstraint(
+            model_name='transaction',
+            constraint=models.UniqueConstraint(fields=('user', 'transaction_id'), name='uniq_transaction_user_transaction_id'),
         ),
     ]
