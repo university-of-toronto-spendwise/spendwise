@@ -1,491 +1,577 @@
-import { useMemo, useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Navbar from "./Navbar";
 
-// TEMP UNTIL WE LINK BANK ACCOUNT
-const TRANSACTIONS = [
-  { id: 1, date: "2026-02-25", merchant: "Metro", category: "Groceries", account: "Debit", amount: -74.21, note: "Weekly groceries" },
-  { id: 2, date: "2026-02-24", merchant: "Tim Hortons", category: "Food", account: "Credit", amount: -8.45, note: "Coffee + bagel" },
-  { id: 3, date: "2026-02-23", merchant: "OSAP Deposit", category: "Income", account: "Bank", amount: 3200.0, note: "Winter term funding" },
-  { id: 4, date: "2026-02-22", merchant: "Rogers", category: "Utilities", account: "Credit", amount: -55.0, note: "Phone bill" },
-  { id: 5, date: "2026-02-20", merchant: "Presto", category: "Transport", account: "Credit", amount: -25.0, note: "Transit top-up" },
-  { id: 6, date: "2026-02-18", merchant: "Amazon.ca", category: "Shopping", account: "Credit", amount: -39.99, note: "Desk organizer" },
-  { id: 7, date: "2026-02-16", merchant: "Part-time Payroll", category: "Income", account: "Bank", amount: 540.75, note: "Weekly shift payout" },
-  { id: 8, date: "2026-02-15", merchant: "Spotify", category: "Subscriptions", account: "Credit", amount: -5.99, note: "Student plan" },
-  { id: 9, date: "2026-02-12", merchant: "Shoppers Drug Mart", category: "Health", account: "Debit", amount: -22.13, note: "Pharmacy" },
-  { id: 10, date: "2026-02-10", merchant: "UofT Bookstore", category: "Education", account: "Credit", amount: -124.8, note: "Lab manual" },
-];
-
-const CANADIAN_BANKS = [
-  "RBC Royal Bank",
-  "TD Canada Trust",
-  "Scotiabank",
-  "CIBC",
-  "BMO",
-  "Tangerine",
-  "Simplii Financial",
-  "EQ Bank",
-];
-
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600;700;800&display=swap');
-
-  :root {
-    --uoft-blue: #002A5C;
-    --uoft-mid: #0047A0;
-    --uoft-accent: #E8B53E;
-    --off-white: #F4F7FB;
-    --text-muted: #6B7A90;
-    --border: #D0DBE8;
-    --white: #FFFFFF;
-    --danger: #C0392B;
-    --success: #18A574;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; }
-  body { font-family: 'Source Sans 3', sans-serif; }
-
-  .tx-page {
-    min-height: 100vh;
-    background: var(--off-white);
-  }
-
-  .tx-body {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .tx-header {
-    margin-bottom: 1rem;
-  }
-
-  .tx-title {
-    font-size: 1.9rem;
-    font-weight: 800;
-    color: var(--uoft-blue);
-    margin: 0 0 0.25rem;
-  }
-
-  .tx-subtitle {
-    color: var(--text-muted);
-    margin: 0;
-    font-size: 0.95rem;
-  }
-
-  .tx-summary {
-    background: linear-gradient(130deg, var(--uoft-blue), var(--uoft-mid));
-    color: white;
-    border-radius: 16px;
-    padding: 1rem 1.25rem;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-    margin: 1rem 0 1rem;
-  }
-
-  .tx-summary-item p {
-    margin: 0;
-    opacity: 0.9;
-    font-size: 0.82rem;
-  }
-
-  .tx-summary-item h3 {
-    margin: 0.2rem 0 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-  }
-
-  .tx-link-card {
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    padding: 0.95rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.9rem;
-    flex-wrap: wrap;
-  }
-
-  .tx-link-left h4 {
-    margin: 0;
-    color: var(--uoft-blue);
-    font-size: 1rem;
-    font-weight: 800;
-  }
-
-  .tx-link-left p {
-    margin: 0.22rem 0 0;
-    color: var(--text-muted);
-    font-size: 0.88rem;
-  }
-
-  .tx-link-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    flex-wrap: wrap;
-  }
-
-  .tx-link-btn {
-    border: 1.5px solid var(--border);
-    background: #fff;
-    color: var(--uoft-blue);
-    height: 38px;
-    border-radius: 10px;
-    padding: 0 0.75rem;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .tx-link-btn.primary {
-    background: var(--uoft-blue);
-    border-color: var(--uoft-blue);
-    color: #fff;
-  }
-
-  .tx-bank-list {
-    width: 100%;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    background: #F8FAFE;
-    padding: 0.65rem;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
-    margin-top: 0.2rem;
-  }
-
-  .tx-bank-item {
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: #fff;
-    color: var(--uoft-blue);
-    height: 38px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.84rem;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 0 0.65rem;
-    text-align: left;
-  }
-
-  .tx-linked-list {
-    width: 100%;
-    display: flex;
-    gap: 0.45rem;
-    flex-wrap: wrap;
-    margin-top: 0.25rem;
-  }
-
-  .tx-linked-pill {
-    border-radius: 999px;
-    border: 1.5px solid var(--border);
-    background: #F7FAFF;
-    color: var(--uoft-blue);
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 0.28rem 0.6rem;
-  }
-
-  .tx-controls {
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    padding: 0.9rem;
-    display: grid;
-    grid-template-columns: 1.2fr repeat(3, minmax(0, 1fr));
-    gap: 0.7rem;
-    margin-bottom: 1rem;
-  }
-
-  .tx-input,
-  .tx-select {
-    height: 40px;
-    border-radius: 10px;
-    border: 1.5px solid var(--border);
-    padding: 0 0.75rem;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.9rem;
-    color: var(--uoft-blue);
-    background: white;
-    outline: none;
-  }
-
-  .tx-input:focus,
-  .tx-select:focus {
-    border-color: var(--uoft-mid);
-  }
-
-  .tx-card {
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .tx-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .tx-table th,
-  .tx-table td {
-    text-align: left;
-    padding: 0.82rem 1rem;
-    border-bottom: 1px solid #E8EEF6;
-    font-size: 0.92rem;
-  }
-
-  .tx-table th {
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: #F8FAFE;
-  }
-
-  .tx-table td {
-    color: var(--uoft-blue);
-    font-weight: 600;
-  }
-
-  .tx-amount {
-    font-weight: 800;
-    white-space: nowrap;
-  }
-
-  .tx-amount.out { color: var(--danger); }
-  .tx-amount.in { color: var(--success); }
-
-  .tx-empty {
-    padding: 1.4rem;
-    color: var(--text-muted);
-    text-align: center;
-    font-size: 0.94rem;
-  }
-
-  @media (max-width: 900px) {
-    .tx-controls {
-      grid-template-columns: 1fr 1fr;
-    }
-    .tx-summary {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 620px) {
-    .tx-body { padding: 1rem; }
-    .tx-controls {
-      grid-template-columns: 1fr;
-    }
-    .tx-bank-list {
-      grid-template-columns: 1fr;
-    }
-    .tx-table th:nth-child(4),
-    .tx-table td:nth-child(4),
-    .tx-table th:nth-child(6),
-    .tx-table td:nth-child(6) {
-      display: none;
-    }
-  }
-`;
-
-const formatMoney = (n) =>
-  n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-const formatDate = (isoDate) =>
-  new Date(isoDate).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
-
 export default function Transactions() {
-  const [q, setQ] = useState("");
+
+  const API_BASE = "http://0.0.0.0:8000/api";
+  const ACCESS_TOKEN_KEY = "userAccessToken";
+  const REFRESH_TOKEN_KEY = "userRefreshToken";
+
+  const [transactions, setTransactions] = useState([]);
+  const [monthlySavingAmount, setMonthlySavingAmount] = useState(null);
+  const [totalExpensesAmount, setTotalExpensesAmount] = useState(null);
+  const [monthlySavingDesc, setMonthlySavingDesc] = useState([]);
+  const [error, setError] = useState("");
+
   const [category, setCategory] = useState("All");
   const [type, setType] = useState("All");
   const [sortBy, setSortBy] = useState("Newest");
-  const [linkedAccounts, setLinkedAccounts] = useState([]);
-  const [showBankPicker, setShowBankPicker] = useState(false);
 
-  const categories = useMemo(
-    () => ["All", ...new Set(TRANSACTIONS.map((t) => t.category))],
-    []
-  );
+  const categories = ["All","Food","Transport","Shopping","Other"];
 
-  const handleLinkBank = (bankName) => {
-    setLinkedAccounts((prev) => {
-      const label = `TODO: Bank Account Linking (${bankName})`;
-      if (prev.includes(label)) return prev;
-      return [...prev, label];
-    });
-    setShowBankPicker(false);
+  const today = new Date();
+
+  const [month, setMonth] = useState(today.getMonth() + 1);
+  const [year, setYear] = useState(today.getFullYear());
+
+  const [loading, setLoading] = useState(false);
+
+  const [accountId, setAccountId] = useState("");
+  const [accounts, setAccounts] = useState([]);
+  const [accountLabelById, setAccountLabelById] = useState({});
+
+  // -----------------------------
+  // Fetch Transactions
+  // -----------------------------
+  const fetchTransactions = async () => {
+
+    try {
+
+      setError("");
+
+      if (!getAccessToken()) {
+        setTransactions([]);
+        setAccounts([]);
+        setError("You’re not logged in. Please sign in again.");
+        return;
+      }
+
+      let url = `${API_BASE}/spending/monthly_transactions/?month=${month}&year=${year}`;
+
+      if (accountId) {
+        url += `&account_id=${accountId}`;
+      }
+
+      const response = await fetchWithAuth(url);
+
+      if (!response.ok) {
+        const text = await response.text();
+        setTransactions([]);
+        setAccounts([]);
+        setError(`Failed to load transactions (${response.status}). ${text}`);
+        return;
+      }
+
+      const result = await response.json();
+      if (!Array.isArray(result)) {
+        setTransactions([]);
+        setAccounts([]);
+        setError("Unexpected response format from server.");
+        return;
+      }
+
+      setTransactions(result);
+
+      // Build account list from transaction account_id
+      const uniqueAccounts = [...new Set(result.map(t => t.account_id))];
+
+      const accountObjects = uniqueAccounts.map(id => ({
+        id: id,
+        name: formatAccountLabel(id)
+      }));
+
+      setAccounts(accountObjects);
+
+    } catch (error) {
+      console.error(error);
+      setTransactions([]);
+      setAccounts([]);
+      setError("Network error while loading transactions.");
+    }
   };
 
-  const handleLinkCreditCard = () => {
-    setLinkedAccounts((prev) => {
-      const label = "Credit Card";
-      if (prev.includes(label)) return prev;
-      return [...prev, label];
-    });
-  };
+  // -----------------------------
+  // Monthly Saving Amount
+  // -----------------------------
+  const fetchMonthlySavingAmount = async () => {
+    try {
 
-  const visible = useMemo(() => {
-    let list = [...TRANSACTIONS];
+      if (!getAccessToken()) {
+        setMonthlySavingAmount(null);
+        return;
+      }
 
-    if (q.trim()) {
-      const query = q.toLowerCase();
-      list = list.filter(
-        (t) =>
-          t.merchant.toLowerCase().includes(query) ||
-          t.note.toLowerCase().includes(query)
+      const response = await fetchWithAuth(
+        `${API_BASE}/spending/monthly_saving_amount/?month=${month}&year=${year}`
       );
+
+      if (!response.ok) {
+        setMonthlySavingAmount(null);
+        return;
+      }
+
+      const result = await response.json();
+
+      setMonthlySavingAmount(result.total_saving);
+
+    } catch (error) {
+      console.error(error);
+      setMonthlySavingAmount(null);
+    }
+  };
+
+  // -----------------------------
+  // Total Expenses
+  // -----------------------------
+  const fetchTotalExpensesAmount = async () => {
+    try {
+
+      if (!getAccessToken()) {
+        setTotalExpensesAmount(null);
+        return;
+      }
+
+      const response = await fetchWithAuth(
+        `${API_BASE}/spending/total_expenses_amount/?month=${month}&year=${year}`
+      );
+
+      if (!response.ok) {
+        setTotalExpensesAmount(null);
+        return;
+      }
+
+      const result = await response.json();
+
+      setTotalExpensesAmount(result.total_expenses);
+
+    } catch (error) {
+      console.error(error);
+      setTotalExpensesAmount(null);
+    }
+  };
+
+  // -----------------------------
+  // Monthly Saving Tips
+  // -----------------------------
+  const fetchMonthlySavingDesc = async () => {
+
+    try {
+
+      if (!getAccessToken()) {
+        setMonthlySavingDesc([]);
+        return;
+      }
+
+      const response = await fetchWithAuth(
+        `${API_BASE}/spending/monthly_saving/?month=${month}&year=${year}`
+      );
+
+      if (!response.ok) {
+        setMonthlySavingDesc([]);
+        return;
+      }
+
+      const result = await response.json();
+
+      setMonthlySavingDesc(result);
+
+    } catch (error) {
+      console.error(error);
+      setMonthlySavingDesc([]);
+    }
+  };
+
+  // -----------------------------
+  // Fetch All
+  // -----------------------------
+  const fetchAllData = async () => {
+
+    if (!month || !year) {
+      alert("Please enter month and year");
+      return;
     }
 
+    setLoading(true);
+
+    await Promise.all([
+      fetchTransactions(),
+      fetchMonthlySavingAmount(),
+      fetchTotalExpensesAmount(),
+      fetchMonthlySavingDesc()
+    ]);
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, [month, year, accountId]);
+
+  useEffect(() => {
+    loadAccountLabels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // -----------------------------
+  // Helpers
+  // -----------------------------
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString();
+  };
+
+  const formatMoney = (num) => {
+    if (!num) return "0";
+    return Number(num).toLocaleString();
+  };
+
+  const getAccessToken = () => (
+    sessionStorage.getItem(ACCESS_TOKEN_KEY) ||
+    sessionStorage.getItem("userToken") // backwards compat
+  );
+
+  const refreshAccessToken = async () => {
+    const refresh = sessionStorage.getItem(REFRESH_TOKEN_KEY);
+    if (!refresh) return null;
+
+    const res = await fetch(`${API_BASE}/token/refresh/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh }),
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const newAccess = data.access;
+    if (!newAccess) return null;
+
+    sessionStorage.setItem("userToken", newAccess);
+    sessionStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
+    return newAccess;
+  };
+
+  const fetchWithAuth = async (url, options = {}) => {
+    const token = getAccessToken();
+    if (!token) return { ok: false, status: 401, bodyText: "Missing auth token." };
+
+    const doFetch = async (accessToken) => {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return res;
+    };
+
+    let res = await doFetch(token);
+    if (res.status !== 401) return res;
+
+    // Try refresh once on 401
+    const newToken = await refreshAccessToken();
+    if (!newToken) return res;
+
+    res = await doFetch(newToken);
+    return res;
+  };
+
+  const shortId = (id) => {
+    const s = String(id || "");
+    if (!s) return "Account";
+    if (s.length <= 12) return `Account ${s}`;
+    return `Account ${s.slice(0, 4)}…${s.slice(-4)}`;
+  };
+
+  const formatAccountLabel = (account_id) => {
+    const label = accountLabelById?.[account_id];
+    return label || shortId(account_id);
+  };
+
+  const amountNumber = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const bucketCategory = (raw) => {
+    const c = String(raw || "").toLowerCase();
+    if (!c) return "Other";
+    if (c.includes("food") || c.includes("restaurant") || c.includes("grocer")) return "Food";
+    if (c.includes("transport") || c.includes("transit") || c.includes("travel")) return "Transport";
+    if (c.includes("shop") || c.includes("store") || c.includes("retail") || c.includes("amazon"))
+      return "Shopping";
+    return "Other";
+  };
+
+  const visibleTransactions = useMemo(() => {
+    let list = Array.isArray(transactions) ? transactions : [];
+
     if (category !== "All") {
-      list = list.filter((t) => t.category === category);
+      list = list.filter((t) => bucketCategory(t.category) === category);
     }
 
     if (type !== "All") {
-      list = list.filter((t) => (type === "Income" ? t.amount > 0 : t.amount < 0));
+      list = list.filter((t) => {
+        const amt = amountNumber(t.amount);
+        const isIncome = amt >= 0;
+        return type === "Income" ? isIncome : !isIncome;
+      });
     }
 
-    if (sortBy === "Newest") list.sort((a, b) => new Date(b.date) - new Date(a.date));
-    if (sortBy === "Oldest") list.sort((a, b) => new Date(a.date) - new Date(b.date));
-    if (sortBy === "Highest") list.sort((a, b) => b.amount - a.amount);
-    if (sortBy === "Lowest") list.sort((a, b) => a.amount - b.amount);
+    const withDate = (t) => new Date(t.date);
+    if (sortBy === "Newest") list = [...list].sort((a, b) => withDate(b) - withDate(a));
+    if (sortBy === "Oldest") list = [...list].sort((a, b) => withDate(a) - withDate(b));
+    if (sortBy === "Highest")
+      list = [...list].sort((a, b) => Math.abs(amountNumber(b.amount)) - Math.abs(amountNumber(a.amount)));
+    if (sortBy === "Lowest")
+      list = [...list].sort((a, b) => Math.abs(amountNumber(a.amount)) - Math.abs(amountNumber(b.amount)));
 
     return list;
-  }, [q, category, type, sortBy]);
+  }, [transactions, category, type, sortBy]);
 
-  const summary = useMemo(() => {
-    const income = visible.filter((t) => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
-    const expenses = visible.filter((t) => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    return { income, expenses, net: income - expenses };
-  }, [visible]);
+  const loadAccountLabels = async () => {
+    try {
+      if (!getAccessToken()) return;
 
+      const itemsRes = await fetchWithAuth(`${API_BASE}/plaid/items/`);
+      if (!itemsRes.ok) return;
+
+      const itemsPayload = await itemsRes.json();
+      const items = itemsPayload?.items || [];
+      if (!Array.isArray(items) || items.length === 0) return;
+
+      const accountMaps = await Promise.all(
+        items.map(async (it) => {
+          const itemId = it?.item_id;
+          if (!itemId) return {};
+
+          const accRes = await fetchWithAuth(`${API_BASE}/plaid/items/${itemId}/accounts/`);
+          if (!accRes.ok) return {};
+          const accPayload = await accRes.json();
+          const accounts = accPayload?.accounts || [];
+          if (!Array.isArray(accounts)) return {};
+
+          const map = {};
+          for (const acc of accounts) {
+            const id = acc?.account_id;
+            if (!id) continue;
+            const name = acc?.official_name || acc?.name || "Account";
+            const mask = acc?.mask ? `••••${acc.mask}` : "";
+            const type = acc?.subtype || acc?.type || "";
+            map[id] = [name, mask || type ? `${mask}${mask && type ? " · " : ""}${type}` : ""]
+              .filter(Boolean)
+              .join(" ");
+          }
+          return map;
+        })
+      );
+
+      const merged = {};
+      for (const m of accountMaps) Object.assign(merged, m);
+      if (Object.keys(merged).length) setAccountLabelById(merged);
+    } catch (e) {
+      // silent; fall back to shortened ids
+    }
+  };
+
+  const CSS = `
+    .tx-page{background:#f6f8fb;min-height:100vh}
+    .tx-body{max-width:1100px;margin:0 auto;padding:28px 18px 60px}
+    .tx-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}
+    .tx-title{margin:0;font-size:34px;letter-spacing:-0.02em;color:#0f172a}
+    .tx-subtitle{margin:6px 0 0;color:#475569}
+    .tx-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid #e2e8f0;background:white;color:#0f172a;font-size:12px}
+    .tx-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin:16px 0}
+    .tx-card{background:white;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 10px 26px rgba(15,23,42,.06)}
+    .tx-card-h{padding:14px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+    .tx-card-h h3{margin:0;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#334155}
+    .tx-card-b{padding:16px}
+    .tx-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .tx-stat{padding:14px;border-radius:14px;background:linear-gradient(180deg,#ffffff,#f8fafc);border:1px solid #eef2f7}
+    .tx-stat p{margin:0;color:#64748b;font-size:12px}
+    .tx-stat h2{margin:6px 0 0;font-size:22px;color:#0f172a}
+    .tx-tips{display:flex;flex-direction:column;gap:10px}
+    .tx-tip{padding:12px 12px;border:1px dashed #dbeafe;background:#eff6ff;border-radius:12px}
+    .tx-tip strong{color:#0f172a}
+    .tx-controls{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:14px}
+    .tx-input,.tx-select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #e2e8f0;background:white;color:#0f172a}
+    .tx-table-wrap{overflow:auto}
+    .tx-table{width:100%;border-collapse:separate;border-spacing:0}
+    .tx-table th{position:sticky;top:0;background:#f8fafc;border-bottom:1px solid #e2e8f0;color:#334155;font-size:12px;text-transform:uppercase;letter-spacing:.08em;padding:12px;text-align:left}
+    .tx-table td{padding:12px;border-bottom:1px solid #f1f5f9;color:#0f172a}
+    .tx-table tr:hover td{background:#fbfdff}
+    .tx-amount{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+    .tx-amount.in{color:#0f766e}
+    .tx-amount.out{color:#b91c1c}
+    .tx-empty{padding:18px;color:#475569}
+    .tx-error{margin:12px 0 0;padding:12px 14px;border-radius:12px;border:1px solid #fecaca;background:#fef2f2;color:#7f1d1d}
+    @media (max-width:980px){.tx-grid{grid-template-columns:1fr}.tx-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  `;
+
+  // -----------------------------
+  // UI
+  // -----------------------------
   return (
     <div className="tx-page">
-      <style>{styles}</style>
+
       <Navbar />
 
       <main className="tx-body">
+
         <header className="tx-header">
-          <h1 className="tx-title">Transactions</h1>
-          <p className="tx-subtitle">Track every payment, transfer, and deposit in one place.</p>
+          <div>
+            <h1 className="tx-title">Transactions</h1>
+            <p className="tx-subtitle">Track every payment, transfer, and deposit in one place.</p>
+          </div>
+          <div className="tx-chip">
+            <span>Month</span>
+            <strong>{month}/{year}</strong>
+          </div>
         </header>
 
-        <section className="tx-summary">
-          <div className="tx-summary-item">
-            <p>Total Income</p>
-            <h3>${formatMoney(summary.income)}</h3>
+        <style>{CSS}</style>
+
+        {error && <div className="tx-error">{error}</div>}
+
+        <section className="tx-grid">
+          <div className="tx-card">
+            <div className="tx-card-h">
+              <h3>Overview</h3>
+              <span className="tx-chip">{visibleTransactions.length} shown</span>
+            </div>
+            <div className="tx-card-b">
+              <div className="tx-stats">
+                <div className="tx-stat">
+                  <p>Total Monthly Expenses</p>
+                  <h2>${formatMoney(totalExpensesAmount)}</h2>
+                </div>
+                <div className="tx-stat">
+                  <p>Potential Saving</p>
+                  <h2>${formatMoney(monthlySavingAmount)}</h2>
+                </div>
+              </div>
+
+              <div className="tx-controls" style={{ marginTop: 14 }}>
+                <input
+                  className="tx-input"
+                  type="number"
+                  placeholder="Month"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  min="1"
+                  max="12"
+                />
+
+                <input
+                  className="tx-input"
+                  type="number"
+                  placeholder="Year"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  min="2000"
+                  max="2100"
+                />
+
+                <select className="tx-select" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+                  <option value="">All Accounts</option>
+                  {accounts.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+
+                <select className="tx-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+
+                <select className="tx-select" value={type} onChange={(e) => setType(e.target.value)}>
+                  <option value="All">All Types</option>
+                  <option value="Income">Income</option>
+                  <option value="Expense">Expense</option>
+                </select>
+
+                <select className="tx-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                  <option value="Newest">Newest first</option>
+                  <option value="Oldest">Oldest first</option>
+                  <option value="Highest">Highest amount</option>
+                  <option value="Lowest">Lowest amount</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div className="tx-summary-item">
-            <p>Total Expenses</p>
-            <h3>${formatMoney(summary.expenses)}</h3>
-          </div>
-          <div className="tx-summary-item">
-            <p>Net Flow</p>
-            <h3>${formatMoney(summary.net)}</h3>
+
+          <div className="tx-card">
+            <div className="tx-card-h">
+              <h3>Monthly Tips</h3>
+              <span className="tx-chip">Based on merchants</span>
+            </div>
+            <div className="tx-card-b">
+              <div className="tx-tips">
+                {monthlySavingDesc?.length ? (
+                  monthlySavingDesc.map((t) => (
+                    <div className="tx-tip" key={t.name}>
+                      <div>
+                        <strong>{t.name}</strong> — spent ${formatMoney(t.total)}
+                      </div>
+                      <div>You could save about ${formatMoney(t.per_saving)} by reducing this expense.</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="tx-empty">No tips available for this month yet.</div>
+                )}
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="tx-link-card">
-          <div className="tx-link-left">
-            <h4>Linked Accounts</h4>
-            <p>Connect your bank account or credit card to auto-import transactions.</p>
+        <section className="tx-card">
+          <div className="tx-card-h">
+            <h3>Transactions</h3>
+            <span className="tx-chip">Sorted: {sortBy}</span>
           </div>
-
-          <div className="tx-link-actions">
-            <button className="tx-link-btn" onClick={() => setShowBankPicker((v) => !v)}>
-              + Link Bank Account
-            </button>
-            <button className="tx-link-btn primary" onClick={handleLinkCreditCard}>
-              + Link Credit Card
-            </button>
-          </div>
-
-          {showBankPicker && (
-            <div className="tx-bank-list">
-              {CANADIAN_BANKS.map((bank) => (
-                <button key={bank} className="tx-bank-item" onClick={() => handleLinkBank(bank)}>
-                  {bank}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="tx-linked-list">
-            {linkedAccounts.length === 0 ? (
-              <span className="tx-linked-pill">No accounts linked yet</span>
+          <div className="tx-table-wrap">
+            {loading ? (
+              <div className="tx-empty">Loading transactions...</div>
+            ) : visibleTransactions.length === 0 ? (
+              <div className="tx-empty">No transactions found.</div>
             ) : (
-              linkedAccounts.map((acc) => (
-                <span key={acc} className="tx-linked-pill">{acc}</span>
-              ))
+              <table className="tx-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Merchant</th>
+                    <th>Category</th>
+                    <th style={{ textAlign: "right" }}>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleTransactions.map((t) => {
+                    const amt = amountNumber(t.amount);
+                    const isIn = amt >= 0;
+                    return (
+                      <tr key={`${t.transaction_id || ""}-${t.date}-${t.account_id}-${t.amount}`}>
+                        <td>{formatDate(t.date)}</td>
+                        <td>{t.merchant_name || t.name || "—"}</td>
+                        <td>{bucketCategory(t.category)}</td>
+                        <td className={`tx-amount ${isIn ? "in" : "out"}`}>
+                          {isIn ? "+" : "-"}${formatMoney(Math.abs(amt))}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             )}
           </div>
         </section>
 
-        <section className="tx-controls">
-          <input
-            className="tx-input"
-            placeholder="Search merchant or note..."
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <select className="tx-select" value={category} onChange={(e) => setCategory(e.target.value)}>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-          <select className="tx-select" value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="All">All Types</option>
-            <option value="Income">Income</option>
-            <option value="Expense">Expense</option>
-          </select>
-          <select className="tx-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="Newest">Newest first</option>
-            <option value="Oldest">Oldest first</option>
-            <option value="Highest">Highest amount</option>
-            <option value="Lowest">Lowest amount</option>
-          </select>
-        </section>
-
-        <section className="tx-card">
-          {visible.length === 0 ? (
-            <div className="tx-empty">No transactions match your filters.</div>
-          ) : (
-            <table className="tx-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Merchant</th>
-                  <th>Category</th>
-                  <th>Account</th>
-                  <th>Amount</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visible.map((t) => (
-                  <tr key={t.id}>
-                    <td>{formatDate(t.date)}</td>
-                    <td>{t.merchant}</td>
-                    <td>{t.category}</td>
-                    <td>{t.account}</td>
-                    <td className={`tx-amount ${t.amount >= 0 ? "in" : "out"}`}>
-                      {t.amount >= 0 ? "+" : "-"}${formatMoney(Math.abs(t.amount))}
-                    </td>
-                    <td>{t.note}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
       </main>
+
     </div>
   );
 }

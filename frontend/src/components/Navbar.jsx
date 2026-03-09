@@ -142,7 +142,7 @@ const SettingsIcon = () => (
 const TABS = [
   { label: "Dashboard", path: "/home" },
   { label: "Scholarships", path: "/scholarships" },
-  { label: "Spending", path: "/transactions" },
+  { label: "Transactions", path: "/transactions" },
   { label: "Bills", path: "/bills" },
   { label: "Student Codes", path: "/student-codes" },
 ];
