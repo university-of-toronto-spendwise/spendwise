@@ -133,46 +133,60 @@ class SpendingViewset(viewsets.ViewSet):
 
         saving = []
 
-        for s in spending:
-
-            merchant = s["merchant_display"]
-            name = (merchant or "").upper()
-            total = s["total_abs"] or Decimal("0")
+        for row in spending:
+            merchant = row["merchant_display"]
+            merchant_upper = (merchant or "").upper()
+            total = row["total_abs"] or Decimal("0")
 
             # Food delivery
-            if "UBER" in name or "DOORDASH" in name or "UNITED AIRLINES" in name:
-
+            if "UBER" in merchant_upper or "DOORDASH" in merchant_upper:
                 possible = total - 200
-
                 if possible > 0:
-                    saving.append({
-                        "name": merchant,
-                        "total": total,
-                        "per_saving": int(possible)
-                    })
+                    saving.append(
+                        {
+                            "name": merchant,
+                            "total": total,
+                            "per_saving": int(possible),
+                            "desc": "Reduce food delivery spending to save about $200 this month.",
+                        }
+                    )
 
             # TTC transit
-            elif "PRESTO" in name:
-
+            elif "PRESTO" in merchant_upper:
                 possible = total * Decimal("0.40")
-
-                saving.append({
-                    "name": merchant,
-                    "total": total,
-                    "per_saving": int(possible)
-                })
-
-            # Gym membership
-            elif "BASECAMP" in name:
-
-                possible = total - 27
-
-                if possible > 0:
-                    saving.append({
+                saving.append(
+                    {
                         "name": merchant,
                         "total": total,
-                        "per_saving": int(possible)
-                    })
+                        "per_saving": int(possible),
+                        "desc": "Consider transit pass/discounts to cut transit costs.",
+                    }
+                )
+
+            # Flights
+            elif "UNITED AIRLINES" in merchant_upper:
+                possible = total * Decimal("0.05")
+                saving.append(
+                    {
+                        "name": merchant,
+                        "total": total,
+                        "per_saving": int(possible),
+                        "desc": "Look for student fares/promos to save ~5% on flights.",
+                    }
+                )
+
+            # Gym membership
+            elif "BASECAMP" in merchant_upper:
+                possible = total - 27
+                if possible > 0:
+                    saving.append(
+                        {
+                            "name": merchant,
+                            "total": total,
+                            "per_saving": int(possible),
+                            "desc": "Switch to a lower-cost gym plan to save this month.",
+                        }
+                    )
 
         return Response(saving)
 

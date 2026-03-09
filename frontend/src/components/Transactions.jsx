@@ -358,60 +358,207 @@ export default function Transactions() {
   const selectedLabel = accountId ? formatAccountLabel(accountId) : "All Accounts";
 
   const CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
 
-    .tx-page{background:#f4f7fb;min-height:100vh;font-family:'Source Sans 3',sans-serif}
-    .tx-body{max-width:1180px;margin:0 auto;padding:30px 20px 70px}
-    .tx-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
-    .tx-title{margin:0;font-size:40px;letter-spacing:-0.02em;color:#002a5c;line-height:1.05;font-weight:800}
-    .tx-subtitle{margin:8px 0 0;color:#6b7a90;font-size:18px}
-    .tx-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:2px solid #d0dbe8;background:#fff;color:#002a5c;font-size:13px;font-weight:700}
-    .tx-sync-btn{border:none;border-radius:12px;padding:11px 16px;background:#002a5c;color:#fff;font-weight:800;cursor:pointer;box-shadow:3px 3px 0px #e8b53e}
-    .tx-sync-btn:hover:not(:disabled){background:#0047a0}
-    .tx-sync-btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
+    *, *::before, *::after { box-sizing: border-box; }
 
-    .tx-account-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
-    .tx-account-tab{max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:2px solid #d0dbe8;background:#fff;color:#002a5c;border-radius:999px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer}
-    .tx-account-tab.active{background:#002a5c;border-color:#002a5c;color:#fff;box-shadow:2px 2px 0px #e8b53e}
+    :root {
+      --uoft-blue: #002A5C;
+      --uoft-mid: #0047A0;
+      --uoft-accent: #E8B53E;
+      --off-white: #F4F7FB;
+      --text-muted: #6B7A90;
+      --border: #D0DBE8;
+      --error: #C0392B;
+      --white: #FFFFFF;
+      --shadow: 0 4px 16px rgba(0,42,92,0.08);
+      --success: #18A574;
+      --danger: #C0392B;
+    }
 
-    .tx-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin:0 0 16px}
-    .tx-card{background:#fff;border:2px solid #d0dbe8;border-radius:18px;box-shadow:0 4px 14px rgba(0,42,92,.06)}
-    .tx-card-h{padding:14px 16px;border-bottom:2px solid #eef2f8;display:flex;align-items:center;justify-content:space-between}
-    .tx-card-h h3{margin:0;font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:#002a5c}
-    .tx-card-b{padding:16px}
+    body { font-family: 'Source Sans 3', sans-serif; }
 
-    .tx-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .tx-stat{padding:14px;border-radius:14px;background:linear-gradient(180deg,#fff,#f8fbff);border:2px solid #e1e9f4}
-    .tx-stat p{margin:0;color:#6b7a90;font-size:12px;font-weight:600}
-    .tx-stat h2{margin:7px 0 0;font-size:30px;color:#002a5c;line-height:1;font-weight:800}
+    .tx-page {
+      min-height: 100vh;
+      background: var(--off-white);
+      font-family: 'Source Sans 3', sans-serif;
+    }
 
-    .tx-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
-    .tx-select{width:100%;padding:10px 12px;border-radius:12px;border:2px solid #d0dbe8;background:#fff;color:#002a5c;font-weight:600;outline:none;min-height:44px}
-    .tx-select:focus{border-color:#0047a0}
+    .tx-body {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 1.5rem;
+    }
 
-    .tx-tips{display:flex;flex-direction:column;gap:10px}
-    .tx-tip{padding:12px;border:2px dashed #c9dbf6;background:#edf4ff;border-radius:12px;color:#002a5c}
-    .tx-tip strong{color:#002a5c}
+    .tx-main { min-width: 0; }
 
-    .tx-table-wrap{overflow:auto}
-    .tx-table{width:100%;border-collapse:separate;border-spacing:0}
-    .tx-table th{position:sticky;top:0;background:#f7faff;border-bottom:2px solid #dce7f4;color:#002a5c;font-size:12px;text-transform:uppercase;letter-spacing:.09em;padding:12px;text-align:left}
-    .tx-table td{padding:13px 12px;border-bottom:1px solid #edf2f8;color:#1e2f45;font-size:15px}
-    .tx-table tr:hover td{background:#f8fbff}
+    .tx-header { margin-bottom: 1.25rem; }
+    .tx-title {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--uoft-blue);
+      margin: 0 0 0.25rem 0;
+    }
+    .tx-subtitle { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
 
-    .tx-cat{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;border:1px solid #d0dbe8;background:#fff;color:#0047a0;font-size:12px;font-weight:700}
-    .tx-amount{font-variant-numeric:tabular-nums;font-weight:900;text-align:right}
-    .tx-amount.in{color:#14805e}
-    .tx-amount.out{color:#c0392b}
+    .tx-filter-bar {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
 
-    .tx-empty{padding:18px;color:#6b7a90;font-size:15px}
-    .tx-note{margin:0 0 12px;padding:11px 14px;border-radius:12px;background:#eef4fb;border:2px solid #d5e0ee;color:#334860;font-size:14px}
-    .tx-error{margin:0 0 12px;padding:11px 14px;border-radius:12px;border:2px solid #f3c3bf;background:#fff4f3;color:#8c2c23}
+    .tx-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
 
-    @media (max-width:980px){
-      .tx-grid{grid-template-columns:1fr}
-      .tx-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .tx-title{font-size:34px}
+    .tx-input {
+      height: 38px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0 0.75rem;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.88rem;
+      color: var(--uoft-blue);
+      outline: none;
+      background: white;
+      width: 110px;
+    }
+
+    .tx-input:focus {
+      border-color: var(--uoft-mid);
+      box-shadow: 0 0 0 3px rgba(0,71,160,0.1);
+    }
+
+    .tx-select {
+      border: none;
+      outline: none;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.88rem;
+      color: var(--uoft-blue);
+      background: transparent;
+      cursor: pointer;
+      padding: 0.25rem 0.1rem;
+      font-weight: 600;
+    }
+
+    .tx-chip {
+      background: #F4F7FB;
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--uoft-blue);
+      border: 1.5px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .tx-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tx-metric {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .tx-metric-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.25rem;
+    }
+    .tx-metric-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--uoft-mid);
+    }
+
+    .tx-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .tx-card-h {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #F0F2F5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .tx-card-h h2 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--uoft-blue);
+      letter-spacing: 0.02em;
+    }
+
+    .tx-table-wrap { overflow: auto; }
+    .tx-table { width: 100%; border-collapse: collapse; }
+    .tx-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.9rem 1.25rem;
+      background: #F8FAFF;
+      border-bottom: 1px solid #F0F2F5;
+      position: sticky;
+      top: 0;
+    }
+    .tx-table td {
+      padding: 0.95rem 1.25rem;
+      border-bottom: 1px solid #F0F2F5;
+      color: var(--uoft-blue);
+      font-weight: 600;
+    }
+    .tx-table tr:hover td { background: #F7FAFF; }
+
+    .tx-amount { text-align: right; font-variant-numeric: tabular-nums; font-weight: 900; }
+    .tx-amount.in { color: var(--success); }
+    .tx-amount.out { color: var(--danger); }
+
+    .tx-empty { padding: 1.25rem; color: var(--text-muted); }
+    .tx-error { margin: 0 0 1rem 0; padding: 0.8rem 1rem; border-radius: 14px; border: 1.5px solid rgba(192,57,43,0.35); background: #FDECEC; color: var(--error); font-weight: 700; }
+
+    .tx-sidebar { position: sticky; top: 80px; align-self: start; }
+    .tx-tip { padding: 0.85rem 0; border-bottom: 1px solid #F0F2F5; }
+    .tx-tip:last-child { border-bottom: none; }
+    .tx-tip strong { color: var(--uoft-blue); }
+    .tx-tip-sub { color: var(--text-muted); font-weight: 600; margin-top: 0.25rem; font-size: 0.86rem; }
+
+    @media (max-width: 980px) {
+      .tx-body { grid-template-columns: 1fr; }
+      .tx-sidebar { position: static; }
+    }
+
+    @media (max-width: 720px) {
+      .tx-body { padding: 1.25rem 1rem; }
+      .tx-grid { grid-template-columns: 1fr; }
+      .tx-input { width: 100%; }
     }
   `;
 
@@ -422,161 +569,149 @@ export default function Transactions() {
       <main className="tx-body">
         <style>{CSS}</style>
 
-        <header className="tx-header">
-          <div>
+        <div className="tx-main">
+          <header className="tx-header">
             <h1 className="tx-title">Transactions</h1>
-            <p className="tx-subtitle">Review spending by account, category, and date range.</p>
-          </div>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-            <div className="tx-chip">{connectedItems.length} bank(s) connected</div>
-            <button
-              className="tx-sync-btn"
-              onClick={async () => {
-                await syncConnectedItems();
-                await fetchAllData();
-              }}
-              disabled={syncing}
-            >
-              {syncing ? "Syncing..." : "Sync Latest"}
-            </button>
-          </div>
-        </header>
+            <p className="tx-subtitle">Track every payment, transfer, and deposit in one place.</p>
+          </header>
 
-        <div className="tx-account-tabs">
-          <button
-            type="button"
-            className={`tx-account-tab ${accountId === "" ? "active" : ""}`}
-            onClick={() => setAccountId("")}
-          >
-            All
-          </button>
-          {accounts.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              className={`tx-account-tab ${accountId === a.id ? "active" : ""}`}
-              onClick={() => setAccountId(a.id)}
-              title={formatAccountLabel(a.id)}
-            >
-              {shortAccountName(formatAccountLabel(a.id))}
-            </button>
-          ))}
+          {error && <div className="tx-error">{error}</div>}
+
+          <section className="tx-filter-bar">
+            <span className="tx-chip">{visibleTransactions.length} shown</span>
+            <span className="tx-divider" />
+
+            <input
+              className="tx-input"
+              type="number"
+              placeholder="Month"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              min="1"
+              max="12"
+            />
+
+            <input
+              className="tx-input"
+              type="number"
+              placeholder="Year"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              min="2000"
+              max="2100"
+            />
+
+            <span className="tx-divider" />
+
+            <select className="tx-select" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+              <option value="">All Accounts</option>
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+
+            <select className="tx-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+
+            <select className="tx-select" value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="All">All Types</option>
+              <option value="Income">Income</option>
+              <option value="Expense">Expense</option>
+            </select>
+
+            <select className="tx-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="Newest">Newest first</option>
+              <option value="Oldest">Oldest first</option>
+              <option value="Highest">Highest amount</option>
+              <option value="Lowest">Lowest amount</option>
+            </select>
+          </section>
+
+          <section className="tx-grid">
+            <div className="tx-metric">
+              <div className="tx-metric-label">Total Monthly Expenses</div>
+              <div className="tx-metric-value">${formatMoney(totalExpensesAmount)}</div>
+            </div>
+            <div className="tx-metric">
+              <div className="tx-metric-label">Potential Saving</div>
+              <div className="tx-metric-value">${formatMoney(monthlySavingAmount)}</div>
+            </div>
+          </section>
+
+          <section className="tx-card">
+            <div className="tx-card-h">
+              <h2>Transactions</h2>
+              <span className="tx-chip">Sorted: {sortBy}</span>
+            </div>
+            <div className="tx-table-wrap">
+              {loading ? (
+                <div className="tx-empty">Loading transactions...</div>
+              ) : visibleTransactions.length === 0 ? (
+                <div className="tx-empty">No transactions found.</div>
+              ) : (
+                <table className="tx-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Merchant</th>
+                      <th>Category</th>
+                      <th style={{ textAlign: "right" }}>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleTransactions.map((t) => {
+                      const amt = amountNumber(t.amount);
+                      const isIn = amt >= 0;
+                      return (
+                        <tr key={`${t.transaction_id || ""}-${t.date}-${t.account_id}-${t.amount}`}>
+                          <td>{formatDate(t.date)}</td>
+                          <td>{t.merchant_name || t.name || "—"}</td>
+                          <td>{bucketCategory(t.category)}</td>
+                          <td className={`tx-amount ${isIn ? "in" : "out"}`}>
+                            {isIn ? "+" : "-"}${formatMoney(Math.abs(amt))}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </section>
         </div>
 
-        {status && <div className="tx-note">{status}</div>}
-        {error && <div className="tx-error">{error}</div>}
-
-        <section className="tx-grid">
-          <div className="tx-card">
+        <aside className="tx-sidebar">
+          <section className="tx-card">
             <div className="tx-card-h">
-              <h3>Overview</h3>
-              <span className="tx-chip">{visibleTransactions.length} shown - {selectedLabel}</span>
+              <h2>Monthly Tips</h2>
+              <span className="tx-chip">{month}/{year}</span>
             </div>
-            <div className="tx-card-b">
-              <div className="tx-stats">
-                <div className="tx-stat">
-                  <p>Total Expenses</p>
-                  <h2>${formatMoney(totalExpensesAmount)}</h2>
-                </div>
-                <div className="tx-stat">
-                  <p>Potential Saving</p>
-                  <h2>${formatMoney(monthlySavingAmount)}</h2>
-                </div>
-              </div>
-
-              <div className="tx-controls">
-                <select className="tx-select" value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
-                  {DATE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-
-                <select className="tx-select" value={category} onChange={(e) => setCategory(e.target.value)}>
-                  {categoryOptions.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-
-                <select className="tx-select" value={type} onChange={(e) => setType(e.target.value)}>
-                  <option value="All">All Types</option>
-                  <option value="Income">Income</option>
-                  <option value="Expense">Expense</option>
-                </select>
-
-                <select className="tx-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  <option value="Newest">Newest first</option>
-                  <option value="Oldest">Oldest first</option>
-                  <option value="Highest">Highest amount</option>
-                  <option value="Lowest">Lowest amount</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="tx-card">
-            <div className="tx-card-h">
-              <h3>Saving Tips</h3>
-              <span className="tx-chip">Based on merchants</span>
-            </div>
-            <div className="tx-card-b">
-              <div className="tx-tips">
-                {monthlySavingDesc?.length ? (
-                  monthlySavingDesc.map((t) => (
-                    <div className="tx-tip" key={t.name}>
-                      <div><strong>{t.name}</strong> - spent ${formatMoney(t.total)}</div>
-                      <div>You could save about ${formatMoney(t.per_saving)} by reducing this expense.</div>
+            <div style={{ padding: "0 1.25rem" }}>
+              {monthlySavingDesc?.length ? (
+                monthlySavingDesc.map((t) => (
+                  <div className="tx-tip" key={t.name}>
+                    <div>
+                      <strong>{t.name}</strong> — you spent ${formatMoney(t.total)}
                     </div>
-                  ))
-                ) : (
-                  <div className="tx-empty">No tips available for this date range yet.</div>
-                )}
-              </div>
+                    <div className="tx-tip-sub">
+                    You could save about ${formatMoney(t.per_saving)} by taking this offer — <strong>"{t.desc}"</strong> — if you haven’t already.
+                  </div>
+                  </div>
+                ))
+              ) : (
+                <div className="tx-empty">No tips available for this month yet.</div>
+              )}
             </div>
-          </div>
-        </section>
+          </section>
+        </aside>
 
-        <section className="tx-card">
-          <div className="tx-card-h">
-            <h3>Transactions</h3>
-            <span className="tx-chip">Sorted: {sortBy}</span>
-          </div>
-          <div className="tx-table-wrap">
-            {loading ? (
-              <div className="tx-empty">Loading transactions...</div>
-            ) : visibleTransactions.length === 0 ? (
-              <div className="tx-empty">No transactions found for this filter.</div>
-            ) : (
-              <table className="tx-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Merchant</th>
-                    <th>Category</th>
-                    <th style={{ textAlign: "right" }}>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleTransactions.map((t) => {
-                    const amt = amountNumber(t.amount);
-                    const isIn = amt >= 0;
-                    const categoryLabel = bucketCategory(t.category);
-
-                    return (
-                      <tr key={`${t.transaction_id || ""}-${t.date}-${t.account_id}-${t.amount}`}>
-                        <td>{formatDate(t.date)}</td>
-                        <td>{t.merchant_name || t.name || "-"}</td>
-                        <td><span className="tx-cat">{categoryLabel}</span></td>
-                        <td className={`tx-amount ${isIn ? "in" : "out"}`}>
-                          {isIn ? "+" : "-"}${formatMoney(Math.abs(amt))}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </section>
       </main>
     </div>
   );
