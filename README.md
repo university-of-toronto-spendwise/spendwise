@@ -47,35 +47,116 @@ After running the application locally (see Development Environment Setup instruc
 http://134.122.6.117:5174/
 
 ---
-
 ## 1. Login / Sign Up
 
-- Log in using the provided credentials, or
-  email: spendwise@mail.utoronto.ca
-  password: SPENDWISE1@new
-- Create a new account through the registration page.
-- After successful login, you will be redirected to the **Dashboard**.
+Users can either **log in with existing credentials** or **create a new account**.
 
-<img width="674" height="698" alt="image" src="https://github.com/user-attachments/assets/fc5c7404-976e-43c1-bfad-23fa6ebc26dd" />
+### Demo Login Credentials
 
+You may log in using the following credentials:
 
+- **Email:** alihassan.shaikh@mail.utoronto.ca  
+- **Password:** SPENDWISE
+
+<img width="674" height="698" alt="Login Page" src="https://github.com/user-attachments/assets/fc5c7404-976e-43c1-bfad-23fa6ebc26dd" />
+
+### Create a New Account
+
+If you create a new account, you will be asked several questions about your financial situation, such as:
+
+- Current monthly expenses
+- Total income
+- Scholarships or financial aid
+- Other relevant financial information
+
+These responses will be used in **D4** to generate **personalized financial insights and recommendations**.
+
+### After Login
+
+After successfully logging in, users will be redirected to the **main dashboard** where they can view and manage their financial data.
+
+<img width="1353" height="788" alt="Dashboard Page" src="https://github.com/user-attachments/assets/f8e8f599-7649-42f8-9cc4-c7e74e37aa45" />
+
+### Future Improvements
+
+In future versions, we plan to integrate **University of Toronto authentication (UofT SSO)** so students can log in using their university accounts.
 
 ---
 
 ## 2. Dashboard
 
-The Dashboard is the main landing page after login. You’ll see a personalized greeting (e.g. “Good morning, [Name]”) based on the time of day and your profile.
+The **Dashboard** is the main landing page after a user logs in.
 
-Here you can:
-- View an overview of your spending
-- Choose a spending period (This Month, Last Month, 3 Months, Past Year) from the dropdown for the spending overview
-- See financial alerts and connect or manage bank accounts
-- Check Upcoming Deadlines for saved scholarships (soonest first)
+From here, users can quickly view an overview of their financial activity and key information.
+
+### Features
+
+On the dashboard, users can:
+
+- View an overview of their spending
+- See financial alerts
+- Check upcoming deadlines
 - View a daily financial tip
 
-This page provides a quick summary of your financial status.
+<img width="743" height="377" alt="Dashboard Overview" src="https://github.com/user-attachments/assets/cdc8a97f-7ee0-4a30-8932-17de3f52ca64" />
 
-<img width="1236" height="839" alt="image" src="https://github.com/user-attachments/assets/01dd8e83-f0e6-4d75-adb8-859a3e6606d0" />
+---
+
+## Bank Connection (D3 Feature)
+
+The **Bank Connection** feature allows users to connect their bank accounts to SpendWise in order to sync and analyze transactions.
+
+### Current Implementation
+
+- The **Plaid API** is used to connect bank accounts.
+- The system currently runs in the **Plaid Sandbox environment**, which allows users to connect **dummy bank accounts for testing purposes**.
+- The full connection pipeline has been implemented **end-to-end**.
+- Further testing will be required before moving from **Sandbox → Development environment**.
+
+### Connecting a Bank Account
+
+For a new user, the dashboard will show a **"Connect Bank Account"** option.
+
+When connecting an account:
+
+1. A Plaid connection window will appear.
+2. Users can select a **test bank account**.
+3. A verification code can be entered if prompted.
+4. Users can connect **one bank account at a time**.
+
+<img width="576" height="739" alt="Bank Connection" src="https://github.com/user-attachments/assets/fc0b9cbd-21eb-45d8-92c5-afa4c25bba3d" />
+
+---
+
+### Connected Bank Account
+
+Once connected, the bank account will appear on the dashboard.
+
+Currently, users must select **Last Month** because the Plaid sandbox provides transactions for **February 2026**.
+
+<img width="1437" height="796" alt="Connected Bank Account" src="https://github.com/user-attachments/assets/c6573b61-4d2e-44db-b156-ff090fd45765" />
+
+---
+
+### Dashboard Summary
+
+The dashboard provides a quick summary of:
+
+- Connected bank accounts
+- Financial status
+- Recent transactions
+- Alerts and insights
+
+---
+
+## Future Improvements (D4)
+
+Planned enhancements include:
+
+- Support for **multiple connected bank accounts**
+- Ability to connect **real bank accounts** (outside the sandbox environment)
+- Support for **multiple months of transaction data**
+- Expanded financial insights and analytics
 
 
 ---
