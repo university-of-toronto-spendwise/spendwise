@@ -9,6 +9,7 @@ urlpatterns = [
     path('api/', include('transactions.urls')),
     # Add student codes path
     path("api/", include("student_codes.urls")),
+    path('api/', include('spending.urls')),
 ]
 
 

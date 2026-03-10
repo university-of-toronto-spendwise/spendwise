@@ -258,7 +258,7 @@ export default function Login() {
 
     setError(""); setLoading(true);
     try {
-      const res = await fetch("http://0.0.0.0:8000/api/login/", {
+      const res = await fetch("http://localhost:8000/api/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -267,12 +267,16 @@ export default function Login() {
         }),
       });
 
-      const data = await res.json();
+	      const data = await res.json();
+	
+	      if (res.ok) {
+	        const accessToken = data.token || data.access || data.key;
+	        const refreshToken = data.refresh;
 
-      if (res.ok) {
-        const token = data.token || data.access || data.key;
-        sessionStorage.setItem("userToken", token);
-        setSuccess(true);
+	        if (accessToken) sessionStorage.setItem("userToken", accessToken);
+	        if (accessToken) sessionStorage.setItem("userAccessToken", accessToken);
+	        if (refreshToken) sessionStorage.setItem("userRefreshToken", refreshToken);
+	        setSuccess(true);
 
         setTimeout(() => { navigate("/home"); }, 2000);
 

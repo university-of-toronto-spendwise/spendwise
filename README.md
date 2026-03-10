@@ -167,7 +167,7 @@ After cloning the repository, follow these steps to work on the remote `dev` bra
 ### 1) Clone the Repository
 
 ```bash
-git clone https://github.com/redpinecube/spendwise.git
+git clone https://github.com/csc301-2026-s/spendwise.git
 cd spendwise
 git fetch --all
 git checkout -b dev origin/dev
@@ -189,7 +189,11 @@ Activate the virtual environment:
 ```bash
 source venv/bin/activate
 ```
+Install the Dependencies
+```bash
 
+python -m pip install -r backend/requirements.txt
+```
 Deactivate when done:
 
 ```bash
