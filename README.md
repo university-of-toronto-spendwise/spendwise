@@ -71,11 +71,13 @@ If you create a new account, you will be asked several questions about your fina
 
 These responses will be used in **D4** to generate **personalized financial insights and recommendations**.
 
+<img width="1353" height="788" alt="Dashboard Page" src="https://github.com/user-attachments/assets/f8e8f599-7649-42f8-9cc4-c7e74e37aa45" />
+
 ### After Login
 
-After successfully logging in, users will be redirected to the **main dashboard** where they can view and manage their financial data.
+After successfully logging in, users will be redirected to the **main dashboard** where they can view and manage their financial data.(Screenshot in the second section)
 
-<img width="1353" height="788" alt="Dashboard Page" src="https://github.com/user-attachments/assets/f8e8f599-7649-42f8-9cc4-c7e74e37aa45" />
+
 
 ### Future Improvements
 
