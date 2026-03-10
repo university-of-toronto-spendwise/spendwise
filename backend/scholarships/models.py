@@ -10,6 +10,12 @@ class AwardType(models.TextChoices):
     GRADUATING = "graduating", "Graduating"
 
 
+class SavedScholarshipStatus(models.TextChoices):
+    SAVED = "saved", "Saved / Planned"
+    IN_PROGRESS = "in_progress", "In Progress"
+    SUBMITTED = "submitted", "Submitted"
+
+
 class Scholarship(models.Model):
     # IDENTITY
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -84,6 +90,11 @@ class SavedScholarship(models.Model):
         related_name="saved_by_users",
     )
     saved_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(
+        max_length=20,
+        choices=SavedScholarshipStatus.choices,
+        default=SavedScholarshipStatus.SAVED,
+    )
 
     class Meta:
         constraints = [
