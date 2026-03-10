@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL, fetchProfile, setOnboardingComplete, setToken } from "../utils/session";
+import { API_BASE_URL, fetchProfile, setOnboardingComplete, setTokens } from "../utils/session";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
@@ -271,9 +271,10 @@ export default function Login() {
       const data = await res.json();
 
       if (res.ok) {
-        const token = data.token || data.access || data.key;
-        setToken(token);
-        const profile = await fetchProfile(token);
+        const access = data.access || data.token || data.key;
+        const refresh = data.refresh;
+        setTokens({ access, refresh });
+        const profile = await fetchProfile(access);
         setOnboardingComplete(Boolean(profile.onboarding_completed));
         setSuccess(true);
 

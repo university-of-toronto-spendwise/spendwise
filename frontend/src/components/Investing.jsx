@@ -365,7 +365,7 @@ const styles = `
 `;
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("userToken");
+  const token = sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
   return {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -434,7 +434,7 @@ export default function Investing() {
 
         const data = await res.json();
         setMonthlyContribution(Number(data.total_saving || 0));
-      } catch (err) {
+      } catch {
         setSavingsError("Could not load your savings estimate.");
         setMonthlyContribution(0);
       } finally {
