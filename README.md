@@ -231,6 +231,18 @@ SpendWise centralizes:
 - Student discounts and codes
 
 All in one platform designed to simplify financial decision-making for UofT students.
+
+---
+
+## D3 Evolution 
+- Plaid API integration for secure bank account linking and automatic transaction syncing (sandbox mode)
+- Spending analytics backend (/api/spending/monthly_saving_amount/) calculating savings from recurring patterns
+- Onboarding form capturing earnings, expenses, scholarships, campus/degree info for personalization
+- Student discounts frontend with SPC data scraping, search/filtering, and copy-to-clipboard functionality
+- Investing simulator linking spending baseline to portfolio comparisons
+
+*(Note: Explained in detail in the product-evolution.md)*
+ ---
  
 # Development Environment Setup
 
@@ -398,12 +410,6 @@ This structure ensures accountability through Jira tracking, improves collaborat
 All folders and file names must use lowercase and follow Django’s default project structure. We maintain consistent code organization by structuring backend files according to features and will document our workflow to ensure clarity, scalability, and team alignment.
 
 ---
-## D3 Evolution 
-- Plaid API integration for secure bank account linking and automatic transaction syncing (sandbox mode)
-- Spending analytics backend (/api/spending/monthly_saving_amount/) calculating savings from recurring patterns
-- Onboarding form capturing earnings, expenses, scholarships, campus/degree info for personalization
-- Student discounts frontend with SPC data scraping, search/filtering, and copy-to-clipboard functionality
-- Investing simulator linking spending baseline to portfolio comparisons
   
 ## License
 
