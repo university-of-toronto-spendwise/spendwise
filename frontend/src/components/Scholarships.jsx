@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Navbar from "./Navbar";
 import UpcomingDeadlines from "./UpcomingDeadlines";
 
@@ -36,6 +37,7 @@ const styles = `
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: 1.5rem;
+    align-items: start;
   }
 
   .sc-main { min-width: 0; }
@@ -345,8 +347,21 @@ const styles = `
   .sc-page-btn.active { background: var(--uoft-blue); color: white; border-color: var(--uoft-blue); }
   .sc-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* ── Sidebar ── */
-  .sc-sidebar { position: sticky; top: 80px; align-self: start; }
+  .sc-sidebar-spacer { width: 300px; min-width: 300px; flex-shrink: 0; }
+
+  /* ── Sidebar: fixed (rendered via portal to body so it never scrolls) ── */
+  .sc-sidebar {
+    position: fixed !important;
+    top: 80px !important;
+    right: max(2rem, calc((100vw - 1200px) / 2 + 2rem)) !important;
+    width: 300px !important;
+    max-height: calc(100vh - 80px) !important;
+    overflow-y: auto;
+    z-index: 50;
+  }
+  @media (max-width: 1247px) {
+    .sc-sidebar { right: 2rem !important; }
+  }
 
   .sc-sidebar-card {
     background: white;
@@ -735,15 +750,46 @@ export default function Scholarships() {
 
   const PAGE_SIZE = 20;
 
-  const token = () => sessionStorage.getItem("userToken");
-  const authHeaders = () => (token() ? { Authorization: `Bearer ${token()}` } : {});
+  const getAccessToken = () =>
+    sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
 
-  // ── Fetch saved scholarships (ids + full list for sidebar and "View saved") ──
+  const refreshAccessToken = async () => {
+    const refresh = sessionStorage.getItem("userRefreshToken");
+    if (!refresh) return null;
+    const res = await fetch(`${API_REL}/token/refresh/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data?.access) return null;
+    sessionStorage.setItem("userToken", data.access);
+    sessionStorage.setItem("userAccessToken", data.access);
+    return data.access;
+  };
+
+  const fetchWithAuth = async (url, options = {}) => {
+    let token = getAccessToken();
+    if (!token) return { ok: false, status: 401 };
+    const doFetch = (accessToken) =>
+      fetch(url, {
+        ...options,
+        headers: { ...(options.headers || {}), Authorization: `Bearer ${accessToken}` },
+      });
+    let res = await doFetch(token);
+    if (res.status === 401) {
+      const newToken = await refreshAccessToken();
+      if (newToken) res = await doFetch(newToken);
+    }
+    return res;
+  };
+
+  // ── Fetch saved scholarships (ids + full list); survives refresh and re-login ──
   const fetchSavedScholarships = useCallback(async () => {
-    if (!token()) return;
+    if (!getAccessToken()) return;
     try {
-      const res = await fetch(`${API_REL}/scholarships/saved/`, { headers: { ...authHeaders() } });
-      if (res.status === 401) return;
+      const res = await fetchWithAuth(`${API_REL}/scholarships/saved/`);
       if (!res.ok) return;
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
@@ -760,11 +806,10 @@ export default function Scholarships() {
 
   // ── Save / Unsave ──
   const handleSave = async (id) => {
-    if (!token()) return;
+    if (!getAccessToken()) return;
     try {
-      const res = await fetch(`${API_REL}/scholarships/${id}/save/`, {
+      const res = await fetchWithAuth(`${API_REL}/scholarships/${id}/save/`, {
         method: "POST",
-        headers: { ...authHeaders() },
       });
       if (res.ok) await fetchSavedScholarships();
     } catch {
@@ -773,11 +818,10 @@ export default function Scholarships() {
   };
 
   const handleUnsave = async (id) => {
-    if (!token()) return;
+    if (!getAccessToken()) return;
     try {
-      const res = await fetch(`${API_REL}/scholarships/${id}/save/`, {
+      const res = await fetchWithAuth(`${API_REL}/scholarships/${id}/save/`, {
         method: "DELETE",
-        headers: { ...authHeaders() },
       });
       if (res.ok) await fetchSavedScholarships();
     } catch {
@@ -999,12 +1043,19 @@ export default function Scholarships() {
             )}
           </div>
 
-          {/* ── SIDEBAR: saved scholarships by due date ── */}
-          <div className="sc-sidebar">
-            <UpcomingDeadlines items={savedScholarships} maxItems={6} />
-          </div>
+          {/* Spacer keeps grid layout; actual sidebar is portaled to body so it stays fixed */}
+          <div className="sc-sidebar-spacer" aria-hidden="true" />
         </div>
       </div>
+
+      {/* Upcoming Deadlines: portaled to body so position:fixed works (no ancestor can break it) */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <div className="sc-sidebar">
+            <UpcomingDeadlines items={savedScholarships} maxItems={6} />
+          </div>,
+          document.body
+        )}
 
       {/* Profile Modal */}
       {showModal && (

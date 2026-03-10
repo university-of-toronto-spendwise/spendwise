@@ -63,7 +63,10 @@ const styles = `
   }
 
   .pill:focus-within, .pill:hover { border-color: var(--border-2); }
-  .pill .chev { margin-left: 0.15rem; opacity: 0.75; }
+  .pill .chev { margin-left: 0.15rem; opacity: 0.75; font-size: 0.7em; }
+  .db-period-pill { min-width: 200px; }
+  .db-period-label { color: var(--text-muted); font-weight: 600; font-size: 0.88rem; }
+  .db-period-value { font-weight: 800; color: var(--uoft-blue); }
 
   .menu {
     position: absolute;
@@ -80,7 +83,7 @@ const styles = `
 
   .menuItem { padding: 0.6rem 0.7rem; border-radius: 10px; font-weight: 700; color: var(--uoft-blue); cursor: pointer; }
   .menuItem:hover { background: #EAF0FF; }
-  .menuItem.active { background: #3B6BE3; color: white; }
+  .menuItem.active { background: var(--uoft-blue); color: white; }
 
   .pillToggle { gap: 0.65rem; padding: 0.55rem 1rem; }
   .dot { width: 14px; height: 14px; border-radius: 999px; border: 2px solid var(--border); background: #fff; }
@@ -94,7 +97,7 @@ const styles = `
     font-weight: 800;
     padding: 0.65rem 1rem;
     cursor: pointer;
-    box-shadow: 3px 3px 0px var(--uoft-accent);
+    box-shadow: 0 2px 8px rgba(0, 42, 92, 0.25);
   }
   .bank-cta:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
@@ -129,7 +132,7 @@ const styles = `
     background: var(--uoft-blue);
     border-color: var(--uoft-blue);
     color: #fff;
-    box-shadow: 3px 3px 0px var(--uoft-accent);
+    box-shadow: 0 2px 8px rgba(0, 42, 92, 0.2);
   }
   .mini-grid {
     display:grid;
@@ -427,15 +430,29 @@ function MonthDropdown({ value, onChange, options }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="pill" onClick={() => setOpen((v) => !v)} role="button" tabIndex={0} aria-label="Select month">
-      <span>Date</span>
-      <span>{value}</span>
-      <span className="chev">v</span>
+    <div
+      className="pill db-period-pill"
+      onClick={() => setOpen((v) => !v)}
+      role="button"
+      tabIndex={0}
+      aria-label="Select spending period"
+      aria-haspopup="listbox"
+      aria-expanded={open}
+    >
+      <span className="db-period-label">Spending period</span>
+      <span className="db-period-value">{value}</span>
+      <span className="chev" aria-hidden>▼</span>
 
       {open && (
-        <div className="menu" onClick={(e) => e.stopPropagation()}>
+        <div className="menu" role="listbox" onClick={(e) => e.stopPropagation()}>
           {options.map((opt) => (
-            <div key={opt} className={`menuItem ${opt === value ? "active" : ""}`} onClick={() => { onChange(opt); setOpen(false); }}>
+            <div
+              key={opt}
+              role="option"
+              aria-selected={opt === value}
+              className={`menuItem ${opt === value ? "active" : ""}`}
+              onClick={() => { onChange(opt); setOpen(false); }}
+            >
               {opt}
             </div>
           ))}

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Navbar from "./Navbar";
 
 const DATE_OPTIONS = ["This Month", "Last Month", "3 Months", "Past Year"];
@@ -401,13 +401,13 @@ export default function Transactions() {
     .tx-title{margin:0;font-size:40px;letter-spacing:-0.02em;color:#002a5c;line-height:1.05;font-weight:800}
     .tx-subtitle{margin:8px 0 0;color:#6b7a90;font-size:18px}
     .tx-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:2px solid #d0dbe8;background:#fff;color:#002a5c;font-size:13px;font-weight:700}
-    .tx-sync-btn{border:none;border-radius:12px;padding:11px 16px;background:#002a5c;color:#fff;font-weight:800;cursor:pointer;box-shadow:3px 3px 0px #e8b53e}
+    .tx-sync-btn{border:none;border-radius:12px;padding:11px 16px;background:#002a5c;color:#fff;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(0,42,92,0.25)}
     .tx-sync-btn:hover:not(:disabled){background:#0047a0}
     .tx-sync-btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
 
     .tx-account-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
     .tx-account-tab{max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:2px solid #d0dbe8;background:#fff;color:#002a5c;border-radius:999px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer}
-    .tx-account-tab.active{background:#002a5c;border-color:#002a5c;color:#fff;box-shadow:2px 2px 0px #e8b53e}
+    .tx-account-tab.active{background:#002a5c;border-color:#002a5c;color:#fff;box-shadow:0 2px 8px rgba(0,42,92,0.2)}
 
     .tx-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin:0 0 16px}
     .tx-card{background:#fff;border:2px solid #d0dbe8;border-radius:18px;box-shadow:0 4px 14px rgba(0,42,92,.06)}

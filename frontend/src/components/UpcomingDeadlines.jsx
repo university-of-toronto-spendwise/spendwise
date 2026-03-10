@@ -2,10 +2,36 @@ import { useState, useEffect } from "react";
 
 const API = "/api";
 
-const token = () => sessionStorage.getItem("userToken");
-const authHeaders = () => {
-  const t = token();
-  return t ? { Authorization: `Bearer ${t}` } : {};
+const getAccessToken = () =>
+  sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
+
+const refreshAccessToken = async () => {
+  const refresh = sessionStorage.getItem("userRefreshToken");
+  if (!refresh) return null;
+  const res = await fetch(`${API}/token/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data?.access) return null;
+  sessionStorage.setItem("userToken", data.access);
+  sessionStorage.setItem("userAccessToken", data.access);
+  return data.access;
+};
+
+const fetchWithAuth = async (url) => {
+  let token = getAccessToken();
+  if (!token) return { ok: false, status: 401 };
+  const doFetch = (accessToken) =>
+    fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  let res = await doFetch(token);
+  if (res.status === 401) {
+    const newToken = await refreshAccessToken();
+    if (newToken) res = await doFetch(newToken);
+  }
+  return res;
 };
 
 const udStyles = `
@@ -50,14 +76,11 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 8 }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/scholarships/saved/`, {
-        headers: { ...authHeaders() },
-      });
-      if (res.status === 401) {
-        setItems([]);
-        return;
+      const res = await fetchWithAuth(`${API}/scholarships/saved/`);
+      if (!res.ok) {
+        if (res.status === 401) return;
+        throw new Error("Failed to load saved scholarships");
       }
-      if (!res.ok) throw new Error("Failed to load saved scholarships");
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
