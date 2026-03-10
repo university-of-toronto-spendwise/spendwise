@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom"
 import Registration from "./components/Registration"
 import Login from "./components/Login"

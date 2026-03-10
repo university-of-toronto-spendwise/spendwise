@@ -25,10 +25,7 @@ const styles = `
     --text-muted: #6B7A90;
 
     --success: #18A574;
-    --success-bg: #EAF7EF;
     --danger: #C0392B;
-    --danger-bg: #FEF0EE;
-    --neutral-bg: #EEF3FA;
 
     --shadow: 0 4px 16px rgba(0,42,92,0.08);
   }
@@ -41,31 +38,16 @@ const styles = `
   .db-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
     gap: 1rem;
     margin-bottom: 1.25rem;
     flex-wrap: wrap;
   }
 
-  .db-header h1 {
-    font-size: 1.9rem;
-    font-weight: 800;
-    color: var(--uoft-blue);
-    margin: 0 0 0.25rem 0;
-  }
+  .db-header h1 { font-size: 1.9rem; font-weight: 800; color: var(--uoft-blue); margin: 0 0 0.25rem 0; }
+  .db-header p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
 
-  .db-header p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-  }
-
-  .db-header-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
+  .db-header-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-left:auto; justify-content:flex-end; }
 
   .pill {
     background: var(--white);
@@ -106,29 +88,11 @@ const styles = `
   .menuItem.active { background: var(--uoft-blue); color: white; }
 
   .menuItem:hover { background: #EAF0FF; }
+  .menuItem.active { background: #3B6BE3; color: white; }
 
-  .menuItem.active {
-    background: #3B6BE3;
-    color: white;
-  }
-
-  .pillToggle {
-    gap: 0.65rem;
-    padding: 0.55rem 1rem;
-  }
-
-  .dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 999px;
-    border: 2px solid var(--border);
-    background: #fff;
-  }
-
-  .dot.on {
-    background: #B9C7E6;
-    border-color: #B9C7E6;
-  }
+  .pillToggle { gap: 0.65rem; padding: 0.55rem 1rem; }
+  .dot { width: 14px; height: 14px; border-radius: 999px; border: 2px solid var(--border); background: #fff; }
+  .dot.on { background: #B9C7E6; border-color: #B9C7E6; }
 
   .bank-cta {
     background: var(--uoft-blue);
@@ -140,12 +104,7 @@ const styles = `
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0, 42, 92, 0.25);
   }
-
-  .bank-cta:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
+  .bank-cta:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
   .bank-status {
     margin-bottom: 1rem;
@@ -157,24 +116,14 @@ const styles = `
     font-weight: 600;
   }
 
-  .bank-status.error {
-    border-color: #f2c7c3;
-    background: #fff4f3;
-    color: #8a2e25;
-  }
-
+  .bank-status.error { border-color: #f2c7c3; background: #fff4f3; color: #8a2e25; }
   .bank-tabs {
     display: flex;
     gap: 0.55rem;
     flex-wrap: wrap;
     margin: 0 0 0.9rem;
   }
-
-  .bank-tab {
-    max-width: 260px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .bank-tab { max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     border: 2px solid var(--border);
     background: #fff;
     color: var(--uoft-blue);
@@ -183,122 +132,41 @@ const styles = `
     padding: 0.45rem 0.9rem;
     cursor: pointer;
   }
-
-  .bank-tab:hover {
-    border-color: var(--uoft-mid);
-    color: var(--uoft-mid);
-  }
-
+  .bank-tab:hover { border-color: var(--uoft-mid); color: var(--uoft-mid); }
   .bank-tab.active {
     background: var(--uoft-blue);
     border-color: var(--uoft-blue);
     color: #fff;
     box-shadow: 0 2px 8px rgba(0, 42, 92, 0.2);
   }
-
   .mini-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.7rem;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:0.7rem;
   }
-
   .mini-card {
-    background: #f7faff;
-    border: 2px solid rgba(208,219,232,0.75);
-    border-radius: 14px;
-    padding: 0.7rem 0.8rem;
+    background:#f7faff;
+    border:2px solid rgba(208,219,232,0.75);
+    border-radius:14px;
+    padding:0.7rem 0.8rem;
   }
-
-  .mini-title {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    font-weight: 700;
-    margin: 0 0 0.2rem;
-  }
-
-  .mini-value {
-    color: var(--uoft-blue);
-    font-size: 1.05rem;
-    font-weight: 900;
-    margin: 0;
-  }
-
+  .mini-title { color:var(--text-muted); font-size:0.8rem; font-weight:700; margin:0 0 0.2rem; }
+  .mini-value { color:var(--uoft-blue); font-size:1.05rem; font-weight:900; margin:0; }
   .mini-value.neg { color: var(--danger); }
   .mini-value.pos { color: var(--success); }
 
-  .db-grid {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 1.5rem;
-    align-items: start;
-  }
-
+  .db-grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; align-items: start; }
   .db-main, .db-side { min-width: 0; }
 
-  .card {
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 18px;
-    padding: 1.25rem 1.5rem;
-  }
+  .card { background: var(--white); border: 2px solid var(--border); border-radius: 18px; padding: 1.25rem 1.5rem; }
+  .card-title { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.85rem; }
+  .card-title h2 { margin: 0; font-size: 1.02rem; font-weight: 900; color: var(--uoft-blue); }
+  .link { color: var(--uoft-mid); font-weight: 800; font-size: 0.92rem; cursor: pointer; user-select: none; }
 
-  .card + .card,
-  .card + .insightCardSpacing,
-  .insightCardSpacing + .card {
-    margin-top: 1.25rem;
-  }
-
-  .card-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.85rem;
-  }
-
-  .card-title h2 {
-    margin: 0;
-    font-size: 1.02rem;
-    font-weight: 900;
-    color: var(--uoft-blue);
-  }
-
-  .link {
-    color: var(--uoft-mid);
-    font-weight: 800;
-    font-size: 0.92rem;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .hero {
-    background: linear-gradient(135deg, var(--uoft-blue), var(--uoft-mid));
-    color: white;
-    border: none;
-    box-shadow: var(--shadow);
-  }
-
-  .hero-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 0.9rem;
-  }
-
-  .hero-label {
-    font-size: 0.85rem;
-    opacity: 0.92;
-    margin: 0 0 0.25rem 0;
-  }
-
-  .hero-amount {
-    font-size: 1.9rem;
-    font-weight: 900;
-    margin: 0;
-    letter-spacing: -0.02em;
-  }
-
+  .hero { background: linear-gradient(135deg, var(--uoft-blue), var(--uoft-mid)); color: white; border: none; box-shadow: var(--shadow); }
+  .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.9rem; }
+  .hero-label { font-size: 0.85rem; opacity: 0.92; margin: 0 0 0.25rem 0; }
+  .hero-amount { font-size: 1.9rem; font-weight: 900; margin: 0; letter-spacing: -0.02em; }
   .hero-change {
     background: rgba(255,255,255,0.14);
     border: 1px solid rgba(255,255,255,0.25);
@@ -308,54 +176,14 @@ const styles = `
     font-size: 0.85rem;
     white-space: nowrap;
   }
+  .hero-change.good { background: rgba(24,165,116,0.2); border-color: rgba(24,165,116,0.45); }
+  .hero-change.bad { background: rgba(192,57,43,0.2); border-color: rgba(192,57,43,0.45); }
+  .hero-change.neutral { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.35); }
+  .hero-meta { display: flex; justify-content: space-between; opacity: 0.92; font-size: 0.88rem; margin-top: 0.6rem; }
+  .progress { height: 8px; background: rgba(255,255,255,0.18); border-radius: 999px; overflow: hidden; margin-top: 0.7rem; }
+  .progress > span { display: block; height: 100%; width: var(--pct, 60%); background: rgba(255,255,255,0.88); border-radius: 999px; }
 
-  .hero-change.good {
-    background: rgba(24,165,116,0.2);
-    border-color: rgba(24,165,116,0.45);
-  }
-
-  .hero-change.bad {
-    background: rgba(192,57,43,0.2);
-    border-color: rgba(192,57,43,0.45);
-  }
-
-  .hero-change.neutral {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.35);
-  }
-
-  .hero-meta {
-    display: flex;
-    justify-content: space-between;
-    opacity: 0.92;
-    font-size: 0.88rem;
-    margin-top: 0.6rem;
-  }
-
-  .progress {
-    height: 8px;
-    background: rgba(255,255,255,0.18);
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 0.7rem;
-  }
-
-  .progress > span {
-    display: block;
-    height: 100%;
-    width: var(--pct, 60%);
-    background: rgba(255,255,255,0.88);
-    border-radius: 999px;
-  }
-
-  .actions {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.25rem;
-    margin-top: 1.25rem;
-    margin-bottom: 1.25rem;
-  }
-
+  .actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; margin-top: 1.25rem; margin-bottom: 1.25rem; }
   .tile {
     background: var(--white);
     border: 2px solid var(--border);
@@ -368,15 +196,7 @@ const styles = `
     gap: 0.95rem;
     min-width: 0;
   }
-
-  .tile:hover {
-    border-color: var(--border-2);
-    box-shadow: 0 6px 18px rgba(0,42,92,0.08);
-    transform: translateY(-1px);
-  }
-
-  .tile:active { transform: translateY(0); }
-
+  .tile:hover { border-color: var(--border-2); box-shadow: 0 6px 18px rgba(0,42,92,0.08); transform: translateY(-1px); }
   .tileIconWrap {
     width: 54px;
     height: 54px;
@@ -388,71 +208,14 @@ const styles = `
     flex-shrink: 0;
     background: #fff;
   }
-
   .tScholar { background: #FFF6E0; border-color: rgba(232,181,62,0.5); }
   .tBills { background: #EAF0FF; border-color: rgba(0,71,160,0.18); }
   .tCodes { background: #ECFDF5; border-color: rgba(24,165,116,0.18); }
-
-  .tileTitle {
-    font-weight: 900;
-    color: var(--uoft-blue);
-    font-size: 1.05rem;
-    margin: 0 0 0.1rem 0;
-  }
-
-  .tileSub {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-  }
-
-  .financial-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .financial-stat {
-    padding: 1rem;
-    border-radius: 16px;
-    background: #F7FAFF;
-    border: 2px solid rgba(208,219,232,0.75);
-  }
-
-  .financial-label {
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 0.45rem;
-  }
-
-  .financial-value {
-    font-size: 1.45rem;
-    font-weight: 900;
-    color: var(--uoft-blue);
-  }
-
-  .financial-value.positive { color: var(--success); }
-  .financial-value.negative { color: var(--danger); }
-
-  .financial-footnote {
-    margin: 1rem 0 0;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    line-height: 1.45;
-  }
+  .tileTitle { font-weight: 900; color: var(--uoft-blue); font-size: 1.05rem; margin: 0 0 0.1rem 0; }
+  .tileSub { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
 
   .insightCardSpacing { margin-bottom: 1.25rem; }
-
-  .insight {
-    display: flex;
-    gap: 0.85rem;
-    align-items: flex-start;
-  }
-
+  .insight { display: flex; gap: 0.85rem; align-items: flex-start; }
   .insightIcon {
     width: 54px;
     height: 54px;
@@ -465,39 +228,10 @@ const styles = `
     flex-shrink: 0;
     font-size: 1.15rem;
   }
-
-  .insight.warning .insightIcon {
-    background: var(--danger-bg);
-    border-color: rgba(192,57,43,0.2);
-  }
-
-  .insight.success .insightIcon {
-    background: var(--success-bg);
-    border-color: rgba(24,165,116,0.2);
-  }
-
-  .insight.neutral .insightIcon {
-    background: var(--neutral-bg);
-    border-color: rgba(0,71,160,0.15);
-  }
-
-  .insight strong {
-    display: block;
-    color: var(--uoft-blue);
-    font-weight: 900;
-    font-size: 1.05rem;
-    margin-bottom: 0.2rem;
-  }
-
-  .insight p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 1rem;
-    line-height: 1.45;
-  }
+  .insight strong { display: block; color: var(--uoft-blue); font-weight: 900; font-size: 1.05rem; margin-bottom: 0.2rem; }
+  .insight p { margin: 0; color: var(--text-muted); font-size: 1rem; line-height: 1.45; }
 
   .list { display: flex; flex-direction: column; gap: 0.95rem; }
-
   .row {
     display: flex;
     align-items: center;
@@ -508,14 +242,7 @@ const styles = `
     background: #F7FAFF;
     border: 2px solid rgba(208,219,232,0.75);
   }
-
-  .row-left {
-    display: flex;
-    gap: 0.9rem;
-    align-items: center;
-    min-width: 0;
-  }
-
+  .row-left { display: flex; gap: 0.9rem; align-items: center; min-width: 0; }
   .row-icon {
     width: 52px;
     height: 52px;
@@ -528,124 +255,12 @@ const styles = `
     flex-shrink: 0;
     font-size: 1.2rem;
   }
-
-  .row-title {
-    font-weight: 900;
-    color: var(--uoft-blue);
-    font-size: 1.05rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .row-sub {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    margin-top: 0.15rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .amt {
-    font-weight: 900;
-    font-size: 1.05rem;
-    white-space: nowrap;
-  }
-
+  .row-title { font-weight: 900; color: var(--uoft-blue); font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-sub { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .amt { font-weight: 900; font-size: 1.05rem; white-space: nowrap; }
   .amt.negative { color: var(--danger); }
   .amt.positive { color: var(--success); }
-
-  .empty {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    text-align: center;
-    padding: 1.25rem 0;
-  }
-
-  .subtle {
-    margin-top: 0.85rem;
-    color: var(--text-muted);
-    font-size: 0.87rem;
-  }
-
-  .scholarship-list,
-  .codes-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-
-  .mini-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem;
-    border-radius: 16px;
-    background: #F7FAFF;
-    border: 2px solid rgba(208,219,232,0.75);
-  }
-
-  .mini-row-main {
-    min-width: 0;
-  }
-
-  .mini-row-main h3 {
-    margin: 0;
-    color: var(--uoft-blue);
-    font-size: 1rem;
-    line-height: 1.35;
-  }
-
-  .mini-row-main p {
-    margin: 0.3rem 0 0;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-  }
-
-  .mini-row-side {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.45rem;
-    flex-shrink: 0;
-  }
-
-  .mini-amount {
-    font-size: 1rem;
-    font-weight: 900;
-    color: var(--uoft-mid);
-  }
-
-  .mini-deadline,
-  .mini-expiry {
-    color: var(--text-muted);
-    font-size: 0.84rem;
-    font-weight: 700;
-  }
-
-  .mini-link {
-    color: var(--uoft-mid);
-    font-size: 0.88rem;
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .mini-link:hover { text-decoration: underline; }
-
-  .code-pill {
-    display: inline-flex;
-    align-self: flex-start;
-    margin-top: 0.55rem;
-    padding: 0.28rem 0.55rem;
-    border-radius: 999px;
-    background: #ECFDF5;
-    color: #12724F;
-    font-size: 0.76rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
+  .empty { color: var(--text-muted); font-size: 0.95rem; text-align: center; padding: 1.25rem 0; }
 
   .deadlineBadge {
     width: 52px;
@@ -659,7 +274,6 @@ const styles = `
     border: 2px solid var(--border);
     background: #fff;
   }
-
   .d-red { background: #FDECEC; color: var(--danger); border-color: rgba(192,57,43,0.25); }
   .d-yellow { background: #FFF6E0; color: #8A5A00; border-color: rgba(232,181,62,0.45); }
   .d-blue { background: #EAF0FF; color: var(--uoft-mid); border-color: rgba(0,71,160,0.25); }
@@ -667,18 +281,15 @@ const styles = `
   @media (max-width: 980px) {
     .db-grid { grid-template-columns: 1fr; }
     .db-side { order: 2; }
-    .mini-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mini-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   }
 
   @media (max-width: 720px) {
     .db-body { padding: 1.25rem 1rem; }
-    .actions,
-    .financial-grid { grid-template-columns: 1fr; }
+    .actions { grid-template-columns: 1fr; }
     .pill { width: 100%; justify-content: space-between; }
     .db-header { align-items: flex-start; }
     .menu { width: 100%; }
-    .mini-row { flex-direction: column; }
-    .mini-row-side { align-items: flex-start; }
   }
 `;
 
@@ -750,124 +361,54 @@ function formatCurrency(value) {
   });
 }
 
-function formatCurrencyWithCents(value) {
-  return value.toLocaleString(undefined, {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return "TBD";
-  const parsed = new Date(`${dateStr}T12:00:00`);
-  if (Number.isNaN(parsed.getTime())) return dateStr;
-  return parsed.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function getDaysUntil(dateStr) {
-  if (!dateStr) return null;
-  const target = new Date(`${dateStr}T12:00:00`);
-  if (Number.isNaN(target.getTime())) return null;
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  return Math.round((target - today) / 86400000);
-}
-
-function fmtMoney(value) {
-  return Number(value || 0).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function getPeriodLength(label) {
+const getPeriodLength = (label) => {
   if (label === "3 Months") return 3;
   if (label === "Past Year") return 12;
   return 1;
-}
+};
 
-function monthYearForLabel(label, windowShift = 0) {
+const monthYearForLabel = (label, windowShift = 0) => {
   const today = new Date();
   const baseOffset = label === "Last Month" ? 1 : 0;
   const totalMonths = getPeriodLength(label);
   const entries = [];
-
   for (let i = 0; i < totalMonths; i += 1) {
-    const date = new Date(today.getFullYear(), today.getMonth() - baseOffset - windowShift - i, 1);
-    entries.push({ month: date.getMonth() + 1, year: date.getFullYear() });
+    const d = new Date(today.getFullYear(), today.getMonth() - baseOffset - windowShift - i, 1);
+    entries.push({ month: d.getMonth() + 1, year: d.getFullYear() });
   }
-
   return entries;
-}
+};
+
+const fmtMoney = (n) =>
+  Number(n || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 function connectIconForTransaction(category) {
-  const normalized = String(category || "").toLowerCase();
-  if (normalized.includes("food") || normalized.includes("restaurant")) return "FD";
-  if (normalized.includes("transport") || normalized.includes("travel") || normalized.includes("transit")) return "TR";
-  if (normalized.includes("shop") || normalized.includes("retail")) return "SH";
-  if (normalized.includes("income") || normalized.includes("deposit")) return "IN";
+  const c = String(category || "").toLowerCase();
+  if (c.includes("food") || c.includes("restaurant")) return "FD";
+  if (c.includes("transport") || c.includes("travel") || c.includes("transit")) return "TR";
+  if (c.includes("shop") || c.includes("retail")) return "SH";
+  if (c.includes("income") || c.includes("deposit")) return "IN";
   return "TX";
 }
 
 function relativeDateLabel(dateText) {
   if (!dateText) return "Unknown date";
-  const parsed = new Date(`${dateText}T00:00:00`);
+  const d = new Date(`${dateText}T00:00:00`);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const input = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-  const diff = Math.round((today - input) / 86400000);
+  const input = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = Math.round((today - input) / (24 * 60 * 60 * 1000));
 
   if (diff === 0) return "Today";
   if (diff === 1) return "Yesterday";
-
-  return parsed.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function shortAccountLabel(label) {
-  const text = String(label || "");
-  if (text.length <= 15) return text;
-  return `${text.slice(0, 12)}...`;
-}
-
-function defaultSpendingSummaryForMonth(label) {
-  if (label === "Last Month") return { total: 1620.3, budget: 2200, deltaPct: -4 };
-  if (label === "3 Months") return { total: 2010.1, budget: 2200, deltaPct: 9 };
-  if (label === "Past Year") return { total: 1894.2, budget: 2200, deltaPct: -6 };
-  return { total: 1847.5, budget: 2200, deltaPct: -12 };
-}
-
-function normalizeScholarship(item) {
-  const amount = Number.isFinite(Number(item.amount))
-    ? Number(item.amount)
-    : Number.isFinite(Number(item.amount_max))
-      ? Number(item.amount_max)
-      : Number.isFinite(Number(item.amount_min))
-        ? Number(item.amount_min)
-        : 0;
-
-  return {
-    id: item.id,
-    title: item.title,
-    amount,
-    deadline: item.deadline,
-    url: item.application_url || item.url || "/scholarships",
-    offered_by: item.offered_by || "SpendWise",
-  };
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
 function HeroSpendingCard({ monthLabel, total, budget, deltaPct }) {
-  const safeBudget = budget || 1;
-  const pctUsed = Math.min(100, Math.round((total / safeBudget) * 100));
+  const pctUsed = Math.min(100, Math.round((total / (budget || 1)) * 100));
   const absDelta = Math.abs(deltaPct || 0);
   const trendClass = deltaPct > 0 ? "bad" : deltaPct < 0 ? "good" : "neutral";
   const trendText =
@@ -881,15 +422,14 @@ function HeroSpendingCard({ monthLabel, total, budget, deltaPct }) {
     <div className="card hero" style={{ ["--pct"]: `${pctUsed}%` }}>
       <div className="hero-top">
         <div>
-          <p className="hero-label">Monthly Spending • {monthLabel}</p>
-          <p className="hero-amount">{formatCurrencyWithCents(total)}</p>
+          <p className="hero-label">Monthly Spending - {monthLabel}</p>
+          <p className="hero-amount">${fmtMoney(total)}</p>
         </div>
-
         <div className={`hero-change ${trendClass}`}>{trendText}</div>
       </div>
 
       <div className="hero-meta">
-        <span>Budget: {formatCurrency(safeBudget)}/mo</span>
+        <span>Budget: ${budget.toLocaleString()}/mo</span>
         <span>{pctUsed}% used</span>
       </div>
 
@@ -898,6 +438,12 @@ function HeroSpendingCard({ monthLabel, total, budget, deltaPct }) {
       </div>
     </div>
   );
+}
+
+function shortAccountLabel(label) {
+  const text = String(label || "");
+  if (text.length <= 15) return text;
+  return `${text.slice(0, 12)}...`;
 }
 
 function QuickTile({ icon, title, subtitle, toneClass, onClick }) {
@@ -917,62 +463,27 @@ function TransactionList({ items }) {
 
   return (
     <div className="list">
-      {items.map((transaction) => (
-        <div className="row" key={transaction.id}>
+      {items.map((t) => (
+        <div className="row" key={t.id}>
           <div className="row-left">
-            <div className="row-icon">{transaction.icon}</div>
+            <div className="row-icon">{t.icon}</div>
             <div style={{ minWidth: 0 }}>
-              <div className="row-title">{transaction.name}</div>
-              <div className="row-sub">{transaction.when}</div>
+              <div className="row-title">{t.name}</div>
+              <div className="row-sub">{t.when}</div>
             </div>
           </div>
-          <div className={`amt ${transaction.tone}`}>{transaction.amount}</div>
+          <div className={`amt ${t.tone}`}>{t.amount}</div>
         </div>
       ))}
     </div>
   );
 }
 
-function FinancialOverviewCard({ income, expenses, balance, hasData }) {
-  const balanceTone = balance > 0 ? "positive" : balance < 0 ? "negative" : "";
-
+function InsightCard({ title, message }) {
   return (
     <div className="card">
-      <div className="card-title">
-        <h2>Financial Overview</h2>
-      </div>
-
-      <div className="financial-grid">
-        <div className="financial-stat">
-          <span className="financial-label">Income</span>
-          <div className="financial-value positive">{formatCurrency(income)}</div>
-        </div>
-        <div className="financial-stat">
-          <span className="financial-label">Expenses</span>
-          <div className="financial-value negative">{formatCurrency(expenses)}</div>
-        </div>
-        <div className="financial-stat">
-          <span className="financial-label">Deficit / Surplus</span>
-          <div className={`financial-value ${balanceTone}`}>{formatCurrency(balance)}</div>
-        </div>
-      </div>
-
-      <p className="financial-footnote">
-        {hasData
-          ? "Calculated from the onboarding totals you entered for earnings, scholarship aid, parental support, and expenses."
-          : "Complete onboarding financial totals to personalize this card with your own numbers."}
-      </p>
-    </div>
-  );
-}
-
-function InsightCard({ title, message, variant = "neutral" }) {
-  const icon = variant === "warning" ? "⚠️" : variant === "success" ? "✅" : "💡";
-
-  return (
-    <div className="card">
-      <div className={`insight ${variant}`}>
-        <div className="insightIcon">{icon}</div>
+      <div className="insight">
+        <div className="insightIcon">AI</div>
         <div>
           <strong>{title}</strong>
           <p>{message}</p>
@@ -982,69 +493,24 @@ function InsightCard({ title, message, variant = "neutral" }) {
   );
 }
 
-function ScholarshipHighlights({ items, loading }) {
-  return (
-    <div className="card">
-      <div className="card-title">
-        <h2>Trending Scholarships</h2>
-      </div>
+function MonthDropdown({ value, onChange, options }) {
+  const [open, setOpen] = useState(false);
 
-      {loading ? (
-        <div className="empty">Loading scholarship highlights...</div>
-      ) : items.length ? (
-        <div className="scholarship-list">
-          {items.map((item) => (
-            <div className="mini-row" key={item.id}>
-              <div className="mini-row-main">
-                <h3>{item.title}</h3>
-                <p>{item.offered_by}</p>
-              </div>
-              <div className="mini-row-side">
-                <div className="mini-amount">{formatCurrency(item.amount)}</div>
-                <div className="mini-deadline">Deadline: {formatDate(item.deadline)}</div>
-                <a
-                  className="mini-link"
-                  href={item.url || "/scholarships"}
-                  target={item.url?.startsWith("http") ? "_blank" : undefined}
-                  rel={item.url?.startsWith("http") ? "noreferrer" : undefined}
-                >
-                  View scholarship
-                </a>
-              </div>
+  return (
+    <div className="pill" onClick={() => setOpen((v) => !v)} role="button" tabIndex={0} aria-label="Select month">
+      <span>Date</span>
+      <span>{value}</span>
+      <span className="chev">v</span>
+
+      {open && (
+        <div className="menu" onClick={(e) => e.stopPropagation()}>
+          {options.map((opt) => (
+            <div key={opt} className={`menuItem ${opt === value ? "active" : ""}`} onClick={() => { onChange(opt); setOpen(false); }}>
+              {opt}
             </div>
           ))}
         </div>
-      ) : (
-        <div className="empty">No scholarship highlights are available right now.</div>
       )}
-    </div>
-  );
-}
-
-function ExpiringCodesCard({ items }) {
-  return (
-    <div className="card">
-      <div className="card-title">
-        <h2>Expiring Student Codes</h2>
-      </div>
-
-      <div className="codes-list">
-        {items.map((item) => (
-          <div className="mini-row" key={item.id}>
-            <div className="mini-row-main">
-              <h3>{item.brand}</h3>
-              <p>{item.discount}</p>
-              <span className="code-pill">Code: {item.code}</span>
-            </div>
-            <div className="mini-row-side">
-              <div className="mini-expiry">Expires {formatDate(item.expiresOn)}</div>
-              <a className="mini-link" href={item.url} target="_blank" rel="noreferrer">
-                Use code
-              </a>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -1052,32 +518,23 @@ function ExpiringCodesCard({ items }) {
 function ConnectBankButton({ onLinked, onError }) {
   const [linkToken, setLinkToken] = useState(null);
   const [busy, setBusy] = useState(false);
-  const onErrorRef = useRef(onError);
 
   useEffect(() => {
-    onErrorRef.current = onError;
-  }, [onError]);
-
-  useEffect(() => {
-    fetch("/api/plaid/link-token/", {
-      method: "POST",
-      headers: { ...authHeaders() },
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Unable to initialize Plaid Link");
-        return response.json();
+    fetch("/api/plaid/link-token/", { method: "POST", headers: { ...authHeaders() } })
+      .then(async (r) => {
+        if (!r.ok) throw new Error("Unable to initialize Plaid Link");
+        return r.json();
       })
       .then((data) => setLinkToken(data.link_token))
-      .catch((e) => onErrorRef.current(e.message));
-  }, []);
+      .catch((e) => onError(e.message));
+  }, [onError]);
 
   const { open, ready } = usePlaidLink({
     token: linkToken,
     onSuccess: async (publicToken, metadata) => {
       setBusy(true);
-
       try {
-        const response = await fetch("/api/plaid/exchange-token/", {
+        const resp = await fetch("/api/plaid/exchange-token/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1089,8 +546,8 @@ function ConnectBankButton({ onLinked, onError }) {
           }),
         });
 
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload?.error || "Failed to connect bank account");
+        const payload = await resp.json();
+        if (!resp.ok) throw new Error(payload?.error || "Failed to connect bank account");
 
         const itemId = payload.item_id;
         await Promise.all([
@@ -1099,16 +556,14 @@ function ConnectBankButton({ onLinked, onError }) {
         ]);
 
         onLinked(payload);
-      } catch (error) {
-        onError(error.message);
+      } catch (e) {
+        onError(e.message);
       } finally {
         setBusy(false);
       }
     },
-    onExit: (error) => {
-      if (error) {
-        onError(error.display_message || error.error_message || "Plaid connection cancelled");
-      }
+    onExit: (err) => {
+      if (err) onError(err.display_message || err.error_message || "Plaid connection cancelled");
     },
   });
 
@@ -1116,43 +571,6 @@ function ConnectBankButton({ onLinked, onError }) {
     <button className="bank-cta" onClick={() => open()} disabled={!ready || busy}>
       {busy ? "Connecting..." : "Connect Bank Account"}
     </button>
-  );
-}
-
-function MonthDropdown({ value, onChange, options }) {
-  const [open, setOpen] = useState(false);
-
-  const handleSelect = (option) => {
-    onChange(option);
-    setOpen(false);
-  };
-
-  return (
-    <div
-      className="pill"
-      onClick={() => setOpen((current) => !current)}
-      role="button"
-      tabIndex={0}
-      aria-label="Select month"
-    >
-      <span>📅</span>
-      <span>{value}</span>
-      <span className="chev">▾</span>
-
-      {open && (
-        <div className="menu" onClick={(event) => event.stopPropagation()}>
-          {options.map((option) => (
-            <div
-              key={option}
-              className={`menuItem ${option === value ? "active" : ""}`}
-              onClick={() => handleSelect(option)}
-            >
-              {option}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -1174,6 +592,8 @@ export default function Dashboard() {
   const [deltaPct, setDeltaPct] = useState(0);
   const [monthlyDetail, setMonthlyDetail] = useState({
     transactions: 0,
+    expenseTx: 0,
+    incomeTx: 0,
     avgExpense: 0,
     avgIncome: 0,
     net: 0,
@@ -1182,116 +602,63 @@ export default function Dashboard() {
     periodMonths: 1,
   });
   const [reloadKey, setReloadKey] = useState(0);
-  const [profile, setProfile] = useState(null);
-  const [trendingScholarships, setTrendingScholarships] = useState(FALLBACK_SCHOLARSHIPS);
-  const [scholarshipsLoading, setScholarshipsLoading] = useState(true);
 
-  useEffect(() => {
-    let ignore = false;
-
-    fetchProfile()
-      .then((data) => {
-        if (!ignore) setProfile(data);
-      })
-      .catch(() => {
-        if (!ignore) setProfile(null);
-      });
-
-    const fetchTrendingScholarships = async () => {
-      const today = new Date().toISOString().slice(0, 10);
-
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/scholarships/?deadline_after=${today}&sort=-amount&page_size=5`
-        );
-
-        if (!response.ok) {
-          throw new Error("Unable to load scholarships");
-        }
-
-        const data = await response.json();
-        const normalized = (data.results || []).map(normalizeScholarship).slice(0, 5);
-
-        if (!ignore && normalized.length) {
-          setTrendingScholarships(normalized);
-        }
-      } catch {
-        if (!ignore) {
-          setTrendingScholarships(FALLBACK_SCHOLARSHIPS);
-        }
-      } finally {
-        if (!ignore) {
-          setScholarshipsLoading(false);
-        }
-      }
-    };
-
-    fetchTrendingScholarships();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
+  const budget = 2200;
+  const selectedBankName =
+    selectedAccountId && bankAccounts.find((b) => b.id === selectedAccountId)?.name;
+  const selectedBankNameShort = selectedBankName ? shortAccountLabel(selectedBankName) : "";
 
   const fetchBankAccounts = async () => {
-    const response = await fetch("/api/plaid/bank-accounts/", { headers: { ...authHeaders() } });
-    if (!response.ok) return [];
-
-    const payload = await response.json();
+    const accResp = await fetch("/api/plaid/bank-accounts/", { headers: { ...authHeaders() } });
+    if (!accResp.ok) return [];
+    const payload = await accResp.json();
     const rows = Array.isArray(payload?.accounts) ? payload.accounts : [];
     const unique = [];
     const seen = new Set();
-
     for (const row of rows) {
       const id = row?.account_id;
       if (!id || seen.has(id)) continue;
-
       seen.add(id);
       const label =
         row?.official_name ||
         row?.name ||
         `${row?.item__institution_name || "Bank"} ${row?.mask ? `...${row.mask}` : ""}`;
-
       unique.push({ id, name: label });
     }
-
     const capped = unique.slice(0, 5);
     setBankAccounts(capped);
     return capped;
   };
 
   useEffect(() => {
-    const loadConnectedBanks = async () => {
+    const load = async () => {
       try {
-        const itemsResponse = await fetch("/api/plaid/items/", { headers: { ...authHeaders() } });
+        const itemResp = await fetch("/api/plaid/items/", { headers: { ...authHeaders() } });
+        if (itemResp.ok) {
+          const payload = await itemResp.json();
+          const items = payload?.items || [];
+          setBankCount(items.length);
 
-        if (!itemsResponse.ok) return;
+          if (items.length) {
+            await Promise.all(
+              items.map((it) =>
+                Promise.all([
+                  fetch(`/api/plaid/items/${it.item_id}/accounts/`, { headers: { ...authHeaders() } }),
+                  fetch(`/api/plaid/items/${it.item_id}/transactions/?days=180&count=500`, { headers: { ...authHeaders() } }),
+                ])
+              )
+            );
+          }
 
-        const payload = await itemsResponse.json();
-        const items = payload?.items || [];
-        setBankCount(items.length);
-
-        if (items.length) {
-          await Promise.all(
-            items.map((item) =>
-              Promise.all([
-                fetch(`/api/plaid/items/${item.item_id}/accounts/`, { headers: { ...authHeaders() } }),
-                fetch(`/api/plaid/items/${item.item_id}/transactions/?days=180&count=500`, {
-                  headers: { ...authHeaders() },
-                }),
-              ])
-            )
-          );
+          await fetchBankAccounts();
         }
-
-        await fetchBankAccounts();
       } catch {
         setStatusError(true);
         setStatusMessage("Could not sync your connected bank data right now.");
       }
     };
 
-    loadConnectedBanks();
+    load();
   }, [reloadKey]);
 
   useEffect(() => {
@@ -1302,237 +669,115 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!selectedAccountId) return;
-    if (!bankAccounts.some((account) => account.id === selectedAccountId)) {
+    if (!bankAccounts.some((acc) => acc.id === selectedAccountId)) {
       setSelectedAccountId("");
     }
   }, [bankAccounts, selectedAccountId]);
 
   useEffect(() => {
     const loadMonthData = async () => {
-      try {
-        const selectedPeriods = monthYearForLabel(month);
-        const previousPeriods = monthYearForLabel(month, getPeriodLength(month));
-        const accountQuery = selectedAccountId
-          ? `&account_id=${encodeURIComponent(selectedAccountId)}`
-          : "";
+      const periodMonths = monthYearForLabel(month);
+      const previousPeriodMonths = monthYearForLabel(month, getPeriodLength(month));
+      const accountQuery = selectedAccountId ? `&account_id=${encodeURIComponent(selectedAccountId)}` : "";
 
-        const currentResponses = await Promise.all(
-          selectedPeriods.map(async ({ month: currentMonth, year }) => {
-            const [transactionsResponse, expensesResponse, savingsResponse] = await Promise.all([
-              fetch(
-                `/api/spending/monthly_transactions/?month=${currentMonth}&year=${year}${accountQuery}`,
-                { headers: { ...authHeaders() } }
-              ),
-              fetch(
-                `/api/spending/total_expenses_amount/?month=${currentMonth}&year=${year}${accountQuery}`,
-                { headers: { ...authHeaders() } }
-              ),
-              fetch(
-                `/api/spending/monthly_saving_amount/?month=${currentMonth}&year=${year}${accountQuery}`,
-                { headers: { ...authHeaders() } }
-              ),
-            ]);
+      const selectedPeriodFetches = await Promise.all(
+        periodMonths.map(async ({ month: m, year: y }) => {
+          const [txResp, expenseResp, savingResp] = await Promise.all([
+            fetch(`/api/spending/monthly_transactions/?month=${m}&year=${y}${accountQuery}`, { headers: { ...authHeaders() } }),
+            fetch(`/api/spending/total_expenses_amount/?month=${m}&year=${y}${accountQuery}`, { headers: { ...authHeaders() } }),
+            fetch(`/api/spending/monthly_saving_amount/?month=${m}&year=${y}${accountQuery}`, { headers: { ...authHeaders() } }),
+          ]);
 
-            return { transactionsResponse, expensesResponse, savingsResponse };
-          })
-        );
+          return { txResp, expenseResp, savingResp };
+        })
+      );
 
-        const previousExpenseResponses = await Promise.all(
-          previousPeriods.map(({ month: previousMonth, year }) =>
-            fetch(
-              `/api/spending/total_expenses_amount/?month=${previousMonth}&year=${year}${accountQuery}`,
-              { headers: { ...authHeaders() } }
-            )
-          )
-        );
+      const previousExpenseFetches = await Promise.all(
+        previousPeriodMonths.map(async ({ month: m, year: y }) =>
+          fetch(`/api/spending/total_expenses_amount/?month=${m}&year=${y}${accountQuery}`, { headers: { ...authHeaders() } })
+        )
+      );
 
-        if (
-          currentResponses.some(
-            ({ transactionsResponse, expensesResponse, savingsResponse }) =>
-              !transactionsResponse.ok || !expensesResponse.ok || !savingsResponse.ok
-          ) ||
-          previousExpenseResponses.some((response) => !response.ok)
-        ) {
-          throw new Error("Could not load all dashboard data.");
-        }
-
-        const transactionPayloads = await Promise.all(
-          currentResponses.map(({ transactionsResponse }) => transactionsResponse.json())
-        );
-        const expensePayloads = await Promise.all(
-          currentResponses.map(({ expensesResponse }) => expensesResponse.json())
-        );
-        const savingsPayloads = await Promise.all(
-          currentResponses.map(({ savingsResponse }) => savingsResponse.json())
-        );
-        const previousExpensePayloads = await Promise.all(
-          previousExpenseResponses.map((response) => response.json())
-        );
-
-        const transactionRows = transactionPayloads.flatMap((rows) => (Array.isArray(rows) ? rows : []));
-        const orderedRows = [...transactionRows].sort((a, b) => new Date(b.date) - new Date(a.date));
-        const expenseTotal = expensePayloads.reduce(
-          (sum, payload) => sum + Number(payload?.total_expenses || 0),
-          0
-        );
-        const savingsTotal = savingsPayloads.reduce(
-          (sum, payload) => sum + Number(payload?.total_saving || 0),
-          0
-        );
-        const previousExpenseTotal = previousExpensePayloads.reduce(
-          (sum, payload) => sum + Number(payload?.total_expenses || 0),
-          0
-        );
-
-        const mappedTransactions = orderedRows.map((transaction) => {
-          const amount = Number(transaction.amount || 0);
-
-          return {
-            id: `${transaction.account_id}-${transaction.date}-${transaction.name}-${transaction.amount}`,
-            icon: connectIconForTransaction(transaction.category),
-            name: transaction.merchant_name || transaction.name || "Transaction",
-            when: relativeDateLabel(transaction.date),
-            amount: `${amount < 0 ? "-" : "+"}$${fmtMoney(Math.abs(amount))}`,
-            tone: amount < 0 ? "negative" : "positive",
-            important: Math.abs(amount) >= 50,
-          };
-        });
-
-        const expenseRows = orderedRows.filter((transaction) => Number(transaction.amount) < 0);
-        const incomeRows = orderedRows.filter((transaction) => Number(transaction.amount) >= 0);
-        const totalIncome = incomeRows.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
-        const totalExpense = Math.abs(
-          expenseRows.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0)
-        );
-        const monthlyDelta =
-          previousExpenseTotal > 0
-            ? Math.round(((expenseTotal - previousExpenseTotal) / previousExpenseTotal) * 100)
-            : 0;
-
-        setRecentTransactions(mappedTransactions);
-        setTotalExpenses(expenseTotal);
-        setTotalSavings(savingsTotal);
-        setDeltaPct(monthlyDelta);
-        setStatusError(false);
-        setStatusMessage("");
-        setMonthlyDetail({
-          transactions: orderedRows.length,
-          avgExpense: expenseRows.length ? totalExpense / expenseRows.length : 0,
-          avgIncome: incomeRows.length ? totalIncome / incomeRows.length : 0,
-          net: totalIncome - totalExpense,
-          totalIncome,
-          totalExpense,
-          periodMonths: getPeriodLength(month),
-        });
-      } catch {
+      if (
+        selectedPeriodFetches.some((r) => !r.txResp.ok || !r.expenseResp.ok || !r.savingResp.ok) ||
+        previousExpenseFetches.some((r) => !r.ok)
+      ) {
         setStatusError(true);
-        setStatusMessage("Could not load all dashboard data. Showing your latest saved overview.");
-        setRecentTransactions([]);
-        setTotalExpenses(0);
-        setTotalSavings(0);
-        setDeltaPct(0);
-        setMonthlyDetail({
-          transactions: 0,
-          avgExpense: 0,
-          avgIncome: 0,
-          net: 0,
-          totalIncome: 0,
-          totalExpense: 0,
-          periodMonths: getPeriodLength(month),
-        });
+        setStatusMessage("Could not load all dashboard data. Please refresh.");
+        return;
       }
+
+      const txPayloads = await Promise.all(selectedPeriodFetches.map((r) => r.txResp.json()));
+      const expensePayloads = await Promise.all(selectedPeriodFetches.map((r) => r.expenseResp.json()));
+      const savingPayloads = await Promise.all(selectedPeriodFetches.map((r) => r.savingResp.json()));
+      const prevExpensePayloads = await Promise.all(previousExpenseFetches.map((r) => r.json()));
+
+      const txData = txPayloads.flatMap((rows) => (Array.isArray(rows) ? rows : []));
+      const expenseTotal = expensePayloads.reduce((sum, p) => sum + Number(p?.total_expenses || 0), 0);
+      const savingTotal = savingPayloads.reduce((sum, p) => sum + Number(p?.total_saving || 0), 0);
+      const prevExpenseTotal = prevExpensePayloads.reduce((sum, p) => sum + Number(p?.total_expenses || 0), 0);
+
+      const ordered = [...(Array.isArray(txData) ? txData : [])].sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      );
+
+      const mapped = ordered.map((t) => {
+        const amountNum = Number(t.amount || 0);
+        return {
+          id: `${t.account_id}-${t.date}-${t.name}-${t.amount}`,
+          icon: connectIconForTransaction(t.category),
+          name: t.merchant_name || t.name || "Transaction",
+          when: relativeDateLabel(t.date),
+          amount: `${amountNum < 0 ? "-" : "+"}$${fmtMoney(Math.abs(amountNum))}`,
+          tone: amountNum < 0 ? "negative" : "positive",
+          important: Math.abs(amountNum) >= 50,
+        };
+      });
+
+      const currentTotal = expenseTotal;
+      const previousTotal = prevExpenseTotal;
+      const monthlyDelta = previousTotal > 0 ? Math.round(((currentTotal - previousTotal) / previousTotal) * 100) : 0;
+      const expenseRows = ordered.filter((tx) => Number(tx.amount) < 0);
+      const incomeRows = ordered.filter((tx) => Number(tx.amount) >= 0);
+      const totalIncome = incomeRows.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+      const totalExpense = Math.abs(expenseRows.reduce((sum, tx) => sum + Number(tx.amount || 0), 0));
+
+      setRecentTransactions(mapped);
+      setTotalExpenses(currentTotal);
+      setTotalSavings(savingTotal);
+      setDeltaPct(monthlyDelta);
+      setMonthlyDetail({
+        transactions: ordered.length,
+        expenseTx: expenseRows.length,
+        incomeTx: incomeRows.length,
+        avgExpense: expenseRows.length ? totalExpense / expenseRows.length : 0,
+        avgIncome: incomeRows.length ? totalIncome / incomeRows.length : 0,
+        net: totalIncome - totalExpense,
+        totalIncome,
+        totalExpense,
+        periodMonths: getPeriodLength(month),
+      });
     };
 
     loadMonthData();
   }, [month, reloadKey, selectedAccountId]);
 
   const spendingSummary = useMemo(() => {
-    if (!recentTransactions.length && totalExpenses === 0) {
-      return defaultSpendingSummaryForMonth(month);
-    }
-
     const periodMonths = Math.max(1, monthlyDetail.periodMonths || 1);
     const avgMonthlyExpense = (monthlyDetail.totalExpense || totalExpenses || 0) / periodMonths;
     const avgMonthlyIncome = (monthlyDetail.totalIncome || 0) / periodMonths;
 
-    let recommendedBudget =
-      avgMonthlyIncome > 0 ? avgMonthlyIncome * 0.6 : avgMonthlyExpense * 1.15;
-
-    if (!Number.isFinite(recommendedBudget) || recommendedBudget <= 0) {
-      recommendedBudget = 2200;
-    }
-
+    let recommendedBudget = avgMonthlyIncome > 0 ? avgMonthlyIncome * 0.6 : avgMonthlyExpense * 1.15;
+    if (!Number.isFinite(recommendedBudget) || recommendedBudget <= 0) recommendedBudget = budget;
     recommendedBudget = Math.max(500, Math.round(recommendedBudget / 50) * 50);
+
     return { total: totalExpenses, budget: recommendedBudget, deltaPct };
-  }, [deltaPct, month, monthlyDetail, recentTransactions.length, totalExpenses]);
+  }, [monthlyDetail, totalExpenses, deltaPct, budget]);
 
   const visibleTransactions = useMemo(() => {
-    const source = recentTransactions.length ? recentTransactions : TRANSACTIONS;
-    const base = onlyImportant ? source.filter((transaction) => transaction.important) : source;
+    const base = onlyImportant ? recentTransactions.filter((t) => t.important) : recentTransactions;
     return showAll ? base : base.slice(0, 4);
   }, [onlyImportant, recentTransactions, showAll]);
-
-  const financialOverview = useMemo(() => {
-    const scholarshipAid = toNumber(profile?.scholarship_aid_amount);
-    const earnings = toNumber(profile?.total_earnings);
-    const parentalSupport = toNumber(profile?.parental_support);
-    const expenses = toNumber(profile?.total_expenses);
-    const income = earnings + parentalSupport + scholarshipAid;
-
-    return {
-      income,
-      expenses,
-      balance: income - expenses,
-      hasData: Boolean(profile) && [scholarshipAid, earnings, parentalSupport, expenses].some((value) => value > 0),
-    };
-  }, [profile]);
-
-  const financialInsight = useMemo(() => {
-    if (!financialOverview.hasData) {
-      return {
-        title: "Finish your financial snapshot",
-        message: "Add your expected earnings, scholarship aid, parental support, and expenses in onboarding to see whether you are running a deficit or surplus this semester.",
-        variant: "neutral",
-      };
-    }
-
-    if (financialOverview.balance < 0) {
-      return {
-        title: "Deficit insight",
-        message: `You are short ${formatCurrency(Math.abs(financialOverview.balance))} this semester based on your onboarding totals. Consider scholarships, family support updates, or trimming recurring expenses.`,
-        variant: "warning",
-      };
-    }
-
-    if (financialOverview.balance > 0) {
-      return {
-        title: "Surplus insight",
-        message: `You have a projected surplus of ${formatCurrency(financialOverview.balance)} this semester. You can direct part of it toward savings, tuition, or emergency costs.`,
-        variant: "success",
-      };
-    }
-
-    return {
-      title: "Balanced outlook",
-      message: "Your current onboarding totals are exactly balanced this semester. Keep watching new expenses so you do not slip into a deficit.",
-      variant: "neutral",
-    };
-  }, [financialOverview]);
-
-  const expiringCodes = useMemo(
-    () => [...EXPIRING_CODES].sort((a, b) => new Date(a.expiresOn) - new Date(b.expiresOn)).slice(0, 4),
-    []
-  );
-
-  const scholarshipSubtitle = useMemo(() => {
-    const soonest = trendingScholarships
-      .map((item) => getDaysUntil(item.deadline))
-      .filter((days) => days !== null && days >= 0)
-      .sort((a, b) => a - b)[0];
-
-    if (soonest === undefined) return "Top awards to review this week.";
-    return `Top awards to review. Closest deadline is in ${soonest} day${soonest === 1 ? "" : "s"}.`;
-  }, [trendingScholarships]);
 
   return (
     <div className="db-page">
@@ -1549,8 +794,8 @@ export default function Dashboard() {
             <h1>{getGreeting(firstName)}</h1>
             <p>
               {bankCount > 0
-                ? `Live overview from ${bankCount} connected bank account${bankCount > 1 ? "s" : ""}.`
-                : "Overview of spending, funding pressure, scholarship opportunities, and expiring savings."}
+                ? `Live overview from ${bankCount} connected bank account${bankCount > 1 ? "s" : ""}${selectedBankNameShort ? ` - ${selectedBankNameShort}` : ""}.`
+                : "Connect a bank account to start seeing real transactions."}
             </p>
           </div>
 
@@ -1559,23 +804,18 @@ export default function Dashboard() {
               onLinked={(payload) => {
                 setStatusError(false);
                 setStatusMessage(payload?.message || "Bank account connected successfully.");
-                setBankCount((count) => count + 1);
-                setReloadKey((current) => current + 1);
+                setBankCount((n) => n + 1);
+                setReloadKey((k) => k + 1);
               }}
-              onError={(message) => {
+              onError={(msg) => {
                 setStatusError(true);
-                setStatusMessage(message || "Could not connect bank account.");
+                setStatusMessage(msg || "Could not connect bank account.");
               }}
             />
 
             <MonthDropdown value={month} onChange={setMonth} options={MONTH_OPTIONS} />
 
-            <div
-              className="pill pillToggle"
-              onClick={() => setOnlyImportant((current) => !current)}
-              role="button"
-              tabIndex={0}
-            >
+            <div className="pill pillToggle" onClick={() => setOnlyImportant((v) => !v)} role="button" tabIndex={0}>
               <span className={`dot ${onlyImportant ? "on" : ""}`} />
               <span>Only important</span>
             </div>
@@ -1593,15 +833,15 @@ export default function Dashboard() {
                 >
                   All
                 </button>
-                {bankAccounts.map((account) => (
+                {bankAccounts.map((acc) => (
                   <button
-                    key={account.id}
+                    key={acc.id}
                     type="button"
-                    className={`bank-tab ${selectedAccountId === account.id ? "active" : ""}`}
-                    onClick={() => setSelectedAccountId(account.id)}
-                    title={account.name}
+                    className={`bank-tab ${selectedAccountId === acc.id ? "active" : ""}`}
+                    onClick={() => setSelectedAccountId(acc.id)}
+                    title={acc.name}
                   >
-                    {shortAccountLabel(account.name)}
+                    {shortAccountLabel(acc.name)}
                   </button>
                 ))}
               </div>
@@ -1642,62 +882,39 @@ export default function Dashboard() {
 
             <div className="actions">
               <QuickTile
-                icon="🎓"
+                icon="SC"
                 title="Scholarships"
                 subtitle="Explore matched awards"
                 toneClass="tScholar"
                 onClick={() => navigate("/scholarships")}
               />
               <QuickTile
-                icon="💵"
+                icon="BL"
                 title="Bills"
                 subtitle="View upcoming bills"
                 toneClass="tBills"
-                onClick={() => navigate("/transactions")}
+                onClick={() => navigate("/bills")}
               />
               <QuickTile
-                icon="🏷️"
+                icon="CD"
                 title="Student Codes"
-                subtitle="Review expiring discounts"
+                subtitle="Apply a discount code"
                 toneClass="tCodes"
-                onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })}
-              />
-                {/* NEW INVESTING TILE */}
-              <QuickTile
-                icon="💰"
-                title="Investments"
-                subtitle="Practice portfolio"
-                toneClass="tInvest"
-                onClick={() => navigate("/investing")}
+                onClick={() => navigate("/student-codes")}
               />
             </div>
-
-            <FinancialOverviewCard
-              income={financialOverview.income}
-              expenses={financialOverview.expenses}
-              balance={financialOverview.balance}
-              hasData={financialOverview.hasData}
-            />
 
             <div className="insightCardSpacing">
               <InsightCard
-                title={financialInsight.title}
-                message={
-                  !financialOverview.hasData && totalSavings > 0
-                    ? `You could save about $${fmtMoney(totalSavings)} this month by reducing repeated spending patterns.`
-                    : financialInsight.message
-                }
-                variant={financialInsight.variant}
+                title="Smart Insight"
+                message={`You could save about $${fmtMoney(totalSavings)} this month by reducing repeated spending patterns.`}
               />
             </div>
-
-            <ScholarshipHighlights items={trendingScholarships} loading={scholarshipsLoading} />
-            <p className="subtle">{scholarshipSubtitle}</p>
 
             <div className="card">
               <div className="card-title">
                 <h2>Recent Transactions</h2>
-                <div className="link" onClick={() => setShowAll((current) => !current)}>
+                <div className="link" onClick={() => setShowAll((v) => !v)}>
                   {showAll ? "Show less" : "See all"}
                 </div>
               </div>
@@ -1715,13 +932,13 @@ export default function Dashboard() {
                 <div className="empty">No upcoming deadlines found.</div>
               ) : (
                 <div className="list">
-                  {DEADLINES.map((deadline) => (
-                    <div className="row" key={deadline.id}>
+                  {DEADLINES.map((d) => (
+                    <div className="row" key={d.id}>
                       <div className="row-left">
-                        <div className={`deadlineBadge ${deadline.badgeClass}`}>{deadline.day}</div>
+                        <div className={`deadlineBadge ${d.badgeClass}`}>{d.day}</div>
                         <div style={{ minWidth: 0 }}>
-                          <div className="row-title">{deadline.title}</div>
-                          <div className="row-sub">{deadline.meta}</div>
+                          <div className="row-title">{d.title}</div>
+                          <div className="row-sub">{d.meta}</div>
                         </div>
                       </div>
                       <div style={{ color: "var(--text-muted)", fontWeight: 900 }}>›</div>
@@ -1730,8 +947,6 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-
-            <ExpiringCodesCard items={expiringCodes} />
           </div>
         </div>
       </div>

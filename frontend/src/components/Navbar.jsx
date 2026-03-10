@@ -153,7 +153,6 @@ const TABS = [
   { label: "Dashboard", path: "/home" },
   { label: "Scholarships", path: "/scholarships" },
   { label: "Transactions", path: "/transactions" },
-  { label: "Bills", path: "/bills" },
   { label: "Student Codes", path: "/student-codes" },
   { label: "Investments", path: "/investing" },
 ];
