@@ -225,25 +225,35 @@ Planned enhancements include:
 
 ## 5. Student Codes (Discounts)
 
-The Student Codes feature allows access to verified student discount codes.
+The **Student Codes** feature allows users to access verified student discount codes that can help reduce everyday spending.
 
-Currently:
-- Backend functionality is implemented.
-- Codes are managed through Django Admin.
-- Four different student categories have been configured.
+### Current Implementation
 
-Discount codes can be accessed via:
-http://localhost:8000/admin
+- The **backend functionality** has been fully implemented.
+- The **UI/UX interface** allows users to easily browse and explore available discount codes.
+- Initially, discount codes were added **manually**, but the system now uses a **Python scraper** to automatically collect and populate the database with **SPC and other student discount codes**.
+- Users can **search and filter** available discounts based on membership or category.
 
-First login through credentials:
-username: admin1
-password: SPENDWISE1
+<img width="1280" height="1186" alt="Student Codes Page" src="https://github.com/user-attachments/assets/a1e1fff1-6a4e-47e2-b5f1-64626f1b309c" />
 
-<img width="631" height="316" alt="image" src="https://github.com/user-attachments/assets/179f0ca9-384d-47b1-bfa0-8915a07c2fd2" />
+### Purpose
 
-Frontend integration is partially completed.
+This feature helps students quickly find relevant discounts and potentially reduce their spending on services such as food delivery, retail purchases, and subscriptions.
 
-<img width="909" height="431" alt="image" src="https://github.com/user-attachments/assets/3adccfcc-a0b5-4658-aae7-5f035dfdab1e" />
+---
+
+### Future Improvements (D4)
+
+- **Personalized Discount Recommendations**  
+  Based on a user's spending patterns, the system will recommend relevant student discount codes directly on the **dashboard**.
+
+- **Spending-Based Insights**  
+  The platform will analyze transaction history and suggest **trending or high-value discount codes** that align with the user's spending habits.
+
+- **Dashboard Integration**  
+  Recommended discount codes will appear directly on the **dashboard**, allowing users to quickly discover savings opportunities without needing to manually search for them.
+
+
 
 ---
 
