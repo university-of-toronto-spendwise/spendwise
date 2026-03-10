@@ -1,16 +1,10 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePlaidLink } from "react-plaid-link";
 import Navbar from "./Navbar";
+import UpcomingDeadlines from "./UpcomingDeadlines";
 
 const MONTH_OPTIONS = ["This Month", "Last Month", "3 Months", "Past Year"];
-
-const DEADLINES = [
-  { id: 1, day: "28", title: "OSAP Application", meta: "Due Feb 28 - 6 days left", badgeClass: "d-red" },
-  { id: 2, day: "01", title: "Rogers Phone Bill", meta: "Due Mar 1 - $55.00", badgeClass: "d-yellow" },
-  { id: 3, day: "15", title: "Lester B. Pearson Scholarship", meta: "Due Mar 15 - $10,000 award", badgeClass: "d-blue" },
-  { id: 4, day: "18", title: "UofT Scholarship", meta: "Due Mar 18 - $5,000 award", badgeClass: "d-blue" },
-];
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
@@ -858,29 +852,7 @@ export default function Dashboard() {
           </div>
 
           <div className="db-side">
-            <div className="card">
-              <div className="card-title">
-                <h2>Upcoming Deadlines</h2>
-              </div>
-              {DEADLINES.length === 0 ? (
-                <div className="empty">No upcoming deadlines found.</div>
-              ) : (
-                <div className="list">
-                  {DEADLINES.map((d) => (
-                    <div className="row" key={d.id}>
-                      <div className="row-left">
-                        <div className={`deadlineBadge ${d.badgeClass}`}>{d.day}</div>
-                        <div style={{ minWidth: 0 }}>
-                          <div className="row-title">{d.title}</div>
-                          <div className="row-sub">{d.meta}</div>
-                        </div>
-                      </div>
-                      <div style={{ color: "var(--text-muted)", fontWeight: 900 }}>›</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <UpcomingDeadlines maxItems={6} />
           </div>
         </div>
       </div>

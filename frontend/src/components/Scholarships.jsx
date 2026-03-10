@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "./Navbar";
+import UpcomingDeadlines from "./UpcomingDeadlines";
 
 const API = "http://localhost:8000/api";
+const API_REL = "/api";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
@@ -233,6 +235,7 @@ const styles = `
     transition: color 0.15s, border-color 0.15s;
   }
   .sc-bookmark-btn:hover { color: var(--uoft-blue); border-color: var(--uoft-blue); }
+  .sc-bookmark-btn.saved { color: var(--uoft-mid); border-color: var(--uoft-mid); background: #E8F0FC; }
 
   .sc-card-amount {
     font-size: 1.4rem;
@@ -522,8 +525,8 @@ const EditIcon = () => (
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
   </svg>
 );
-const BookmarkIcon = () => (
-  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+const BookmarkIcon = ({ filled }) => (
+  <svg width="14" height="14" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
     <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
   </svg>
 );
@@ -570,17 +573,26 @@ function formatDeadline(dateStr) {
 }
 
 // ── Sub-components ──
-function ScholarshipCard({ s, score, reasons }) {
+function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
   const amt = formatAmount(s);
   const days = daysUntil(s.deadline);
   const isUrgent = days !== null && days <= 14;
+
+  const handleBookmarkClick = () => {
+    if (isSaved) onUnsave?.(s.id);
+    else onSave?.(s.id);
+  };
 
   return (
     <div className="sc-card">
       <div className="sc-card-top">
         <div className="sc-card-title">{s.title}</div>
-        <button className="sc-bookmark-btn" title="Bookmark">
-          <BookmarkIcon />
+        <button
+          className={`sc-bookmark-btn ${isSaved ? "saved" : ""}`}
+          title={isSaved ? "Unsave" : "Save to my scholarships"}
+          onClick={handleBookmarkClick}
+        >
+          <BookmarkIcon filled={isSaved} />
         </button>
       </div>
 
@@ -712,11 +724,66 @@ export default function Scholarships() {
 
   // filters
   const [q, setQ]                       = useState("");
-  const [sortBy, setSortBy]             = useState("");
+  const [sortBy, setSortBy]             = useState("title");
   const [filterCitizenship, setFilterCitizenship] = useState("");
   const [filterAwardType, setFilterAwardType]     = useState("");
 
+  // saved scholarships (for bookmark state + upcoming deadlines + "View saved")
+  const [savedIds, setSavedIds]             = useState(new Set());
+  const [savedScholarships, setSavedScholarships] = useState([]);
+  const [viewSavedOnly, setViewSavedOnly]    = useState(false);
+
   const PAGE_SIZE = 20;
+
+  const token = () => sessionStorage.getItem("userToken");
+  const authHeaders = () => (token() ? { Authorization: `Bearer ${token()}` } : {});
+
+  // ── Fetch saved scholarships (ids + full list for sidebar and "View saved") ──
+  const fetchSavedScholarships = useCallback(async () => {
+    if (!token()) return;
+    try {
+      const res = await fetch(`${API_REL}/scholarships/saved/`, { headers: { ...authHeaders() } });
+      if (res.status === 401) return;
+      if (!res.ok) return;
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      setSavedScholarships(list);
+      setSavedIds(new Set(list.map((s) => s.id)));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSavedScholarships();
+  }, [fetchSavedScholarships]);
+
+  // ── Save / Unsave ──
+  const handleSave = async (id) => {
+    if (!token()) return;
+    try {
+      const res = await fetch(`${API_REL}/scholarships/${id}/save/`, {
+        method: "POST",
+        headers: { ...authHeaders() },
+      });
+      if (res.ok) await fetchSavedScholarships();
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleUnsave = async (id) => {
+    if (!token()) return;
+    try {
+      const res = await fetch(`${API_REL}/scholarships/${id}/save/`, {
+        method: "DELETE",
+        headers: { ...authHeaders() },
+      });
+      if (res.ok) await fetchSavedScholarships();
+    } catch {
+      // ignore
+    }
+  };
 
   // ── Fetch list ──
   const fetchScholarships = useCallback(async () => {
@@ -754,9 +821,10 @@ export default function Scholarships() {
   }, [profile]);
 
   useEffect(() => {
-    if (onlyMatched) { fetchMatch(); }
-    else { fetchScholarships(); }
-  }, [onlyMatched, fetchScholarships, fetchMatch]);
+    if (viewSavedOnly) return;
+    if (onlyMatched) fetchMatch();
+    else fetchScholarships();
+  }, [onlyMatched, viewSavedOnly, fetchScholarships, fetchMatch]);
 
   // reset page on filter change
   useEffect(() => { setPage(1); }, [q, sortBy, filterCitizenship, filterAwardType, onlyMatched]);
@@ -768,20 +836,17 @@ export default function Scholarships() {
     if (onlyMatched) fetchMatch();
   };
 
-  const displayList = onlyMatched
-    ? (matchResults || []).map((r) => ({ ...r.scholarship, _score: r.score, _reasons: r.reasons }))
-    : scholarships;
+  // When "match to my profile" is on: always order by match strength (strongest first), ignore sort dropdown
+  const displayList = (() => {
+    if (onlyMatched && matchResults?.length) {
+      const mapped = matchResults.map((r) => ({ ...r.scholarship, _score: r.score, _reasons: r.reasons }));
+      return [...mapped].sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
+    }
+    if (viewSavedOnly) return savedScholarships;
+    return scholarships;
+  })();
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-
-  // Upcoming deadlines — scholarships with a deadline, sorted soonest first
-  const upcomingDeadlines = [...(onlyMatched
-    ? (matchResults || []).map(r => r.scholarship)
-    : scholarships
-  )]
-    .filter(s => s.deadline)
-    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-    .slice(0, 6);
 
   const yearLabel = ["1st", "2nd", "3rd", "4th", "5th"][profile.year - 1] || `${profile.year}th`;
 
@@ -845,8 +910,15 @@ export default function Scholarships() {
 
               <div className="sc-divider" />
 
-              <select className="sc-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                <option value="">Sort</option>
+              <select
+                className="sc-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                disabled={onlyMatched}
+                title={onlyMatched ? "Match view is always ordered by match strength" : ""}
+              >
+                <option value="title">Title A–Z</option>
+                <option value="-title">Title Z–A</option>
                 <option value="-amount">Amount ↓</option>
                 <option value="amount">Amount ↑</option>
                 <option value="deadline">Deadline ↑</option>
@@ -864,17 +936,30 @@ export default function Scholarships() {
               <div className="sc-divider" />
 
               <div className="sc-toggle-wrap" onClick={() => setOnlyMatched((v) => !v)}>
-                Only matched to me
+                Match to my profile
                 <div className={`sc-toggle ${onlyMatched ? "on" : ""}`} />
               </div>
+
+              <div className="sc-divider" />
+
+              <button
+                type="button"
+                className="sc-edit-btn"
+                onClick={() => setViewSavedOnly((v) => !v)}
+                style={{ marginLeft: 0 }}
+              >
+                <BookmarkIcon filled={viewSavedOnly} /> {viewSavedOnly ? "Show all" : "View saved"}
+              </button>
             </div>
 
             {/* Results count */}
             {!loading && (
               <div className="sc-results-header">
-                {onlyMatched
-                  ? `${displayList.length} scholarships matched to your profile`
-                  : `${total} scholarships found`}
+                {viewSavedOnly
+                  ? `${displayList.length} saved scholarship${displayList.length !== 1 ? "s" : ""}`
+                  : onlyMatched
+                    ? `${displayList.length} scholarships matched to your profile (strongest first)`
+                    : `${total} scholarships found`}
               </div>
             )}
 
@@ -884,8 +969,8 @@ export default function Scholarships() {
             ) : displayList.length === 0 ? (
               <div className="sc-empty">
                 <div className="sc-empty-icon">🎓</div>
-                <h3>No scholarships found</h3>
-                <p>Try adjusting your filters or editing your profile.</p>
+                <h3>{viewSavedOnly ? "No saved scholarships" : "No scholarships found"}</h3>
+                <p>{viewSavedOnly ? "Use the bookmark on any scholarship to save it and see it here." : "Try adjusting your filters or editing your profile."}</p>
               </div>
             ) : (
               displayList.map((s) => (
@@ -894,12 +979,15 @@ export default function Scholarships() {
                   s={s}
                   score={s._score}
                   reasons={s._reasons}
+                  isSaved={savedIds.has(s.id)}
+                  onSave={handleSave}
+                  onUnsave={handleUnsave}
                 />
               ))
             )}
 
-            {/* Pagination — only in list mode */}
-            {!onlyMatched && totalPages > 1 && !loading && (
+            {/* Pagination — only in list mode, not when viewing saved */}
+            {!onlyMatched && !viewSavedOnly && totalPages > 1 && !loading && (
               <div className="sc-pagination">
                 <button className="sc-page-btn" onClick={() => setPage((p) => p - 1)} disabled={page === 1}>‹</button>
                 {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((p) => (
@@ -911,23 +999,9 @@ export default function Scholarships() {
             )}
           </div>
 
-          {/* ── SIDEBAR ── */}
+          {/* ── SIDEBAR: saved scholarships by due date ── */}
           <div className="sc-sidebar">
-            <div className="sc-sidebar-card">
-              <div className="sc-sidebar-title">
-                <CalendarIcon /> Upcoming Deadlines
-              </div>
-              {upcomingDeadlines.length === 0 ? (
-                <p style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>No upcoming deadlines found.</p>
-              ) : (
-                upcomingDeadlines.map((s) => (
-                  <div className="sc-deadline-item" key={s.id}>
-                    <div className="sc-deadline-item-title">{s.title}</div>
-                    <div className="sc-deadline-item-date">{formatDeadline(s.deadline)}</div>
-                  </div>
-                ))
-              )}
-            </div>
+            <UpcomingDeadlines items={savedScholarships} maxItems={6} />
           </div>
         </div>
       </div>
