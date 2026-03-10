@@ -18,7 +18,7 @@ const styles = `
     --error: #C0392B;
   }
 
-  body { font-family: 'Source Sans 3', sans-serif; }
+  body { font-family: inherit; }
 
   .uoft-page {
     min-height: 100vh;
@@ -103,7 +103,7 @@ const styles = `
     border-radius: 10px;
     background: white;
     padding: 0 2.8rem 0 2.6rem;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.92rem;
     color: var(--uoft-blue);
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -152,7 +152,7 @@ const styles = `
     border: none;
     background: var(--uoft-blue);
     color: white;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.97rem;
     font-weight: 600;
     letter-spacing: 0.04em;

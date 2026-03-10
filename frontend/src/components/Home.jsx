@@ -28,9 +28,9 @@ const styles = `
     --shadow: 0 4px 16px rgba(0,42,92,0.08);
   }
 
-  body { font-family: 'Source Sans 3', sans-serif; }
+  body { font-family: inherit; }
 
-  .db-page { min-height: 100vh; background: var(--off-white); font-family: 'Source Sans 3', sans-serif; }
+  .db-page { min-height: 100vh; background: var(--off-white); font-family: inherit; }
   .db-body { max-width: 1200px; margin: 0 auto; padding: 2rem; }
 
   .db-header {
@@ -288,11 +288,58 @@ const styles = `
   }
 `;
 
-const token = () => sessionStorage.getItem("userToken");
+const API = "/api";
+const token = () => sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
 const authHeaders = () => {
   const t = token();
   return t ? { Authorization: `Bearer ${t}` } : {};
 };
+const refreshAccessToken = async () => {
+  const refresh = sessionStorage.getItem("userRefreshToken");
+  if (!refresh) return null;
+  const res = await fetch(`${API}/token/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data?.access) return null;
+  sessionStorage.setItem("userToken", data.access);
+  sessionStorage.setItem("userAccessToken", data.access);
+  return data.access;
+};
+const fetchWithAuth = async (url) => {
+  let t = token();
+  if (!t) return { ok: false, status: 401 };
+  let res = await fetch(url, { headers: { ...authHeaders() } });
+  if (res.status === 401) {
+    const newT = await refreshAccessToken();
+    if (newT) res = await fetch(url, { headers: { Authorization: `Bearer ${newT}` } });
+  }
+  return res;
+};
+
+/** Time-based greeting using the user's local timezone. X = first name. */
+function getGreeting(firstName) {
+  const name = (firstName || "").trim() || "there";
+  const hour = new Date().getHours();
+  const morning = ["Good morning", "Rise and shine", "Morning"];
+  const afternoon = ["Good afternoon", "Hey there", "Welcome back"];
+  const evening = ["Good evening", "Welcome back", "Evening"];
+  const night = ["Good night", "Late night vibes", "Burning the midnight oil"];
+  let list;
+  if (hour >= 5 && hour < 12) list = morning;
+  else if (hour >= 12 && hour < 17) list = afternoon;
+  else if (hour >= 17 && hour < 21) list = evening;
+  else list = night;
+  const prefix = list[hour % list.length];
+  if (prefix === "Hey there" || prefix === "Welcome back" || prefix === "Rise and shine") return `${prefix}, ${name}!`;
+  if (prefix === "Morning" || prefix === "Evening") return `${prefix}, ${name}!`;
+  if (prefix === "Late night vibes") return `${prefix}, ${name}!`;
+  if (prefix === "Burning the midnight oil") return `${prefix}, ${name}!`;
+  return `${prefix}, ${name}`;
+}
 
 const getPeriodLength = (label) => {
   if (label === "3 Months") return 3;
@@ -529,6 +576,7 @@ function ConnectBankButton({ onLinked, onError }) {
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const [firstName, setFirstName] = useState("");
   const [month, setMonth] = useState("This Month");
   const [selectedAccountId, setSelectedAccountId] = useState("");
   const [onlyImportant, setOnlyImportant] = useState(false);
@@ -611,6 +659,12 @@ export default function Dashboard() {
 
     load();
   }, [reloadKey]);
+
+  useEffect(() => {
+    fetchWithAuth(`${API}/me/`).then((res) => {
+      if (res.ok) res.json().then((data) => setFirstName(data?.first_name || ""));
+    });
+  }, []);
 
   useEffect(() => {
     if (!selectedAccountId) return;
@@ -736,7 +790,7 @@ export default function Dashboard() {
 
         <div className="db-header">
           <div>
-            <h1>Dashboard</h1>
+            <h1>{getGreeting(firstName)}</h1>
             <p>
               {bankCount > 0
                 ? `Live overview from ${bankCount} connected bank account${bankCount > 1 ? "s" : ""}${selectedBankNameShort ? ` - ${selectedBankNameShort}` : ""}.`

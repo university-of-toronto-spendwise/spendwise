@@ -1,0 +1,447 @@
+/* Dark mode – applied when [data-theme="dark"] on <html> */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="dark"] html,
+[data-theme="dark"] body,
+[data-theme="dark"] #root {
+  background: #0f172a !important;
+  color: #e2e8f0;
+}
+
+/* Navbar */
+[data-theme="dark"] .sw-nav {
+  background: #1e293b !important;
+  border-bottom-color: #334155 !important;
+}
+[data-theme="dark"] .sw-nav-tab {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .sw-nav-tab:hover {
+  color: #f1f5f9 !important;
+  background: #334155 !important;
+}
+[data-theme="dark"] .sw-nav-tab.active {
+  color: #f1f5f9 !important;
+  background: #334155 !important;
+  border-color: #475569 !important;
+}
+[data-theme="dark"] .sw-nav-icon-btn {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .sw-nav-icon-btn:hover {
+  color: #f1f5f9 !important;
+  border-color: #64748b !important;
+}
+[data-theme="dark"] .sw-nav-dropdown {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
+}
+[data-theme="dark"] .sw-nav-dropdown-section {
+  border-bottom-color: #334155 !important;
+}
+[data-theme="dark"] .sw-nav-dropdown-name {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .sw-nav-dropdown-meta {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .sw-nav-dropdown-btn {
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .sw-nav-dropdown-btn:hover {
+  background: #334155 !important;
+}
+[data-theme="dark"] .sw-nav-dropdown-btn.logout:hover {
+  background: #450a0a !important;
+}
+
+/* Dashboard / Home */
+[data-theme="dark"] .db-page {
+  background: #0f172a !important;
+}
+[data-theme="dark"] .db-header h1,
+[data-theme="dark"] .db-header p {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .card,
+[data-theme="dark"] .mini-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .card-title h2,
+[data-theme="dark"] .tileTitle,
+[data-theme="dark"] .row-title,
+[data-theme="dark"] .mini-value {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .tileSub,
+[data-theme="dark"] .row-sub,
+[data-theme="dark"] .mini-title,
+[data-theme="dark"] .empty {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .pill {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .db-period-label {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .db-period-value {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .menu {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .menuItem {
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .menuItem:hover {
+  background: #334155 !important;
+}
+[data-theme="dark"] .tile,
+[data-theme="dark"] .row {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .hero {
+  background: linear-gradient(135deg, #1e3a5f, #1e293b) !important;
+}
+[data-theme="dark"] .bank-tab,
+[data-theme="dark"] .bank-cta {
+  border-color: #475569 !important;
+}
+[data-theme="dark"] .bank-tab {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .bank-tab.active {
+  background: #002A5C !important;
+}
+[data-theme="dark"] .insight strong,
+[data-theme="dark"] .insight p {
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .insight p {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .link {
+  color: #93c5fd !important;
+}
+[data-theme="dark"] .bank-status {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+/* Scholarships */
+[data-theme="dark"] .sc-page {
+  background: #0f172a !important;
+}
+[data-theme="dark"] .sc-header h1,
+[data-theme="dark"] .sc-header p {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .sc-header p {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .sc-profile-bar,
+[data-theme="dark"] .sc-filter-bar,
+[data-theme="dark"] .sc-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .sc-profile-field-value,
+[data-theme="dark"] .sc-card-title,
+[data-theme="dark"] .sc-card-amount {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .sc-profile-field-label,
+[data-theme="dark"] .sc-results-header,
+[data-theme="dark"] .sc-offered-by,
+[data-theme="dark"] .sc-score-label {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .sc-card-amount {
+  color: #93c5fd !important;
+}
+[data-theme="dark"] .sc-select,
+[data-theme="dark"] .sc-search-wrap input {
+  color: #e2e8f0 !important;
+  background: transparent !important;
+}
+[data-theme="dark"] .sc-toggle-wrap {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .sc-edit-btn {
+  background: #0047A0 !important;
+}
+[data-theme="dark"] .sc-bookmark-btn {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .sc-bookmark-btn.saved {
+  background: #1e3a5f !important;
+  color: #93c5fd !important;
+}
+[data-theme="dark"] .sc-empty h3,
+[data-theme="dark"] .sc-empty p {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .sc-page-btn {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .sc-page-btn.active {
+  background: #002A5C !important;
+}
+[data-theme="dark"] .sc-sidebar .ud-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .sc-card-status-badge.saved {
+  background: #312e81 !important;
+  color: #c7d2fe !important;
+  border-color: #4338ca !important;
+}
+[data-theme="dark"] .sc-card-status-badge.in_progress {
+  background: #78350f !important;
+  color: #fde68a !important;
+  border-color: #92400e !important;
+}
+[data-theme="dark"] .sc-card-status-badge.submitted {
+  background: #064e3b !important;
+  color: #a7f3d0 !important;
+  border-color: #047857 !important;
+}
+
+/* UpcomingDeadlines (ud-*) */
+[data-theme="dark"] .ud-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .ud-card-title {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .ud-row {
+  background: #334155 !important;
+  border-color: #475569 !important;
+}
+[data-theme="dark"] .ud-row-title {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .ud-row-sub,
+[data-theme="dark"] .ud-empty {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .ud-badge {
+  background: #1e3a5f !important;
+  border-color: #334155 !important;
+  color: #93c5fd !important;
+}
+
+/* Profile page */
+[data-theme="dark"] .profile-page {
+  background: #0f172a !important;
+}
+[data-theme="dark"] .profile-header h1 {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .profile-header p {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .profile-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .profile-card h2 {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .profile-field label {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .profile-field input,
+[data-theme="dark"] .profile-field select {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .profile-btn-cancel {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+
+/* My Scholarships (Kanban) */
+[data-theme="dark"] .ms-page {
+  background: #0f172a !important;
+}
+[data-theme="dark"] .ms-header h1 {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .ms-header p {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .ms-column {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .ms-column-title--saved {
+  background: #312e81 !important;
+  color: #c7d2fe !important;
+  border-color: #4338ca !important;
+}
+[data-theme="dark"] .ms-column-title--in_progress {
+  background: #78350f !important;
+  color: #fde68a !important;
+  border-color: #92400e !important;
+}
+[data-theme="dark"] .ms-column-title--submitted {
+  background: #064e3b !important;
+  color: #a7f3d0 !important;
+  border-color: #047857 !important;
+}
+[data-theme="dark"] .ms-card {
+  background: #334155 !important;
+  border-color: #475569 !important;
+}
+[data-theme="dark"] .ms-card-title {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .ms-card-amount {
+  color: #93c5fd !important;
+}
+[data-theme="dark"] .ms-card-status--saved {
+  background: #312e81 !important;
+  color: #c7d2fe !important;
+  border-color: #4338ca !important;
+}
+[data-theme="dark"] .ms-card-status--in_progress {
+  background: #78350f !important;
+  color: #fde68a !important;
+  border-color: #92400e !important;
+}
+[data-theme="dark"] .ms-card-status--submitted {
+  background: #064e3b !important;
+  color: #a7f3d0 !important;
+  border-color: #047857 !important;
+}
+[data-theme="dark"] .ms-card-deadline,
+[data-theme="dark"] .ms-empty {
+  color: #94a3b8 !important;
+}
+
+/* Login / Registration */
+[data-theme="dark"] .login-page,
+[data-theme="dark"] .register-page {
+  background: #0f172a !important;
+}
+[data-theme="dark"] .login-card,
+[data-theme="dark"] .register-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .card-subtitle,
+[data-theme="dark"] .form-group label,
+[data-theme="dark"] label {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .input-wrap input,
+[data-theme="dark"] input,
+[data-theme="dark"] select {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .submit-btn {
+  background: #0047A0 !important;
+}
+[data-theme="dark"] .signup-prompt,
+[data-theme="dark"] .forgot-link {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .signup-prompt a,
+[data-theme="dark"] .forgot-link {
+  color: #93c5fd !important;
+}
+
+/* Transactions */
+[data-theme="dark"] .tx-page {
+  background: #0f172a !important;
+}
+[data-theme="dark"] .tx-title,
+[data-theme="dark"] .tx-subtitle {
+  color: #f1f5f9 !important;
+}
+[data-theme="dark"] .tx-subtitle {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .tx-chip,
+[data-theme="dark"] .tx-card,
+[data-theme="dark"] .tx-stat-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .tx-card-h h3 {
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .tx-stat p {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .tx-stat h2 {
+  color: #93c5fd !important;
+}
+[data-theme="dark"] .tx-select {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .tx-tip,
+[data-theme="dark"] .tx-tip strong {
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+  background: #1e3a5f !important;
+}
+[data-theme="dark"] .tx-table th {
+  background: #1e293b !important;
+  border-bottom-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .tx-table td {
+  color: #cbd5e1 !important;
+  border-bottom-color: #334155 !important;
+}
+[data-theme="dark"] .tx-table tr:hover td {
+  background: #334155 !important;
+}
+[data-theme="dark"] .tx-empty {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .tx-note {
+  background: #1e3a5f !important;
+  border-color: #475569 !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .tx-amount.out {
+  color: #fca5a5 !important;
+}
+[data-theme="dark"] .tx-amount.in {
+  color: #86efac !important;
+}
+[data-theme="dark"] .tx-account-tab:not(.active) {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}

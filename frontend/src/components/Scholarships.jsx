@@ -22,12 +22,12 @@ const styles = `
     --white: #FFFFFF;
   }
 
-  body { font-family: 'Source Sans 3', sans-serif; }
+  body { font-family: inherit; }
 
   .sc-page {
     min-height: 100vh;
     background: var(--off-white);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
   }
 
   .sc-body {
@@ -45,7 +45,7 @@ const styles = `
   /* ── Page Header ── */
   .sc-header { margin-bottom: 1.5rem; }
   .sc-header h1 {
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 1.9rem;
     font-weight: 700;
     color: var(--uoft-blue);
@@ -89,7 +89,7 @@ const styles = `
     border: none;
     border-radius: 10px;
     padding: 0.6rem 1.2rem;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -127,7 +127,7 @@ const styles = `
   .sc-search-wrap input {
     border: none;
     outline: none;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.92rem;
     color: var(--uoft-blue);
     background: transparent;
@@ -146,7 +146,7 @@ const styles = `
   .sc-select {
     border: none;
     outline: none;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     color: var(--uoft-blue);
     background: transparent;
@@ -333,7 +333,7 @@ const styles = `
     border: 1.5px solid var(--border);
     background: white;
     color: var(--uoft-blue);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -472,7 +472,7 @@ const styles = `
     border: 1.5px solid var(--border);
     border-radius: 8px;
     padding: 0 0.75rem;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     color: var(--uoft-blue);
     outline: none;
@@ -498,7 +498,7 @@ const styles = `
     border: 1.5px solid var(--border);
     background: white;
     color: var(--text-muted);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -512,7 +512,7 @@ const styles = `
     border: none;
     background: var(--uoft-blue);
     color: white;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -525,6 +525,30 @@ const styles = `
     color: var(--text-muted);
     margin-bottom: 0.85rem;
     font-weight: 500;
+  }
+  .sc-card-status-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .sc-card-status-badge.saved {
+    background: #E0E7FF;
+    color: #3730A3;
+    border: 1px solid #C7D2FE;
+  }
+  .sc-card-status-badge.in_progress {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+  }
+  .sc-card-status-badge.submitted {
+    background: #D1FAE5;
+    color: #047857;
+    border: 1px solid #A7F3D0;
   }
 `;
 
@@ -587,8 +611,10 @@ function formatDeadline(dateStr) {
   return new Date(dateStr).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
 }
 
+const STATUS_LABELS = { saved: "Saved", in_progress: "In Progress", submitted: "Submitted" };
+
 // ── Sub-components ──
-function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
+function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave, status }) {
   const amt = formatAmount(s);
   const days = daysUntil(s.deadline);
   const isUrgent = days !== null && days <= 14;
@@ -602,13 +628,20 @@ function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
     <div className="sc-card">
       <div className="sc-card-top">
         <div className="sc-card-title">{s.title}</div>
-        <button
-          className={`sc-bookmark-btn ${isSaved ? "saved" : ""}`}
-          title={isSaved ? "Unsave" : "Save to my scholarships"}
-          onClick={handleBookmarkClick}
-        >
-          <BookmarkIcon filled={isSaved} />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          {status && (
+            <span className={`sc-card-status-badge ${status}`} title={STATUS_LABELS[status] || status}>
+              {STATUS_LABELS[status] || status}
+            </span>
+          )}
+          <button
+            className={`sc-bookmark-btn ${isSaved ? "saved" : ""}`}
+            title={isSaved ? "Unsave" : "Save to my scholarships"}
+            onClick={handleBookmarkClick}
+          >
+            <BookmarkIcon filled={isSaved} />
+          </button>
+        </div>
       </div>
 
       {amt && <div className="sc-card-amount">{amt}</div>}
@@ -671,65 +704,8 @@ function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
   );
 }
 
-function ProfileModal({ profile, onSave, onClose }) {
-  const [form, setForm] = useState({ ...profile });
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  return (
-    <div className="sc-modal-overlay" onClick={onClose}>
-      <div className="sc-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>✏️ Edit Your Profile</h2>
-        <div className="sc-modal-grid">
-          <div className="sc-modal-field">
-            <label>Faculty</label>
-            <input value={form.faculty} onChange={(e) => set("faculty", e.target.value)} placeholder="e.g. Engineering" />
-          </div>
-          <div className="sc-modal-field">
-            <label>Major</label>
-            <input value={form.major} onChange={(e) => set("major", e.target.value)} placeholder="e.g. Computer Science" />
-          </div>
-          <div className="sc-modal-field">
-            <label>Year</label>
-            <select value={form.year} onChange={(e) => set("year", Number(e.target.value))}>
-              {[1, 2, 3, 4, 5].map((y) => <option key={y} value={y}>{y}</option>)}
-            </select>
-          </div>
-          <div className="sc-modal-field">
-            <label>Degree</label>
-            <select value={form.degree_type} onChange={(e) => set("degree_type", e.target.value)}>
-              <option>Undergrad</option>
-              <option>Postgrad</option>
-            </select>
-          </div>
-          <div className="sc-modal-field">
-            <label>Status</label>
-            <select value={form.citizenship} onChange={(e) => set("citizenship", e.target.value)}>
-              <option>Domestic</option>
-              <option>International</option>
-            </select>
-          </div>
-          <div className="sc-modal-field">
-            <label>Campus</label>
-            <select value={form.campus} onChange={(e) => set("campus", e.target.value)}>
-              <option>St.George</option>
-              <option>Scarborough</option>
-              <option>Mississauga</option>
-            </select>
-          </div>
-        </div>
-        <div className="sc-modal-actions">
-          <button className="sc-modal-cancel" onClick={onClose}>Cancel</button>
-          <button className="sc-modal-save" onClick={() => onSave(form)}>Save Profile</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main Component ──
 export default function Scholarships() {
-  const [profile, setProfile]         = useState(loadProfile);
-  const [showModal, setShowModal]      = useState(false);
   const [scholarships, setScholarships] = useState([]);
   const [matchResults, setMatchResults] = useState(null);
   const [loading, setLoading]          = useState(false);
@@ -794,7 +770,7 @@ export default function Scholarships() {
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
       setSavedScholarships(list);
-      setSavedIds(new Set(list.map((s) => s.id)));
+      setSavedIds(new Set(list.map((i) => i.scholarship?.id).filter(Boolean)));
     } catch {
       // ignore
     }
@@ -855,14 +831,14 @@ export default function Scholarships() {
       const res = await fetch(`${API}/scholarships/match/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(loadProfile()),
       });
       const data = await res.json();
       setMatchResults(data);
     } catch (e) {
       console.error(e);
     } finally { setLoading(false); }
-  }, [profile]);
+  }, []);
 
   useEffect(() => {
     if (viewSavedOnly) return;
@@ -873,14 +849,7 @@ export default function Scholarships() {
   // reset page on filter change
   useEffect(() => { setPage(1); }, [q, sortBy, filterCitizenship, filterAwardType, onlyMatched]);
 
-  const handleSaveProfile = (newProfile) => {
-    setProfile(newProfile);
-    localStorage.setItem("userProfile", JSON.stringify(newProfile));
-    setShowModal(false);
-    if (onlyMatched) fetchMatch();
-  };
-
-  // When "match to my profile" is on: always order by match strength (strongest first), ignore sort dropdown
+  // When "match to my profile" is on: order by match strength. When "View saved": show saved items (with status).
   const displayList = (() => {
     if (onlyMatched && matchResults?.length) {
       const mapped = matchResults.map((r) => ({ ...r.scholarship, _score: r.score, _reasons: r.reasons }));
@@ -891,8 +860,6 @@ export default function Scholarships() {
   })();
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-
-  const yearLabel = ["1st", "2nd", "3rd", "4th", "5th"][profile.year - 1] || `${profile.year}th`;
 
   return (
     <>
@@ -907,29 +874,7 @@ export default function Scholarships() {
             {/* Header */}
             <div className="sc-header">
               <h1>Scholarships & Bursaries</h1>
-              <p>Matched to your program, faculty, and financial profile.</p>
-            </div>
-
-            {/* Profile Bar */}
-            <div className="sc-profile-bar">
-              <div className="sc-profile-fields">
-                {[
-                  ["Faculty",    profile.faculty    || "—"],
-                  ["Major",      profile.major      || "—"],
-                  ["Year",       profile.faculty ? `${yearLabel} Year` : "—"],
-                  ["Degree",     profile.degree_type],
-                  ["Status",     profile.citizenship],
-                  ["Campus",     profile.campus],
-                ].map(([label, value]) => (
-                  <div className="sc-profile-field" key={label}>
-                    <div className="sc-profile-field-label">{label}</div>
-                    <div className="sc-profile-field-value">{value}</div>
-                  </div>
-                ))}
-              </div>
-              <button className="sc-edit-btn" onClick={() => setShowModal(true)}>
-                <EditIcon /> Edit Profile
-              </button>
+              <p>Matched to your program, faculty, and financial profile. Edit your profile from the menu.</p>
             </div>
 
             {/* Filter Bar */}
@@ -1000,7 +945,7 @@ export default function Scholarships() {
             {!loading && (
               <div className="sc-results-header">
                 {viewSavedOnly
-                  ? `${displayList.length} saved scholarship${displayList.length !== 1 ? "s" : ""}`
+                  ? `${displayList.length} saved scholarship${displayList.length !== 1 ? "s" : ""} (edit status on My Scholarships)`
                   : onlyMatched
                     ? `${displayList.length} scholarships matched to your profile (strongest first)`
                     : `${total} scholarships found`}
@@ -1016,6 +961,19 @@ export default function Scholarships() {
                 <h3>{viewSavedOnly ? "No saved scholarships" : "No scholarships found"}</h3>
                 <p>{viewSavedOnly ? "Use the bookmark on any scholarship to save it and see it here." : "Try adjusting your filters or editing your profile."}</p>
               </div>
+            ) : viewSavedOnly ? (
+              displayList.map((item) => (
+                <ScholarshipCard
+                  key={item.id}
+                  s={item.scholarship}
+                  score={undefined}
+                  reasons={undefined}
+                  isSaved={true}
+                  onSave={handleSave}
+                  onUnsave={handleUnsave}
+                  status={item.status}
+                />
+              ))
             ) : (
               displayList.map((s) => (
                 <ScholarshipCard
@@ -1057,14 +1015,6 @@ export default function Scholarships() {
           document.body
         )}
 
-      {/* Profile Modal */}
-      {showModal && (
-        <ProfileModal
-          profile={profile}
-          onSave={handleSaveProfile}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </>
   );
 }

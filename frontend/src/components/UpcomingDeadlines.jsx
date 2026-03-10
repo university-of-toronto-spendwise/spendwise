@@ -44,6 +44,18 @@ const udStyles = `
   .ud-row-title { font-weight: 900; color: var(--uoft-blue); font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ud-row-sub { color: var(--text-muted, #6B7A90); font-size: 0.95rem; margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ud-empty { color: var(--text-muted); font-size: 0.95rem; text-align: center; padding: 1.25rem 0; }
+  .ud-row { position: relative; }
+  .ud-status-dot {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--uoft-mid, #0047A0);
+  }
+  .ud-status-dot.in_progress { background: #E8B53E; }
+  .ud-status-dot.submitted { background: #18A574; }
 `;
 
 function formatDeadline(dateStr) {
@@ -100,9 +112,12 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 8 }) {
     fetchSaved();
   }, [itemsProp]);
 
-  const withDeadlines = items
-    .filter((s) => s.deadline)
-    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+  const normalized = items.map((it) =>
+    it.scholarship ? { s: it.scholarship, status: it.status } : { s: it, status: null }
+  );
+  const withDeadlines = normalized
+    .filter(({ s }) => s?.deadline)
+    .sort((a, b) => new Date(a.s.deadline) - new Date(b.s.deadline))
     .slice(0, maxItems);
 
   if (loading && withDeadlines.length === 0) {
@@ -138,7 +153,7 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 8 }) {
           <div className="ud-empty">No upcoming deadlines. Save scholarships to see them here.</div>
         ) : (
           <div className="ud-list">
-            {withDeadlines.map((s) => {
+            {withDeadlines.map(({ s, status }) => {
               const days = daysUntil(s.deadline);
               const meta =
                 days !== null && days >= 0
@@ -146,6 +161,12 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 8 }) {
                   : formatDeadline(s.deadline);
               return (
                 <div className="ud-row" key={s.id}>
+                  {status && (
+                    <span
+                      className={`ud-status-dot ${status}`}
+                      title={status === "saved" ? "Saved" : status === "in_progress" ? "In Progress" : "Submitted"}
+                    />
+                  )}
                   <div className="ud-row-left">
                     <div className="ud-badge">
                       {s.deadline ? new Date(s.deadline).getDate() : "—"}

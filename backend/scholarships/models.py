@@ -71,8 +71,14 @@ class Scholarship(models.Model):
         return self.title
 
 
+class SavedScholarshipStatus(models.TextChoices):
+    SAVED = "saved", "Saved / Planned"
+    IN_PROGRESS = "in_progress", "In Progress"
+    SUBMITTED = "submitted", "Submitted"
+
+
 class SavedScholarship(models.Model):
-    """Links a user to a scholarship they saved; used for profile and upcoming deadlines."""
+    """Links a user to a scholarship they saved; status tracks application progress."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -84,6 +90,11 @@ class SavedScholarship(models.Model):
         related_name="saved_by_users",
     )
     saved_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(
+        max_length=20,
+        choices=SavedScholarshipStatus.choices,
+        default=SavedScholarshipStatus.SAVED,
+    )
 
     class Meta:
         constraints = [

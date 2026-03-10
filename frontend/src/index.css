@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600;700;800;900&display=swap');
+
 html, body, #root {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
   background: #F4F7FB;
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
 }

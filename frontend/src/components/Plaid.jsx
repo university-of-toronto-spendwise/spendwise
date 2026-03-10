@@ -433,10 +433,8 @@ export default function Plaid() {
 
 // ─── Styles — SpendWise UofT design language ──────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
-
 .tx-page {
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: inherit;
   background: #F4F7FB;
   min-height: 100vh;
   padding: 2rem 2.5rem;
@@ -479,7 +477,7 @@ const CSS = `
   color: white;
   border: none;
   border-radius: 10px;
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: inherit;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -623,7 +621,7 @@ const CSS = `
   border-radius: 10px;
   background: white;
   padding: 0 1rem 0 2.5rem;
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: inherit;
   font-size: 0.88rem;
   color: #002A5C;
   outline: none;
@@ -641,7 +639,7 @@ const CSS = `
   border-radius: 10px;
   background: white;
   padding: 0 2.2rem 0 0.9rem;
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: inherit;
   font-size: 0.88rem;
   font-weight: 500;
   color: #002A5C;
