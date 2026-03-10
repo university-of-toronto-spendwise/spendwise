@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePlaidLink } from "react-plaid-link";
 import Navbar from "./Navbar";
@@ -454,6 +454,11 @@ function MonthDropdown({ value, onChange, options }) {
 function ConnectBankButton({ onLinked, onError }) {
   const [linkToken, setLinkToken] = useState(null);
   const [busy, setBusy] = useState(false);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   useEffect(() => {
     fetch("/api/plaid/link-token/", { method: "POST", headers: { ...authHeaders() } })
@@ -462,8 +467,8 @@ function ConnectBankButton({ onLinked, onError }) {
         return r.json();
       })
       .then((data) => setLinkToken(data.link_token))
-      .catch((e) => onError(e.message));
-  }, [onError]);
+      .catch((e) => onErrorRef.current(e.message));
+  }, []);
 
   const { open, ready } = usePlaidLink({
     token: linkToken,
@@ -890,7 +895,6 @@ export default function Dashboard() {
     </div>
   );
 }
-
 
 
 

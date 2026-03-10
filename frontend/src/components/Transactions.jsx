@@ -273,18 +273,53 @@ export default function Transactions() {
     if (responses.some((res) => !res.ok)) return setMonthlySavingDesc([]);
 
     const payloads = await Promise.all(responses.map((res) => res.json()));
-    const merged = {};
+    const asNumber = (value) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const keyFor = (name) => {
+      const normalized = String(name || "").trim().toLowerCase();
+      return normalized || "unknown";
+    };
+
+    const merged = new Map();
     for (const tips of payloads) {
       if (!Array.isArray(tips)) continue;
       for (const tip of tips) {
-        const name = tip?.name || "Unknown";
-        if (!merged[name]) merged[name] = { name, total: 0, per_saving: 0 };
-        merged[name].total += Number(tip?.total || 0);
-        merged[name].per_saving += Number(tip?.per_saving || 0);
+        const displayName = String(tip?.name || "Unknown").trim() || "Unknown";
+        const key = keyFor(displayName);
+        const total = asNumber(tip?.total);
+        const perSaving = asNumber(tip?.per_saving);
+        const desc = tip?.desc ? String(tip.desc) : "";
+
+        const existing = merged.get(key) || {
+          name: displayName,
+          total: 0,
+          per_saving: 0,
+          desc: "",
+          _bestSaving: Number.NEGATIVE_INFINITY,
+        };
+
+        existing.total += total;
+        existing.per_saving += perSaving;
+
+        if (desc && perSaving >= existing._bestSaving) {
+          existing.desc = desc;
+          existing._bestSaving = perSaving;
+        }
+
+        merged.set(key, existing);
       }
     }
 
-    setMonthlySavingDesc(Object.values(merged));
+    const rows = Array.from(merged.values()).map((row) => {
+      const clean = { ...row };
+      delete clean._bestSaving;
+      return clean;
+    });
+    rows.sort((a, b) => b.per_saving - a.per_saving || b.total - a.total || a.name.localeCompare(b.name));
+    setMonthlySavingDesc(rows);
   };
 
   const fetchAllData = async () => {
@@ -523,8 +558,10 @@ export default function Transactions() {
                 {monthlySavingDesc?.length ? (
                   monthlySavingDesc.map((t) => (
                     <div className="tx-tip" key={t.name}>
-                      <div><strong>{t.name}</strong> - spent ${formatMoney(t.total)}</div>
-                      <div>You could save about ${formatMoney(t.per_saving)} by reducing this expense.</div>
+                      <div><strong>{t.name}</strong> - You spent ${formatMoney(t.total)}</div>
+                      <div className="tx-tip-sub">
+                        You could save about ${formatMoney(t.per_saving)} by taking this offer — <strong>"{t.desc}"</strong> — if you haven’t already.
+                      </div>
                     </div>
                   ))
                 ) : (
