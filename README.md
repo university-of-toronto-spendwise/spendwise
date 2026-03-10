@@ -44,15 +44,15 @@ SpendWise empowers students to discover funding, reduce living costs, and manage
 
 After running the application locally (see Development Environment Setup instructions below),  open:
 
-http://localhost:5174
+http://134.122.6.117:5174/
 
 ---
 
 ## 1. Login / Sign Up
 
 - Log in using the provided credentials, or
-  email: admin5@gmail.com
-  password: SPENDWISE1
+  email: spendwise@mail.utoronto.ca
+  password: SPENDWISE1@new
 - Create a new account through the registration page.
 - After successful login, you will be redirected to the **Dashboard**.
 
@@ -161,8 +161,19 @@ Frontend integration is partially completed.
 
 <img width="909" height="431" alt="image" src="https://github.com/user-attachments/assets/3adccfcc-a0b5-4658-aae7-5f035dfdab1e" />
 
+---
+
+## 6. Bank Connection
+
+The bank connection feature allows users to connect their bank accounts to Spendwise.
+
+Currently:
+The plaid API is being used in a sandbox environment to allow users to connect dummy bank accounts. Further testing is required before the 
+sandbox environment will be able to switch to a dev env. This feature has been implemented end to end.
+
 
 ---
+
 
 ## Summary
 
