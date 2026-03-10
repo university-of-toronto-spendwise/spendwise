@@ -1,6 +1,7 @@
-from django.contrib.auth import get_user_model 
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+from .models import UserProfile
 
 User = get_user_model()
 
@@ -32,3 +33,68 @@ class RegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source="user.first_name", read_only=True)
+    last_name = serializers.CharField(source="user.last_name", read_only=True)
+    email = serializers.EmailField(source="user.email", read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "citizenship_status",
+            "campus",
+            "receives_scholarships_or_aid",
+            "scholarship_aid_amount",
+            "total_earnings",
+            "total_expenses",
+            "parental_support",
+            "degree_type",
+            "expected_graduation",
+            "onboarding_completed",
+        )
+        read_only_fields = ("onboarding_completed",)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+
+        receives_aid = attrs.get(
+            "receives_scholarships_or_aid",
+            getattr(self.instance, "receives_scholarships_or_aid", False),
+        )
+        scholarship_amount = attrs.get(
+            "scholarship_aid_amount",
+            getattr(self.instance, "scholarship_aid_amount", None),
+        )
+
+        if receives_aid and scholarship_amount in (None, ""):
+            raise serializers.ValidationError(
+                {"scholarship_aid_amount": "Please enter how much scholarship or aid you receive."}
+            )
+
+        return attrs
+
+    def update(self, instance, validated_data):
+        if not validated_data.get("receives_scholarships_or_aid", instance.receives_scholarships_or_aid):
+            validated_data["scholarship_aid_amount"] = None
+
+        instance = super().update(instance, validated_data)
+
+        required_values = [
+            instance.citizenship_status,
+            instance.campus,
+            instance.total_earnings,
+            instance.total_expenses,
+            instance.parental_support,
+            instance.degree_type,
+            instance.expected_graduation,
+        ]
+        instance.onboarding_completed = all(value not in (None, "") for value in required_values) and (
+            not instance.receives_scholarships_or_aid or instance.scholarship_aid_amount is not None
+        )
+        instance.save(update_fields=["onboarding_completed", "updated_at"])
+        return instance

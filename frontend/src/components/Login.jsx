@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL, fetchProfile, setOnboardingComplete, setToken } from "../utils/session";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
@@ -258,7 +259,7 @@ export default function Login() {
 
     setError(""); setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/login/", {
+      const res = await fetch(`${API_BASE_URL}/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -267,18 +268,16 @@ export default function Login() {
         }),
       });
 
-	      const data = await res.json();
-	
-	      if (res.ok) {
-	        const accessToken = data.token || data.access || data.key;
-	        const refreshToken = data.refresh;
+      const data = await res.json();
 
-	        if (accessToken) sessionStorage.setItem("userToken", accessToken);
-	        if (accessToken) sessionStorage.setItem("userAccessToken", accessToken);
-	        if (refreshToken) sessionStorage.setItem("userRefreshToken", refreshToken);
-	        setSuccess(true);
+      if (res.ok) {
+        const token = data.token || data.access || data.key;
+        setToken(token);
+        const profile = await fetchProfile(token);
+        setOnboardingComplete(Boolean(profile.onboarding_completed));
+        setSuccess(true);
 
-        setTimeout(() => { navigate("/home"); }, 2000);
+        setTimeout(() => { navigate(profile.onboarding_completed ? "/home" : "/onboarding"); }, 900);
 
       } else {
         setError(data?.detail || data?.message || "Invalid email or password.");

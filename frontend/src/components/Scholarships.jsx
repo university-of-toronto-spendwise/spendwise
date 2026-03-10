@@ -22,12 +22,12 @@ const styles = `
     --white: #FFFFFF;
   }
 
-  body { font-family: 'Source Sans 3', sans-serif; }
+  body { font-family: inherit; }
 
   .sc-page {
     min-height: 100vh;
     background: var(--off-white);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
   }
 
   .sc-body {
@@ -42,10 +42,9 @@ const styles = `
 
   .sc-main { min-width: 0; }
 
-  /* ── Page Header ── */
   .sc-header { margin-bottom: 1.5rem; }
   .sc-header h1 {
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 1.9rem;
     font-weight: 700;
     color: var(--uoft-blue);
@@ -53,7 +52,6 @@ const styles = `
   }
   .sc-header p { color: var(--text-muted); font-size: 0.95rem; }
 
-  /* ── Profile Bar ── */
   .sc-profile-bar {
     background: white;
     border: 1.5px solid var(--border);
@@ -89,7 +87,7 @@ const styles = `
     border: none;
     border-radius: 10px;
     padding: 0.6rem 1.2rem;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -102,7 +100,6 @@ const styles = `
   }
   .sc-edit-btn:hover { background: var(--uoft-mid); }
 
-  /* ── Filter Bar ── */
   .sc-filter-bar {
     background: white;
     border: 1.5px solid var(--border);
@@ -127,7 +124,7 @@ const styles = `
   .sc-search-wrap input {
     border: none;
     outline: none;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.92rem;
     color: var(--uoft-blue);
     background: transparent;
@@ -146,7 +143,7 @@ const styles = `
   .sc-select {
     border: none;
     outline: none;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     color: var(--uoft-blue);
     background: transparent;
@@ -194,7 +191,6 @@ const styles = `
   }
   .sc-toggle.on::after { left: 19px; }
 
-  /* ── Cards ── */
   .sc-card {
     background: white;
     border: 1.5px solid var(--border);
@@ -238,6 +234,7 @@ const styles = `
   }
   .sc-bookmark-btn:hover { color: var(--uoft-blue); border-color: var(--uoft-blue); }
   .sc-bookmark-btn.saved { color: var(--uoft-mid); border-color: var(--uoft-mid); background: #E8F0FC; }
+  .sc-bookmark-btn.saved:hover { color: var(--uoft-blue); border-color: var(--uoft-blue); }
 
   .sc-card-amount {
     font-size: 1.4rem;
@@ -317,7 +314,6 @@ const styles = `
     transition: width 0.4s ease;
   }
 
-  /* ── Pagination ── */
   .sc-pagination {
     display: flex;
     align-items: center;
@@ -333,7 +329,7 @@ const styles = `
     border: 1.5px solid var(--border);
     background: white;
     color: var(--uoft-blue);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -349,7 +345,6 @@ const styles = `
 
   .sc-sidebar-spacer { width: 300px; min-width: 300px; flex-shrink: 0; }
 
-  /* ── Sidebar: fixed (rendered via portal to body so it never scrolls) ── */
   .sc-sidebar {
     position: fixed !important;
     top: 80px !important;
@@ -397,7 +392,6 @@ const styles = `
     color: var(--text-muted);
   }
 
-  /* ── Empty / Loading states ── */
   .sc-empty {
     text-align: center;
     padding: 3rem 1rem;
@@ -420,7 +414,6 @@ const styles = `
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Modal ── */
   .sc-modal-overlay {
     position: fixed;
     inset: 0;
@@ -472,7 +465,7 @@ const styles = `
     border: 1.5px solid var(--border);
     border-radius: 8px;
     padding: 0 0.75rem;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     color: var(--uoft-blue);
     outline: none;
@@ -498,7 +491,7 @@ const styles = `
     border: 1.5px solid var(--border);
     background: white;
     color: var(--text-muted);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -512,7 +505,7 @@ const styles = `
     border: none;
     background: var(--uoft-blue);
     color: white;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -525,6 +518,30 @@ const styles = `
     color: var(--text-muted);
     margin-bottom: 0.85rem;
     font-weight: 500;
+  }
+  .sc-card-status-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .sc-card-status-badge.saved {
+    background: #E0E7FF;
+    color: #3730A3;
+    border: 1px solid #C7D2FE;
+  }
+  .sc-card-status-badge.in_progress {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+  }
+  .sc-card-status-badge.submitted {
+    background: #D1FAE5;
+    color: #047857;
+    border: 1px solid #A7F3D0;
   }
 `;
 
@@ -578,8 +595,7 @@ function formatAmount(s) {
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
-  const diff = Math.ceil((new Date(dateStr) - new Date()) / 86400000);
-  return diff;
+  return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
 }
 
 function formatDeadline(dateStr) {
@@ -587,15 +603,13 @@ function formatDeadline(dateStr) {
   return new Date(dateStr).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
 }
 
+const STATUS_LABELS = { saved: "Saved", in_progress: "In Progress", submitted: "Submitted" };
+
 // ── Sub-components ──
-function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
+function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave, status }) {
   const amt = formatAmount(s);
   const days = daysUntil(s.deadline);
   const isUrgent = days !== null && days <= 14;
-  const handleBookmark = () => {
-    if (isSaved) onUnsave?.(s.id);
-    else onSave?.(s.id);
-  };
 
   const handleBookmarkClick = () => {
     if (isSaved) onUnsave?.(s.id);
@@ -606,13 +620,20 @@ function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
     <div className="sc-card">
       <div className="sc-card-top">
         <div className="sc-card-title">{s.title}</div>
-        <button
-          className={`sc-bookmark-btn ${isSaved ? "saved" : ""}`}
-          title={isSaved ? "Unsave" : "Save to my scholarships"}
-          onClick={handleBookmarkClick}
-        >
-          <BookmarkIcon filled={isSaved} />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          {status && (
+            <span className={`sc-card-status-badge ${status}`} title={STATUS_LABELS[status] || status}>
+              {STATUS_LABELS[status] || status}
+            </span>
+          )}
+          <button
+            className={`sc-bookmark-btn ${isSaved ? "saved" : ""}`}
+            title={isSaved ? "Unsave" : "Save to my scholarships"}
+            onClick={handleBookmarkClick}
+          >
+            <BookmarkIcon filled={isSaved} />
+          </button>
+        </div>
       </div>
 
       {amt && <div className="sc-card-amount">{amt}</div>}
@@ -624,17 +645,13 @@ function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
 
       <div className="sc-card-tags">
         {s.award_type && (
-          <span className="sc-tag sc-tag-blue">
-            {s.award_type.replace("_", "-")}
-          </span>
+          <span className="sc-tag sc-tag-blue">{s.award_type.replace("_", "-")}</span>
         )}
         {s.citizenship?.map((c) => (
           <span key={c} className="sc-tag sc-tag-green">{c}</span>
         ))}
         {s.nature?.slice(0, 2).map((n) => (
-          <span key={n} className="sc-tag sc-tag-gray">
-            {n.replace(/_/g, " ")}
-          </span>
+          <span key={n} className="sc-tag sc-tag-gray">{n.replace(/_/g, " ")}</span>
         ))}
         {s.application_required && (
           <span className="sc-tag sc-tag-yellow">Application Required</span>
@@ -653,9 +670,7 @@ function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
             <CalendarIcon /> No deadline listed
           </span>
         )}
-        {s.offered_by && (
-          <span className="sc-offered-by">{s.offered_by}</span>
-        )}
+        {s.offered_by && <span className="sc-offered-by">{s.offered_by}</span>}
       </div>
 
       {score !== undefined && (
@@ -665,9 +680,7 @@ function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave }) {
             <div className="sc-score-fill" style={{ width: `${score * 100}%` }} />
           </div>
           {reasons?.length > 0 && (
-            <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
-              {reasons[0]}
-            </span>
+            <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>{reasons[0]}</span>
           )}
         </div>
       )}
@@ -732,29 +745,25 @@ function ProfileModal({ profile, onSave, onClose }) {
 
 // ── Main Component ──
 export default function Scholarships() {
-  const [profile, setProfile]         = useState(loadProfile);
-  const [showModal, setShowModal]      = useState(false);
-  const [scholarships, setScholarships] = useState([]);
+  const [profile, setProfile]           = useState(loadProfile);
+  const [showModal, setShowModal]        = useState(false);
+  const [scholarships, setScholarships]  = useState([]);
   const [savedScholarships, setSavedScholarships] = useState([]);
-  const [matchResults, setMatchResults] = useState(null);
-  const [loading, setLoading]          = useState(false);
-  const [total, setTotal]              = useState(0);
-  const [page, setPage]                = useState(1);
-  const [onlyMatched, setOnlyMatched]  = useState(false);
+  const [matchResults, setMatchResults]  = useState(null);
+  const [loading, setLoading]            = useState(false);
+  const [total, setTotal]                = useState(0);
+  const [page, setPage]                  = useState(1);
+  const [onlyMatched, setOnlyMatched]    = useState(false);
+  const [viewSavedOnly, setViewSavedOnly] = useState(false);
+  const [savedIds, setSavedIds]          = useState(new Set());
 
   // filters
-  const [q, setQ]                       = useState("");
-  const [sortBy, setSortBy]             = useState("title");
+  const [q, setQ]                               = useState("");
+  const [sortBy, setSortBy]                     = useState("title");
   const [filterCitizenship, setFilterCitizenship] = useState("");
-  const [filterAwardType, setFilterAwardType]     = useState("");
-
-  // saved scholarships (for bookmark state + upcoming deadlines + "View saved")
-  const [savedIds, setSavedIds]             = useState(new Set());
-  const [savedScholarships, setSavedScholarships] = useState([]);
-  const [viewSavedOnly, setViewSavedOnly]    = useState(false);
+  const [filterAwardType, setFilterAwardType]   = useState("");
 
   const PAGE_SIZE = 20;
-  const savedIds = new Set((savedScholarships || []).map((s) => s.id));
 
   const getAccessToken = () =>
     sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
@@ -791,7 +800,7 @@ export default function Scholarships() {
     return res;
   };
 
-  // ── Fetch saved scholarships (ids + full list); survives refresh and re-login ──
+  // ── Fetch saved scholarships ──
   const fetchSavedScholarships = useCallback(async () => {
     if (!getAccessToken()) return;
     try {
@@ -800,7 +809,7 @@ export default function Scholarships() {
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
       setSavedScholarships(list);
-      setSavedIds(new Set(list.map((s) => s.id)));
+      setSavedIds(new Set(list.map((i) => i.scholarship?.id ?? i.id).filter(Boolean)));
     } catch {
       // ignore
     }
@@ -814,25 +823,17 @@ export default function Scholarships() {
   const handleSave = async (id) => {
     if (!getAccessToken()) return;
     try {
-      const res = await fetchWithAuth(`${API_REL}/scholarships/${id}/save/`, {
-        method: "POST",
-      });
+      const res = await fetchWithAuth(`${API_REL}/scholarships/${id}/save/`, { method: "POST" });
       if (res.ok) await fetchSavedScholarships();
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   };
 
   const handleUnsave = async (id) => {
     if (!getAccessToken()) return;
     try {
-      const res = await fetchWithAuth(`${API_REL}/scholarships/${id}/save/`, {
-        method: "DELETE",
-      });
+      const res = await fetchWithAuth(`${API_REL}/scholarships/${id}/save/`, { method: "DELETE" });
       if (res.ok) await fetchSavedScholarships();
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   };
 
   // ── Fetch list ──
@@ -870,23 +871,6 @@ export default function Scholarships() {
     } finally { setLoading(false); }
   }, [profile]);
 
-  // ── Fetch saved (for sidebar deadlines + bookmark state) ──
-  const fetchSaved = useCallback(async () => {
-    try {
-      const res = await fetch(`${API}/scholarships/saved/`, { headers: authHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        setSavedScholarships(Array.isArray(data) ? data : []);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchSaved();
-  }, [fetchSaved]);
-
   useEffect(() => {
     if (viewSavedOnly) return;
     if (onlyMatched) fetchMatch();
@@ -903,18 +887,18 @@ export default function Scholarships() {
     if (onlyMatched) fetchMatch();
   };
 
-  // When "match to my profile" is on: always order by match strength (strongest first), ignore sort dropdown
   const displayList = (() => {
     if (onlyMatched && matchResults?.length) {
       const mapped = matchResults.map((r) => ({ ...r.scholarship, _score: r.score, _reasons: r.reasons }));
       return [...mapped].sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
     }
-    if (viewSavedOnly) return savedScholarships;
+    if (viewSavedOnly) {
+      return savedScholarships.map((i) => i.scholarship ?? i);
+    }
     return scholarships;
   })();
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-
   const yearLabel = ["1st", "2nd", "3rd", "4th", "5th"][profile.year - 1] || `${profile.year}th`;
 
   return (
@@ -924,25 +908,24 @@ export default function Scholarships() {
         <Navbar />
 
         <div className="sc-body">
-          {/* ── MAIN ── */}
           <div className="sc-main">
 
             {/* Header */}
             <div className="sc-header">
               <h1>Scholarships & Bursaries</h1>
-              <p>Matched to your program, faculty, and financial profile.</p>
+              <p>Matched to your program, faculty, and financial profile. Edit your profile from the menu.</p>
             </div>
 
             {/* Profile Bar */}
             <div className="sc-profile-bar">
               <div className="sc-profile-fields">
                 {[
-                  ["Faculty",    profile.faculty    || "—"],
-                  ["Major",      profile.major      || "—"],
-                  ["Year",       profile.faculty ? `${yearLabel} Year` : "—"],
-                  ["Degree",     profile.degree_type],
-                  ["Status",     profile.citizenship],
-                  ["Campus",     profile.campus],
+                  ["Faculty",  profile.faculty    || "—"],
+                  ["Major",    profile.major      || "—"],
+                  ["Year",     profile.faculty ? `${yearLabel} Year` : "—"],
+                  ["Degree",   profile.degree_type],
+                  ["Status",   profile.citizenship],
+                  ["Campus",   profile.campus],
                 ].map(([label, value]) => (
                   <div className="sc-profile-field" key={label}>
                     <div className="sc-profile-field-label">{label}</div>
@@ -954,10 +937,8 @@ export default function Scholarships() {
                 <EditIcon /> Edit Profile
               </button>
             </div>
-            )}
 
-            {/* Filter Bar (hide on saved view) */}
-            {!isSavedView && (
+            {/* Filter Bar */}
             <div className="sc-filter-bar">
               <div className="sc-search-wrap">
                 <SearchIcon />
@@ -1020,13 +1001,12 @@ export default function Scholarships() {
                 <BookmarkIcon filled={viewSavedOnly} /> {viewSavedOnly ? "Show all" : "View saved"}
               </button>
             </div>
-            )}
 
             {/* Results count */}
             {!loading && (
               <div className="sc-results-header">
                 {viewSavedOnly
-                  ? `${displayList.length} saved scholarship${displayList.length !== 1 ? "s" : ""}`
+                  ? `${displayList.length} saved scholarship${displayList.length !== 1 ? "s" : ""} (edit status on My Scholarships)`
                   : onlyMatched
                     ? `${displayList.length} scholarships matched to your profile (strongest first)`
                     : `${total} scholarships found`}
@@ -1040,7 +1020,7 @@ export default function Scholarships() {
               <div className="sc-empty">
                 <div className="sc-empty-icon">🎓</div>
                 <h3>{viewSavedOnly ? "No saved scholarships" : "No scholarships found"}</h3>
-                <p>{viewSavedOnly ? "Use the bookmark on any scholarship to save it and see it here." : "Try adjusting your filters or editing your profile."}</p>
+                <p>{viewSavedOnly ? "Use the bookmark on any scholarship to save it." : "Try adjusting your filters or editing your profile."}</p>
               </div>
             ) : (
               displayList.map((s) => (
@@ -1056,7 +1036,7 @@ export default function Scholarships() {
               ))
             )}
 
-            {/* Pagination — only in list mode, not when viewing saved */}
+            {/* Pagination */}
             {!onlyMatched && !viewSavedOnly && totalPages > 1 && !loading && (
               <div className="sc-pagination">
                 <button className="sc-page-btn" onClick={() => setPage((p) => p - 1)} disabled={page === 1}>‹</button>
@@ -1069,12 +1049,10 @@ export default function Scholarships() {
             )}
           </div>
 
-          {/* Spacer keeps grid layout; actual sidebar is portaled to body so it stays fixed */}
           <div className="sc-sidebar-spacer" aria-hidden="true" />
         </div>
       </div>
 
-      {/* Upcoming Deadlines: portaled to body so position:fixed works (no ancestor can break it) */}
       {typeof document !== "undefined" &&
         createPortal(
           <div className="sc-sidebar">
@@ -1083,7 +1061,6 @@ export default function Scholarships() {
           document.body
         )}
 
-      {/* Profile Modal */}
       {showModal && (
         <ProfileModal
           profile={profile}

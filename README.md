@@ -100,17 +100,41 @@ This helps students quickly identify funding opportunities that match their prof
 
 ## 4. Spending Page
 
-Navigate to the **Spending** section.
+Navigate to the **Spending** section to view your monthly financial activity.
 
-Here you can:
-- View your recent transactions
-- Track your spending activity
+Features available on this page:
 
-Future improvements (planned):
-- Monthly spending breakdown
-- Smart tips when overspending in certain categories
+- **Monthly Transactions**  
+  View all transactions for a selected month (e.g., February 2026). The page summarizes:
+  - Total monthly expenses
+  - Estimated monthly savings opportunities
 
-<img width="1073" height="834" alt="image" src="https://github.com/user-attachments/assets/8c80d4ca-dee9-45b6-a3c0-dd27af8f900f" />
+- **Savings Suggestions**  
+  The system analyzes your spending and identifies potential savings using common **student discounts or promotional offers** (e.g., Uber Eats, DoorDash).  
+  For example, if a user spends more than **5 times or over $300** with a specific service, the backend calculates how much could be saved by applying available discounts.
+
+- **Investment Perspective**  
+  The platform highlights potential savings so users can redirect that money toward **future investments or financial goals**.
+
+- **Transaction Syncing**  
+  Users must click **Sync** to retrieve the latest transaction data from Plaid.
+
+- **Filtering**  
+  Users can filter transactions to analyze spending patterns.
+
+⚠️ **Current Limitation (D4):**  
+Due to Plaid limitations in this stage of development, only **last month's transactions** are currently supported. Future updates will expand this to support **multiple months and more customizable analysis**.
+
+---
+
+### Future Improvements
+
+Planned enhancements include:
+- **Smart financial tips** when overspending in certain categories
+- **Improved multi-month transaction analysis**
+
+<img width="1124" height="747" alt="image" src="https://github.com/user-attachments/assets/2c6e3619-b7c4-4a33-9901-7221cc1eb0be" />
+
 
 
 ---
@@ -312,7 +336,8 @@ This structure ensures accountability through Jira tracking, improves collaborat
 
 All folders and file names must use lowercase and follow Django’s default project structure. We maintain consistent code organization by structuring backend files according to features and will document our workflow to ensure clarity, scalability, and team alignment.
 ---
-
+## D3 Evolution 
+- Implementation of the Investments feature which is based on the user story where a UofT student wants guidance on investing using their savings analysis. It allows UofT students to learn about potential stock/ETFs combinations to invest in based on their savings calculated through the spending analysis feature. 
 ## License
 
 - The repository will remain **private** during development.

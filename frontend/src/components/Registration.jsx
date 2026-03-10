@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../utils/session";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
@@ -252,6 +254,7 @@ const CheckIcon = () => (
 );
 
 export default function UofTSignup() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ first_name: "", last_name: "", email: "", password: "", password2: "" });
   const [showPass, setShowPass]   = useState(false);
   const [showPass2, setShowPass2] = useState(false);
@@ -268,12 +271,13 @@ export default function UofTSignup() {
     if (!formData.email.trim()) { setError("Please enter your email address."); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) { setError("Please enter a valid email address."); return; }
+    if (!/utoronto\.ca$/i.test(formData.email.trim())) { setError("Please use your UofT email address."); return; }
     if (!formData.password) { setError("Please enter a password."); return; }
     if (!formData.password2) { setError("Please confirm your password."); return; }
     if (formData.password !== formData.password2) { setError("Passwords do not match."); return; }
     setError(""); setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/register/", {
+      const res = await fetch(`${API_BASE_URL}/register/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -281,7 +285,7 @@ export default function UofTSignup() {
       const data = await res.json();
       if (res.ok) {
         setSuccess(true);
-        setTimeout(() => { window.location.href = "/login"; }, 2000);
+        setTimeout(() => { navigate("/login"); }, 900);
       } else {
         // Parse Django serializer errors e.g. {"email": ["This field must be unique."]}
         if (typeof data === 'object') {

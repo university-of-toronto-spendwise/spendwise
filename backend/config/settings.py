@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'scholarships',
+    'investments.apps.InvestmentsConfig',
     'rest_framework',
     'spending',
     'corsheaders',
@@ -87,6 +88,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
+# Use an in-memory SQLite database for tests, Postgres when configured, and
+# finally a local SQLite file for lightweight local development.
+# Database
 if "test" in sys.argv:
     DATABASES = {
         "default": {
@@ -94,7 +98,6 @@ if "test" in sys.argv:
             "NAME": ":memory:",
         }
     }
-# Database: support DATABASE_URL (deployment/CI) or POSTGRES_* (Docker/local)
 elif env("DATABASE_URL", default=None):
     DATABASES = {"default": env.db("DATABASE_URL")}
 else:
