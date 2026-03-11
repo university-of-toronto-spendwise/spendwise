@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Navbar from "./Navbar";
-import { API_BASE_URL, fetchProfile, profileToScholarshipProfile, saveProfile } from "../utils/session";
+import UpcomingDeadlines from "./UpcomingDeadlines";
+
+const API = "http://localhost:8000/api";
+const API_REL = "/api";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
@@ -18,12 +22,12 @@ const styles = `
     --white: #FFFFFF;
   }
 
-  body { font-family: 'Source Sans 3', sans-serif; }
+  body { font-family: inherit; }
 
   .sc-page {
     min-height: 100vh;
     background: var(--off-white);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
   }
 
   .sc-body {
@@ -33,14 +37,14 @@ const styles = `
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: 1.5rem;
+    align-items: start;
   }
 
   .sc-main { min-width: 0; }
 
-  /* ── Page Header ── */
   .sc-header { margin-bottom: 1.5rem; }
   .sc-header h1 {
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 1.9rem;
     font-weight: 700;
     color: var(--uoft-blue);
@@ -48,7 +52,6 @@ const styles = `
   }
   .sc-header p { color: var(--text-muted); font-size: 0.95rem; }
 
-  /* ── Profile Bar ── */
   .sc-profile-bar {
     background: white;
     border: 1.5px solid var(--border);
@@ -84,7 +87,7 @@ const styles = `
     border: none;
     border-radius: 10px;
     padding: 0.6rem 1.2rem;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -97,7 +100,6 @@ const styles = `
   }
   .sc-edit-btn:hover { background: var(--uoft-mid); }
 
-  /* ── Filter Bar ── */
   .sc-filter-bar {
     background: white;
     border: 1.5px solid var(--border);
@@ -122,7 +124,7 @@ const styles = `
   .sc-search-wrap input {
     border: none;
     outline: none;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.92rem;
     color: var(--uoft-blue);
     background: transparent;
@@ -141,7 +143,7 @@ const styles = `
   .sc-select {
     border: none;
     outline: none;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     color: var(--uoft-blue);
     background: transparent;
@@ -189,7 +191,6 @@ const styles = `
   }
   .sc-toggle.on::after { left: 19px; }
 
-  /* ── Cards ── */
   .sc-card {
     background: white;
     border: 1.5px solid var(--border);
@@ -232,6 +233,8 @@ const styles = `
     transition: color 0.15s, border-color 0.15s;
   }
   .sc-bookmark-btn:hover { color: var(--uoft-blue); border-color: var(--uoft-blue); }
+  .sc-bookmark-btn.saved { color: var(--uoft-mid); border-color: var(--uoft-mid); background: #E8F0FC; }
+  .sc-bookmark-btn.saved:hover { color: var(--uoft-blue); border-color: var(--uoft-blue); }
 
   .sc-card-amount {
     font-size: 1.4rem;
@@ -311,7 +314,6 @@ const styles = `
     transition: width 0.4s ease;
   }
 
-  /* ── Pagination ── */
   .sc-pagination {
     display: flex;
     align-items: center;
@@ -327,7 +329,7 @@ const styles = `
     border: 1.5px solid var(--border);
     background: white;
     color: var(--uoft-blue);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -341,8 +343,20 @@ const styles = `
   .sc-page-btn.active { background: var(--uoft-blue); color: white; border-color: var(--uoft-blue); }
   .sc-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* ── Sidebar ── */
-  .sc-sidebar { position: sticky; top: 80px; align-self: start; }
+  .sc-sidebar-spacer { width: 300px; min-width: 300px; flex-shrink: 0; }
+
+  .sc-sidebar {
+    position: fixed !important;
+    top: 80px !important;
+    right: max(2rem, calc((100vw - 1200px) / 2 + 2rem)) !important;
+    width: 300px !important;
+    max-height: calc(100vh - 80px) !important;
+    overflow-y: auto;
+    z-index: 50;
+  }
+  @media (max-width: 1247px) {
+    .sc-sidebar { right: 2rem !important; }
+  }
 
   .sc-sidebar-card {
     background: white;
@@ -378,7 +392,6 @@ const styles = `
     color: var(--text-muted);
   }
 
-  /* ── Empty / Loading states ── */
   .sc-empty {
     text-align: center;
     padding: 3rem 1rem;
@@ -401,7 +414,6 @@ const styles = `
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Modal ── */
   .sc-modal-overlay {
     position: fixed;
     inset: 0;
@@ -453,7 +465,7 @@ const styles = `
     border: 1.5px solid var(--border);
     border-radius: 8px;
     padding: 0 0.75rem;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     color: var(--uoft-blue);
     outline: none;
@@ -479,7 +491,7 @@ const styles = `
     border: 1.5px solid var(--border);
     background: white;
     color: var(--text-muted);
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -493,7 +505,7 @@ const styles = `
     border: none;
     background: var(--uoft-blue);
     color: white;
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: inherit;
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -506,6 +518,30 @@ const styles = `
     color: var(--text-muted);
     margin-bottom: 0.85rem;
     font-weight: 500;
+  }
+  .sc-card-status-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .sc-card-status-badge.saved {
+    background: #E0E7FF;
+    color: #3730A3;
+    border: 1px solid #C7D2FE;
+  }
+  .sc-card-status-badge.in_progress {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+  }
+  .sc-card-status-badge.submitted {
+    background: #D1FAE5;
+    color: #047857;
+    border: 1px solid #A7F3D0;
   }
 `;
 
@@ -521,8 +557,8 @@ const EditIcon = () => (
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
   </svg>
 );
-const BookmarkIcon = () => (
-  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+const BookmarkIcon = ({ filled }) => (
+  <svg width="14" height="14" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
     <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
   </svg>
 );
@@ -559,8 +595,7 @@ function formatAmount(s) {
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
-  const diff = Math.ceil((new Date(dateStr) - new Date()) / 86400000);
-  return diff;
+  return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
 }
 
 function formatDeadline(dateStr) {
@@ -568,19 +603,37 @@ function formatDeadline(dateStr) {
   return new Date(dateStr).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
 }
 
+const STATUS_LABELS = { saved: "Saved", in_progress: "In Progress", submitted: "Submitted" };
+
 // ── Sub-components ──
-function ScholarshipCard({ s, score, reasons }) {
+function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave, status }) {
   const amt = formatAmount(s);
   const days = daysUntil(s.deadline);
   const isUrgent = days !== null && days <= 14;
+
+  const handleBookmarkClick = () => {
+    if (isSaved) onUnsave?.(s.id);
+    else onSave?.(s.id);
+  };
 
   return (
     <div className="sc-card">
       <div className="sc-card-top">
         <div className="sc-card-title">{s.title}</div>
-        <button className="sc-bookmark-btn" title="Bookmark">
-          <BookmarkIcon />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          {status && (
+            <span className={`sc-card-status-badge ${status}`} title={STATUS_LABELS[status] || status}>
+              {STATUS_LABELS[status] || status}
+            </span>
+          )}
+          <button
+            className={`sc-bookmark-btn ${isSaved ? "saved" : ""}`}
+            title={isSaved ? "Unsave" : "Save to my scholarships"}
+            onClick={handleBookmarkClick}
+          >
+            <BookmarkIcon filled={isSaved} />
+          </button>
+        </div>
       </div>
 
       {amt && <div className="sc-card-amount">{amt}</div>}
@@ -592,17 +645,13 @@ function ScholarshipCard({ s, score, reasons }) {
 
       <div className="sc-card-tags">
         {s.award_type && (
-          <span className="sc-tag sc-tag-blue">
-            {s.award_type.replace("_", "-")}
-          </span>
+          <span className="sc-tag sc-tag-blue">{s.award_type.replace("_", "-")}</span>
         )}
         {s.citizenship?.map((c) => (
           <span key={c} className="sc-tag sc-tag-green">{c}</span>
         ))}
         {s.nature?.slice(0, 2).map((n) => (
-          <span key={n} className="sc-tag sc-tag-gray">
-            {n.replace(/_/g, " ")}
-          </span>
+          <span key={n} className="sc-tag sc-tag-gray">{n.replace(/_/g, " ")}</span>
         ))}
         {s.application_required && (
           <span className="sc-tag sc-tag-yellow">Application Required</span>
@@ -621,9 +670,7 @@ function ScholarshipCard({ s, score, reasons }) {
             <CalendarIcon /> No deadline listed
           </span>
         )}
-        {s.offered_by && (
-          <span className="sc-offered-by">{s.offered_by}</span>
-        )}
+        {s.offered_by && <span className="sc-offered-by">{s.offered_by}</span>}
       </div>
 
       {score !== undefined && (
@@ -633,9 +680,7 @@ function ScholarshipCard({ s, score, reasons }) {
             <div className="sc-score-fill" style={{ width: `${score * 100}%` }} />
           </div>
           {reasons?.length > 0 && (
-            <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
-              {reasons[0]}
-            </span>
+            <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>{reasons[0]}</span>
           )}
         </div>
       )}
@@ -700,23 +745,96 @@ function ProfileModal({ profile, onSave, onClose }) {
 
 // ── Main Component ──
 export default function Scholarships() {
-  const [profile, setProfile]         = useState(loadProfile);
-  const [profileData, setProfileData] = useState(null);
-  const [showModal, setShowModal]      = useState(false);
-  const [scholarships, setScholarships] = useState([]);
-  const [matchResults, setMatchResults] = useState(null);
-  const [loading, setLoading]          = useState(false);
-  const [total, setTotal]              = useState(0);
-  const [page, setPage]                = useState(1);
-  const [onlyMatched, setOnlyMatched]  = useState(false);
+  const [profile, setProfile]           = useState(loadProfile);
+  const [showModal, setShowModal]        = useState(false);
+  const [scholarships, setScholarships]  = useState([]);
+  const [savedScholarships, setSavedScholarships] = useState([]);
+  const [matchResults, setMatchResults]  = useState(null);
+  const [loading, setLoading]            = useState(false);
+  const [total, setTotal]                = useState(0);
+  const [page, setPage]                  = useState(1);
+  const [onlyMatched, setOnlyMatched]    = useState(false);
+  const [viewSavedOnly, setViewSavedOnly] = useState(false);
+  const [savedIds, setSavedIds]          = useState(new Set());
 
   // filters
-  const [q, setQ]                       = useState("");
-  const [sortBy, setSortBy]             = useState("");
+  const [q, setQ]                               = useState("");
+  const [sortBy, setSortBy]                     = useState("title");
   const [filterCitizenship, setFilterCitizenship] = useState("");
-  const [filterAwardType, setFilterAwardType]     = useState("");
+  const [filterAwardType, setFilterAwardType]   = useState("");
 
   const PAGE_SIZE = 20;
+
+  const getAccessToken = () =>
+    sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
+
+  const refreshAccessToken = async () => {
+    const refresh = sessionStorage.getItem("userRefreshToken");
+    if (!refresh) return null;
+    const res = await fetch(`${API_REL}/token/refresh/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data?.access) return null;
+    sessionStorage.setItem("userToken", data.access);
+    sessionStorage.setItem("userAccessToken", data.access);
+    return data.access;
+  };
+
+  const fetchWithAuth = async (url, options = {}) => {
+    let token = getAccessToken();
+    if (!token) return { ok: false, status: 401 };
+    const doFetch = (accessToken) =>
+      fetch(url, {
+        ...options,
+        headers: { ...(options.headers || {}), Authorization: `Bearer ${accessToken}` },
+      });
+    let res = await doFetch(token);
+    if (res.status === 401) {
+      const newToken = await refreshAccessToken();
+      if (newToken) res = await doFetch(newToken);
+    }
+    return res;
+  };
+
+  // ── Fetch saved scholarships ──
+  const fetchSavedScholarships = useCallback(async () => {
+    if (!getAccessToken()) return;
+    try {
+      const res = await fetchWithAuth(`${API_REL}/scholarships/saved/`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      setSavedScholarships(list);
+      setSavedIds(new Set(list.map((i) => i.scholarship?.id ?? i.id).filter(Boolean)));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSavedScholarships();
+  }, [fetchSavedScholarships]);
+
+  // ── Save / Unsave ──
+  const handleSave = async (id) => {
+    if (!getAccessToken()) return;
+    try {
+      const res = await fetchWithAuth(`${API_REL}/scholarships/${id}/save/`, { method: "POST" });
+      if (res.ok) await fetchSavedScholarships();
+    } catch { /* ignore */ }
+  };
+
+  const handleUnsave = async (id) => {
+    if (!getAccessToken()) return;
+    try {
+      const res = await fetchWithAuth(`${API_REL}/scholarships/${id}/save/`, { method: "DELETE" });
+      if (res.ok) await fetchSavedScholarships();
+    } catch { /* ignore */ }
+  };
 
   // ── Fetch list ──
   const fetchScholarships = useCallback(async () => {
@@ -728,7 +846,7 @@ export default function Scholarships() {
       if (filterCitizenship) params.set("citizenship", filterCitizenship);
       if (filterAwardType)   params.set("award_type", filterAwardType);
 
-      const res = await fetch(`${API_BASE_URL}/scholarships/?${params}`);
+      const res = await fetch(`${API}/scholarships/?${params}`);
       const data = await res.json();
       setScholarships(data.results || []);
       setTotal(data.count || 0);
@@ -741,7 +859,7 @@ export default function Scholarships() {
   const fetchMatch = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/scholarships/match/`, {
+      const res = await fetch(`${API}/scholarships/match/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
@@ -754,62 +872,33 @@ export default function Scholarships() {
   }, [profile]);
 
   useEffect(() => {
-    if (onlyMatched) { fetchMatch(); }
-    else { fetchScholarships(); }
-  }, [onlyMatched, fetchScholarships, fetchMatch]);
-
-  useEffect(() => {
-    let isMounted = true;
-    fetchProfile()
-      .then((data) => {
-        if (!isMounted) return;
-        setProfileData(data);
-        setProfile(profileToScholarshipProfile(data));
-      })
-      .catch(() => {})
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    if (viewSavedOnly) return;
+    if (onlyMatched) fetchMatch();
+    else fetchScholarships();
+  }, [onlyMatched, viewSavedOnly, fetchScholarships, fetchMatch]);
 
   // reset page on filter change
   useEffect(() => { setPage(1); }, [q, sortBy, filterCitizenship, filterAwardType, onlyMatched]);
 
-  const handleSaveProfile = async (newProfile) => {
-    const payload = {
-      ...(profileData || {}),
-      citizenship_status: newProfile.citizenship,
-      campus: newProfile.campus,
-      degree_type: newProfile.degree_type,
-    };
-
-    try {
-      const updated = await saveProfile(payload);
-      const scholarshipProfile = profileToScholarshipProfile(updated);
-      setProfileData(updated);
-      setProfile(scholarshipProfile);
-      setShowModal(false);
-      if (onlyMatched) fetchMatch();
-    } catch (err) {
-      console.error(err);
-    }
+  const handleSaveProfile = (newProfile) => {
+    setProfile(newProfile);
+    localStorage.setItem("userProfile", JSON.stringify(newProfile));
+    setShowModal(false);
+    if (onlyMatched) fetchMatch();
   };
 
-  const displayList = onlyMatched
-    ? (matchResults || []).map((r) => ({ ...r.scholarship, _score: r.score, _reasons: r.reasons }))
-    : scholarships;
+  const displayList = (() => {
+    if (onlyMatched && matchResults?.length) {
+      const mapped = matchResults.map((r) => ({ ...r.scholarship, _score: r.score, _reasons: r.reasons }));
+      return [...mapped].sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
+    }
+    if (viewSavedOnly) {
+      return savedScholarships.map((i) => i.scholarship ?? i);
+    }
+    return scholarships;
+  })();
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-
-  // Upcoming deadlines — scholarships with a deadline, sorted soonest first
-  const upcomingDeadlines = [...(onlyMatched
-    ? (matchResults || []).map(r => r.scholarship)
-    : scholarships
-  )]
-    .filter(s => s.deadline)
-    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-    .slice(0, 6);
-
   const yearLabel = ["1st", "2nd", "3rd", "4th", "5th"][profile.year - 1] || `${profile.year}th`;
 
   return (
@@ -819,25 +908,24 @@ export default function Scholarships() {
         <Navbar />
 
         <div className="sc-body">
-          {/* ── MAIN ── */}
           <div className="sc-main">
 
             {/* Header */}
             <div className="sc-header">
               <h1>Scholarships & Bursaries</h1>
-              <p>Matched to your program, faculty, and financial profile.</p>
+              <p>Matched to your program, faculty, and financial profile. Edit your profile from the menu.</p>
             </div>
 
             {/* Profile Bar */}
             <div className="sc-profile-bar">
               <div className="sc-profile-fields">
                 {[
-                  ["Faculty",    profile.faculty    || "—"],
-                  ["Major",      profile.major      || "—"],
-                  ["Year",       profile.faculty ? `${yearLabel} Year` : "—"],
-                  ["Degree",     profile.degree_type],
-                  ["Status",     profile.citizenship],
-                  ["Campus",     profile.campus],
+                  ["Faculty",  profile.faculty    || "—"],
+                  ["Major",    profile.major      || "—"],
+                  ["Year",     profile.faculty ? `${yearLabel} Year` : "—"],
+                  ["Degree",   profile.degree_type],
+                  ["Status",   profile.citizenship],
+                  ["Campus",   profile.campus],
                 ].map(([label, value]) => (
                   <div className="sc-profile-field" key={label}>
                     <div className="sc-profile-field-label">{label}</div>
@@ -872,8 +960,15 @@ export default function Scholarships() {
 
               <div className="sc-divider" />
 
-              <select className="sc-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                <option value="">Sort</option>
+              <select
+                className="sc-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                disabled={onlyMatched}
+                title={onlyMatched ? "Match view is always ordered by match strength" : ""}
+              >
+                <option value="title">Title A–Z</option>
+                <option value="-title">Title Z–A</option>
                 <option value="-amount">Amount ↓</option>
                 <option value="amount">Amount ↑</option>
                 <option value="deadline">Deadline ↑</option>
@@ -891,17 +986,30 @@ export default function Scholarships() {
               <div className="sc-divider" />
 
               <div className="sc-toggle-wrap" onClick={() => setOnlyMatched((v) => !v)}>
-                Only matched to me
+                Match to my profile
                 <div className={`sc-toggle ${onlyMatched ? "on" : ""}`} />
               </div>
+
+              <div className="sc-divider" />
+
+              <button
+                type="button"
+                className="sc-edit-btn"
+                onClick={() => setViewSavedOnly((v) => !v)}
+                style={{ marginLeft: 0 }}
+              >
+                <BookmarkIcon filled={viewSavedOnly} /> {viewSavedOnly ? "Show all" : "View saved"}
+              </button>
             </div>
 
             {/* Results count */}
             {!loading && (
               <div className="sc-results-header">
-                {onlyMatched
-                  ? `${displayList.length} scholarships matched to your profile`
-                  : `${total} scholarships found`}
+                {viewSavedOnly
+                  ? `${displayList.length} saved scholarship${displayList.length !== 1 ? "s" : ""} (edit status on My Scholarships)`
+                  : onlyMatched
+                    ? `${displayList.length} scholarships matched to your profile (strongest first)`
+                    : `${total} scholarships found`}
               </div>
             )}
 
@@ -911,8 +1019,8 @@ export default function Scholarships() {
             ) : displayList.length === 0 ? (
               <div className="sc-empty">
                 <div className="sc-empty-icon">🎓</div>
-                <h3>No scholarships found</h3>
-                <p>Try adjusting your filters or editing your profile.</p>
+                <h3>{viewSavedOnly ? "No saved scholarships" : "No scholarships found"}</h3>
+                <p>{viewSavedOnly ? "Use the bookmark on any scholarship to save it." : "Try adjusting your filters or editing your profile."}</p>
               </div>
             ) : (
               displayList.map((s) => (
@@ -921,12 +1029,15 @@ export default function Scholarships() {
                   s={s}
                   score={s._score}
                   reasons={s._reasons}
+                  isSaved={savedIds.has(s.id)}
+                  onSave={handleSave}
+                  onUnsave={handleUnsave}
                 />
               ))
             )}
 
-            {/* Pagination — only in list mode */}
-            {!onlyMatched && totalPages > 1 && !loading && (
+            {/* Pagination */}
+            {!onlyMatched && !viewSavedOnly && totalPages > 1 && !loading && (
               <div className="sc-pagination">
                 <button className="sc-page-btn" onClick={() => setPage((p) => p - 1)} disabled={page === 1}>‹</button>
                 {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((p) => (
@@ -938,28 +1049,18 @@ export default function Scholarships() {
             )}
           </div>
 
-          {/* ── SIDEBAR ── */}
-          <div className="sc-sidebar">
-            <div className="sc-sidebar-card">
-              <div className="sc-sidebar-title">
-                <CalendarIcon /> Upcoming Deadlines
-              </div>
-              {upcomingDeadlines.length === 0 ? (
-                <p style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>No upcoming deadlines found.</p>
-              ) : (
-                upcomingDeadlines.map((s) => (
-                  <div className="sc-deadline-item" key={s.id}>
-                    <div className="sc-deadline-item-title">{s.title}</div>
-                    <div className="sc-deadline-item-date">{formatDeadline(s.deadline)}</div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <div className="sc-sidebar-spacer" aria-hidden="true" />
         </div>
       </div>
 
-      {/* Profile Modal */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <div className="sc-sidebar">
+            <UpcomingDeadlines items={savedScholarships} maxItems={6} />
+          </div>,
+          document.body
+        )}
+
       {showModal && (
         <ProfileModal
           profile={profile}

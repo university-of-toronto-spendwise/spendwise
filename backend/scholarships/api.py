@@ -1,16 +1,17 @@
-from django.db.models import Q, Value                  # ✅ added Value import
+from django.db.models import Q, Value
 from django.db.models.functions import Coalesce
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Scholarship
+from .models import Scholarship, SavedScholarship, SavedScholarshipStatus
 from .serializers import (
     ScholarshipListSerializer,
     ScholarshipDetailSerializer,
     MatchRequestSerializer,
+    SavedScholarshipSerializer,
 )
 
 NATURE_FIELD_MAP = {
@@ -110,19 +111,23 @@ class ScholarshipsListAPI(APIView):
             except ValueError:
                 pass
 
-        # ---- sorting ----
+        # ---- sorting (default: alphabetical by title) ----
         sort = request.query_params.get("sort")
         if sort:
             s = sort.strip()
-            if "amount" in s:
+            if s == "title" or s == "-title":
+                qs = qs.order_by(("-" if s.startswith("-") else "") + "title", "id")
+            elif "amount" in s:
                 qs = qs.annotate(
-                    _amount_sort=Coalesce("amount_max", "amount_min", Value(0))  # ✅ fixed Value(0)
+                    _amount_sort=Coalesce("amount_max", "amount_min", Value(0))
                 )
-                qs = qs.order_by(("-" if s.startswith("-") else "") + "_amount_sort", "-created_at")
+                qs = qs.order_by(("-" if s.startswith("-") else "") + "_amount_sort", "title")
             elif "deadline" in s:
-                qs = qs.order_by(("-" if s.startswith("-") else "") + "deadline", "-created_at")
+                qs = qs.order_by(("-" if s.startswith("-") else "") + "deadline", "title")
+            else:
+                qs = qs.order_by("title", "id")
         else:
-            qs = qs.order_by("-created_at")
+            qs = qs.order_by("title", "id")
 
         # ---- pagination ----
         paginator = StandardResultsSetPagination()
@@ -268,9 +273,68 @@ class ScholarshipsMatchAPI(APIView):
                 }
             )
 
+        # Always order by match strength (strongest first), then deadline as tiebreaker
         def sort_key(x):
             d = x["scholarship"].get("deadline") or "9999-12-31"
             return (-x["score"], d)
 
         results.sort(key=sort_key)
         return Response(results)
+
+
+class SavedScholarshipsListAPI(APIView):
+    """List all saved scholarships with status for the authenticated user."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        saved = SavedScholarship.objects.filter(user=request.user).select_related("scholarship").order_by("-saved_at")
+        data = SavedScholarshipSerializer(saved, many=True).data
+        return Response(data)
+
+
+class SaveUnsaveScholarshipAPI(APIView):
+    """POST: save scholarship for the user. DELETE: unsave."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            scholarship = Scholarship.objects.get(pk=pk)
+        except Scholarship.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        _, created = SavedScholarship.objects.get_or_create(
+            user=request.user,
+            scholarship=scholarship,
+        )
+        return Response(
+            {"saved": True, "created": created},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    def delete(self, request, pk):
+        deleted, _ = SavedScholarship.objects.filter(
+            user=request.user,
+            scholarship_id=pk,
+        ).delete()
+        if not deleted:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SavedScholarshipStatusAPI(APIView):
+    """PATCH: update status of a saved scholarship (saved, in_progress, submitted)."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            saved = SavedScholarship.objects.get(pk=pk, user=request.user)
+        except SavedScholarship.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        new_status = request.data.get("status")
+        if new_status not in {s.value for s in SavedScholarshipStatus}:
+            return Response(
+                {"detail": "Invalid status. Use: saved, in_progress, submitted"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        saved.status = new_status
+        saved.save()
+        return Response(SavedScholarshipSerializer(saved).data)

@@ -483,7 +483,7 @@ const CSS = `
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 4px 4px 0px #E8B53E;
+  box-shadow: 0 2px 8px rgba(0,42,92,0.25);
   transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
@@ -491,9 +491,9 @@ const CSS = `
 .tx-connect-btn:hover:not(:disabled) {
   background: #0047A0;
   transform: translateY(-1px);
-  box-shadow: 4px 5px 0px #E8B53E;
+  box-shadow: 0 4px 12px rgba(0,42,92,0.3);
 }
-.tx-connect-btn:active { transform: translateY(0); box-shadow: 2px 2px 0px #E8B53E; }
+.tx-connect-btn:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(0,42,92,0.2); }
 .tx-connect-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .tx-error-banner {
@@ -532,7 +532,7 @@ const CSS = `
   background: #002A5C;
   border-color: #002A5C;
   color: white;
-  box-shadow: 3px 3px 0px #E8B53E;
+  box-shadow: 0 2px 8px rgba(0,42,92,0.2);
 }
 .tx-account-icon { font-size: 14px; }
 .tx-account-label { font-weight: 500; }
@@ -562,7 +562,7 @@ const CSS = `
 .tx-stat-card.accent {
   background: #002A5C;
   border-color: #002A5C;
-  box-shadow: 4px 4px 0px #E8B53E;
+  box-shadow: 0 2px 8px rgba(0,42,92,0.25);
 }
 .tx-stat-card.accent .tx-stat-label { color: rgba(255,255,255,0.6); }
 .tx-stat-card.accent .tx-stat-sub   { color: rgba(255,255,255,0.5); }

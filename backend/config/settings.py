@@ -13,9 +13,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 import sys
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+if (BASE_DIR / ".env").exists():
+    env.read_env(BASE_DIR / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-+xgw5q*c-*#g&l)06#7gjs^9a%%4xg$cfz#e&^u(e_w-#$1q1g'
@@ -83,8 +88,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-# Use an in-memory SQLite database for tests, Postgres when configured, and
-# finally a local SQLite file for lightweight local development.
+# Use an in-memory SQLite database for tests.
+# In CI (e.g. GitHub Actions), use Postgres via POSTGRES_* env (host 127.0.0.1).
+# Otherwise use DATABASE_URL if set (e.g. Docker: db:5432), or POSTGRES_* with default host "db".
 if "test" in sys.argv:
     DATABASES = {
         "default": {
@@ -92,22 +98,28 @@ if "test" in sys.argv:
             "NAME": ":memory:",
         }
     }
-elif os.environ.get("POSTGRES_DB") and os.environ.get("POSTGRES_USER"):
+elif os.environ.get("GITHUB_ACTIONS") or os.environ.get("CI"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("POSTGRES_DB"),
-            "USER": os.environ.get("POSTGRES_USER"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-            "HOST": os.environ.get("POSTGRES_HOST", "db"),
-            "PORT": os.environ.get("POSTGRES_PORT", 5432),
+            "NAME": os.environ.get("POSTGRES_DB", "app"),
+            "USER": os.environ.get("POSTGRES_USER", "app"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "app"),
+            "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
         }
     }
+elif env("DATABASE_URL", default=None):
+    DATABASES = {"default": env.db("DATABASE_URL")}
 else:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "spendwise"),
+            "USER": os.environ.get("POSTGRES_USER", "postgres"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
+            "HOST": os.environ.get("POSTGRES_HOST", "db"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
         }
     }
 

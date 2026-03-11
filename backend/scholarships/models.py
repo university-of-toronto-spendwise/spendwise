@@ -1,4 +1,5 @@
 import uuid
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -7,6 +8,12 @@ class AwardType(models.TextChoices):
     ADMISSIONS = "admissions", "Admissions"
     IN_COURSE  = "in_course", "In-course"
     GRADUATING = "graduating", "Graduating"
+
+
+class SavedScholarshipStatus(models.TextChoices):
+    SAVED = "saved", "Saved / Planned"
+    IN_PROGRESS = "in_progress", "In Progress"
+    SUBMITTED = "submitted", "Submitted"
 
 
 class Scholarship(models.Model):
@@ -65,5 +72,38 @@ class Scholarship(models.Model):
             models.Index(fields=["open_to_domestic"]),
             models.Index(fields=["open_to_international"]),
         ]
+
     def __str__(self):
-        return self.title        
+        return self.title
+
+
+class SavedScholarship(models.Model):
+    """Links a user to a scholarship they saved; used for profile and upcoming deadlines."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="saved_scholarships",
+    )
+    scholarship = models.ForeignKey(
+        Scholarship,
+        on_delete=models.CASCADE,
+        related_name="saved_by_users",
+    )
+    saved_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(
+        max_length=20,
+        choices=SavedScholarshipStatus.choices,
+        default=SavedScholarshipStatus.SAVED,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "scholarship"],
+                name="uniq_user_saved_scholarship",
+            )
+        ]
+        ordering = ["saved_at"]
+
+    def __str__(self):
+        return f"{self.user_id} saved {self.scholarship_id}"        

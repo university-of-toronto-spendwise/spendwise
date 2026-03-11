@@ -1,16 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePlaidLink } from "react-plaid-link";
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL, authHeaders, fetchProfile } from "../utils/session";
 import Navbar from "./Navbar";
+import UpcomingDeadlines from "./UpcomingDeadlines";
 
 const MONTH_OPTIONS = ["This Month", "Last Month", "3 Months", "Past Year"];
-
-const DEADLINES = [
-  { id: 1, day: "28", title: "OSAP Application", meta: "Due Feb 28 - 6 days left", badgeClass: "d-red" },
-  { id: 2, day: "01", title: "Rogers Phone Bill", meta: "Due Mar 1 - $55.00", badgeClass: "d-yellow" },
-  { id: 3, day: "15", title: "Lester B. Pearson Scholarship", meta: "Due Mar 15 - $10,000 award", badgeClass: "d-blue" },
-  { id: 4, day: "18", title: "UofT Scholarship", meta: "Due Mar 18 - $5,000 award", badgeClass: "d-blue" },
-];
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
@@ -34,9 +30,9 @@ const styles = `
     --shadow: 0 4px 16px rgba(0,42,92,0.08);
   }
 
-  body { font-family: 'Source Sans 3', sans-serif; }
+  body { font-family: inherit; }
 
-  .db-page { min-height: 100vh; background: var(--off-white); font-family: 'Source Sans 3', sans-serif; }
+  .db-page { min-height: 100vh; background: var(--off-white); font-family: inherit; }
   .db-body { max-width: 1200px; margin: 0 auto; padding: 2rem; }
 
   .db-header {
@@ -69,7 +65,10 @@ const styles = `
   }
 
   .pill:focus-within, .pill:hover { border-color: var(--border-2); }
-  .pill .chev { margin-left: 0.15rem; opacity: 0.75; }
+  .pill .chev { margin-left: 0.15rem; opacity: 0.75; font-size: 0.7em; }
+  .db-period-pill { min-width: 200px; }
+  .db-period-label { color: var(--text-muted); font-weight: 600; font-size: 0.88rem; }
+  .db-period-value { font-weight: 800; color: var(--uoft-blue); }
 
   .menu {
     position: absolute;
@@ -86,6 +85,9 @@ const styles = `
 
   .menuItem { padding: 0.6rem 0.7rem; border-radius: 10px; font-weight: 700; color: var(--uoft-blue); cursor: pointer; }
   .menuItem:hover { background: #EAF0FF; }
+  .menuItem.active { background: var(--uoft-blue); color: white; }
+
+  .menuItem:hover { background: #EAF0FF; }
   .menuItem.active { background: #3B6BE3; color: white; }
 
   .pillToggle { gap: 0.65rem; padding: 0.55rem 1rem; }
@@ -100,7 +102,7 @@ const styles = `
     font-weight: 800;
     padding: 0.65rem 1rem;
     cursor: pointer;
-    box-shadow: 3px 3px 0px var(--uoft-accent);
+    box-shadow: 0 2px 8px rgba(0, 42, 92, 0.25);
   }
   .bank-cta:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
@@ -135,7 +137,7 @@ const styles = `
     background: var(--uoft-blue);
     border-color: var(--uoft-blue);
     color: #fff;
-    box-shadow: 3px 3px 0px var(--uoft-accent);
+    box-shadow: 0 2px 8px rgba(0, 42, 92, 0.2);
   }
   .mini-grid {
     display:grid;
@@ -291,11 +293,73 @@ const styles = `
   }
 `;
 
-const token = () => sessionStorage.getItem("userToken");
+const API = "/api";
+const token = () => sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
 const authHeaders = () => {
   const t = token();
   return t ? { Authorization: `Bearer ${t}` } : {};
 };
+const refreshAccessToken = async () => {
+  const refresh = sessionStorage.getItem("userRefreshToken");
+  if (!refresh) return null;
+  const res = await fetch(`${API}/token/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data?.access) return null;
+  sessionStorage.setItem("userToken", data.access);
+  sessionStorage.setItem("userAccessToken", data.access);
+  return data.access;
+};
+const fetchWithAuth = async (url) => {
+  let t = token();
+  if (!t) return { ok: false, status: 401 };
+  let res = await fetch(url, { headers: { ...authHeaders() } });
+  if (res.status === 401) {
+    const newT = await refreshAccessToken();
+    if (newT) res = await fetch(url, { headers: { Authorization: `Bearer ${newT}` } });
+  }
+  return res;
+};
+
+/** Time-based greeting using the user's local timezone. X = first name. */
+function getGreeting(firstName) {
+  const name = (firstName || "").trim() || "there";
+  const hour = new Date().getHours();
+  const morning = ["Good morning", "Rise and shine", "Morning"];
+  const afternoon = ["Good afternoon", "Hey there", "Welcome back"];
+  const evening = ["Good evening", "Welcome back", "Evening"];
+  const night = ["Good night", "Late night vibes", "Burning the midnight oil"];
+  let list;
+  if (hour >= 5 && hour < 12) list = morning;
+  else if (hour >= 12 && hour < 17) list = afternoon;
+  else if (hour >= 17 && hour < 21) list = evening;
+  else list = night;
+  const prefix = list[hour % list.length];
+  if (prefix === "Hey there" || prefix === "Welcome back" || prefix === "Rise and shine") return `${prefix}, ${name}!`;
+  if (prefix === "Morning" || prefix === "Evening") return `${prefix}, ${name}!`;
+  if (prefix === "Late night vibes") return `${prefix}, ${name}!`;
+  if (prefix === "Burning the midnight oil") return `${prefix}, ${name}!`;
+  return `${prefix}, ${name}`;
+}
+
+function toNumber(value) {
+  if (value === null || value === undefined || value === "") return 0;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatCurrency(value) {
+  return value.toLocaleString(undefined, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
 
 const getPeriodLength = (label) => {
   if (label === "3 Months") return 3;
@@ -513,6 +577,7 @@ function ConnectBankButton({ onLinked, onError }) {
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const [firstName, setFirstName] = useState("");
   const [month, setMonth] = useState("This Month");
   const [selectedAccountId, setSelectedAccountId] = useState("");
   const [onlyImportant, setOnlyImportant] = useState(false);
@@ -595,6 +660,12 @@ export default function Dashboard() {
 
     load();
   }, [reloadKey]);
+
+  useEffect(() => {
+    fetchWithAuth(`${API}/me/`).then((res) => {
+      if (res.ok) res.json().then((data) => setFirstName(data?.first_name || ""));
+    });
+  }, []);
 
   useEffect(() => {
     if (!selectedAccountId) return;
@@ -720,7 +791,7 @@ export default function Dashboard() {
 
         <div className="db-header">
           <div>
-            <h1>Dashboard</h1>
+            <h1>{getGreeting(firstName)}</h1>
             <p>
               {bankCount > 0
                 ? `Live overview from ${bankCount} connected bank account${bankCount > 1 ? "s" : ""}${selectedBankNameShort ? ` - ${selectedBankNameShort}` : ""}.`

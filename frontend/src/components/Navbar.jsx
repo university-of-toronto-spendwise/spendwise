@@ -9,11 +9,21 @@ const styles = `
     border-bottom: 1.5px solid #D0DBE8;
     display: flex;
     align-items: center;
-    padding: 0 2rem;
-    gap: 2rem;
+    justify-content: center;
     position: sticky;
     top: 0;
     z-index: 100;
+  }
+
+  .sw-nav-inner {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 100%;
   }
 
   .sw-nav-logo {
@@ -155,29 +165,38 @@ export default function Navbar() {
     <>
       <style>{styles}</style>
       <nav className="sw-nav">
-        <div className="sw-nav-logo" onClick={() => navigate("/home")} style={{ cursor: "pointer" }}>
-          <div className="sw-nav-logo-box">
-            <DollarIcon />
-            <span className="sw-nav-logo-text">SpendWise</span>
+        <div className="sw-nav-inner">
+          {/* Logo - DO NOT CHANGE */}
+          <div className="sw-nav-logo" onClick={() => navigate("/home")} style={{ cursor: "pointer" }}>
+            <div className="sw-nav-logo-box">
+              <DollarIcon />
+              <span className="sw-nav-logo-text">SpendWise</span>
+            </div>
+            <span className="sw-nav-badge">UofT</span>
           </div>
-          <span className="sw-nav-badge">UofT</span>
-        </div>
 
-        <div className="sw-nav-tabs">
-          {TABS.map((tab) => (
-            <button
-              key={tab.path}
-              className={`sw-nav-tab ${location.pathname === tab.path ? "active" : ""}`}
-              onClick={() => navigate(tab.path)}
-            >
-              {tab.label}
+          {/* Tabs */}
+          <div className="sw-nav-tabs">
+            {TABS.map((tab) => (
+              <button
+                key={tab.path}
+                className={`sw-nav-tab ${location.pathname === tab.path ? "active" : ""}`}
+                onClick={() => navigate(tab.path)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Profile & Settings - inside same navbar box */}
+          <div className="sw-nav-right">
+            <button type="button" className="sw-nav-icon-btn" title="Profile" aria-label="Profile">
+              <PersonIcon />
             </button>
-          ))}
-        </div>
-
-        <div className="sw-nav-right">
-          <div className="sw-nav-icon-btn"><PersonIcon /></div>
-          <div className="sw-nav-icon-btn"><SettingsIcon /></div>
+            <button type="button" className="sw-nav-icon-btn" title="Settings" aria-label="Settings">
+              <SettingsIcon />
+            </button>
+          </div>
         </div>
       </nav>
     </>
