@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import UpcomingDeadlines from "./UpcomingDeadlines";
 
-const API = "http://localhost:8000/api";
+const API = "/api";
 const API_REL = "/api";
 
 const styles = `
@@ -529,9 +530,9 @@ const styles = `
     display: inline-block;
   }
   .sc-card-status-badge.saved {
-    background: #E0E7FF;
-    color: #3730A3;
-    border: 1px solid #C7D2FE;
+    background: #FEE2E2;
+    color: #B91C1C;
+    border: 1px solid #FECACA;
   }
   .sc-card-status-badge.in_progress {
     background: #FEF3C7;
@@ -688,65 +689,10 @@ function ScholarshipCard({ s, score, reasons, isSaved, onSave, onUnsave, status 
   );
 }
 
-function ProfileModal({ profile, onSave, onClose }) {
-  const [form, setForm] = useState({ ...profile });
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  return (
-    <div className="sc-modal-overlay" onClick={onClose}>
-      <div className="sc-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>✏️ Edit Your Profile</h2>
-        <div className="sc-modal-grid">
-          <div className="sc-modal-field">
-            <label>Faculty</label>
-            <input value={form.faculty} onChange={(e) => set("faculty", e.target.value)} placeholder="e.g. Engineering" />
-          </div>
-          <div className="sc-modal-field">
-            <label>Major</label>
-            <input value={form.major} onChange={(e) => set("major", e.target.value)} placeholder="e.g. Computer Science" />
-          </div>
-          <div className="sc-modal-field">
-            <label>Year</label>
-            <select value={form.year} onChange={(e) => set("year", Number(e.target.value))}>
-              {[1, 2, 3, 4, 5].map((y) => <option key={y} value={y}>{y}</option>)}
-            </select>
-          </div>
-          <div className="sc-modal-field">
-            <label>Degree</label>
-            <select value={form.degree_type} onChange={(e) => set("degree_type", e.target.value)}>
-              <option>Undergrad</option>
-              <option>Postgrad</option>
-            </select>
-          </div>
-          <div className="sc-modal-field">
-            <label>Status</label>
-            <select value={form.citizenship} onChange={(e) => set("citizenship", e.target.value)}>
-              <option>Domestic</option>
-              <option>International</option>
-            </select>
-          </div>
-          <div className="sc-modal-field">
-            <label>Campus</label>
-            <select value={form.campus} onChange={(e) => set("campus", e.target.value)}>
-              <option>St.George</option>
-              <option>Scarborough</option>
-              <option>Mississauga</option>
-            </select>
-          </div>
-        </div>
-        <div className="sc-modal-actions">
-          <button className="sc-modal-cancel" onClick={onClose}>Cancel</button>
-          <button className="sc-modal-save" onClick={() => onSave(form)}>Save Profile</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main Component ──
 export default function Scholarships() {
+  const navigate = useNavigate();
   const [profile, setProfile]           = useState(loadProfile);
-  const [showModal, setShowModal]        = useState(false);
   const [scholarships, setScholarships]  = useState([]);
   const [savedScholarships, setSavedScholarships] = useState([]);
   const [matchResults, setMatchResults]  = useState(null);
@@ -880,13 +826,6 @@ export default function Scholarships() {
   // reset page on filter change
   useEffect(() => { setPage(1); }, [q, sortBy, filterCitizenship, filterAwardType, onlyMatched]);
 
-  const handleSaveProfile = (newProfile) => {
-    setProfile(newProfile);
-    localStorage.setItem("userProfile", JSON.stringify(newProfile));
-    setShowModal(false);
-    if (onlyMatched) fetchMatch();
-  };
-
   const displayList = (() => {
     if (onlyMatched && matchResults?.length) {
       const mapped = matchResults.map((r) => ({ ...r.scholarship, _score: r.score, _reasons: r.reasons }));
@@ -897,6 +836,12 @@ export default function Scholarships() {
     }
     return scholarships;
   })();
+
+  const savedStatusMap = Object.fromEntries(
+    savedScholarships
+      .filter((i) => i.scholarship?.id)
+      .map((i) => [i.scholarship.id, i.status])
+  );
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const yearLabel = ["1st", "2nd", "3rd", "4th", "5th"][profile.year - 1] || `${profile.year}th`;
@@ -933,7 +878,7 @@ export default function Scholarships() {
                   </div>
                 ))}
               </div>
-              <button className="sc-edit-btn" onClick={() => setShowModal(true)}>
+              <button className="sc-edit-btn" onClick={() => navigate("/profile")}>
                 <EditIcon /> Edit Profile
               </button>
             </div>
@@ -1030,6 +975,7 @@ export default function Scholarships() {
                   score={s._score}
                   reasons={s._reasons}
                   isSaved={savedIds.has(s.id)}
+                  status={savedStatusMap[s.id]}
                   onSave={handleSave}
                   onUnsave={handleUnsave}
                 />
@@ -1056,18 +1002,11 @@ export default function Scholarships() {
       {typeof document !== "undefined" &&
         createPortal(
           <div className="sc-sidebar">
-            <UpcomingDeadlines items={savedScholarships} maxItems={6} />
+            <UpcomingDeadlines items={savedScholarships} maxItems={5} />
           </div>,
           document.body
         )}
 
-      {showModal && (
-        <ProfileModal
-          profile={profile}
-          onSave={handleSaveProfile}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </>
   );
 }

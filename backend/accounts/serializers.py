@@ -36,8 +36,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(source="user.first_name", read_only=True)
-    last_name = serializers.CharField(source="user.last_name", read_only=True)
+    first_name = serializers.CharField(source="user.first_name", required=False, allow_blank=True)
+    last_name = serializers.CharField(source="user.last_name", required=False, allow_blank=True)
     email = serializers.EmailField(source="user.email", read_only=True)
 
     class Meta:
@@ -79,6 +79,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return attrs
 
     def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", None)
+        if user_data:
+            user = instance.user
+            if "first_name" in user_data:
+                user.first_name = user_data.get("first_name", user.first_name)
+            if "last_name" in user_data:
+                user.last_name = user_data.get("last_name", user.last_name)
+            user.save()
+
         if not validated_data.get("receives_scholarships_or_aid", instance.receives_scholarships_or_aid):
             validated_data["scholarship_aid_amount"] = None
 

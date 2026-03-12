@@ -60,14 +60,34 @@ function daysUntil(dateStr) {
   return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
 }
 
+/** End of school year placeholder for scholarships without a deadline (sorts to the back). */
+const NO_DEADLINE_PLACEHOLDER = "9999-12-31";
+
+/**
+ * Normalize saved scholarship item to flat shape. Handles API format { scholarship, status }.
+ */
+function normalizeItem(raw) {
+  const s = raw.scholarship || raw;
+  const status = raw.status || "saved";
+  return {
+    id: raw.id ?? s?.id,
+    scholarshipId: s?.id,
+    title: s?.title ?? raw.title,
+    deadline: s?.deadline ?? raw.deadline,
+    status,
+  };
+}
+
 /**
  * Reusable Upcoming Deadlines component.
- * Shows saved scholarships ordered by due date (soonest first).
+ * Shows saved scholarships (saved + in_progress only) ordered by due date (soonest first).
+ * Scholarships without a deadline are pushed to the very back.
+ * Submitted scholarships are excluded to make space for others.
  * - If `items` is provided, uses that list (e.g. from parent state).
  * - Otherwise fetches saved scholarships from the API.
  * Used on both Dashboard and Scholarships pages.
  */
-export default function UpcomingDeadlines({ items: itemsProp, maxItems = 8 }) {
+export default function UpcomingDeadlines({ items: itemsProp, maxItems = 5 }) {
   const [items, setItems] = useState(itemsProp ?? []);
   const [loading, setLoading] = useState(!itemsProp);
   const [error, setError] = useState(null);
@@ -101,8 +121,13 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 8 }) {
   }, [itemsProp]);
 
   const withDeadlines = items
-    .filter((s) => s.deadline)
-    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+    .map(normalizeItem)
+    .filter((s) => s.status !== "submitted")
+    .map((s) => ({
+      ...s,
+      sortDeadline: s.deadline || NO_DEADLINE_PLACEHOLDER,
+    }))
+    .sort((a, b) => new Date(a.sortDeadline) - new Date(b.sortDeadline))
     .slice(0, maxItems);
 
   if (loading && withDeadlines.length === 0) {
@@ -139,16 +164,18 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 8 }) {
         ) : (
           <div className="ud-list">
             {withDeadlines.map((s) => {
+              const hasRealDeadline = !!s.deadline;
               const days = daysUntil(s.deadline);
-              const meta =
-                days !== null && days >= 0
+              const meta = hasRealDeadline
+                ? days !== null && days >= 0
                   ? `${formatDeadline(s.deadline)} – ${days} days left`
-                  : formatDeadline(s.deadline);
+                  : formatDeadline(s.deadline)
+                : "No deadline listed";
               return (
-                <div className="ud-row" key={s.id}>
+                <div className="ud-row" key={s.id ?? s.scholarshipId}>
                   <div className="ud-row-left">
                     <div className="ud-badge">
-                      {s.deadline ? new Date(s.deadline).getDate() : "—"}
+                      {hasRealDeadline ? new Date(s.deadline).getDate() : "—"}
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div className="ud-row-title">{s.title}</div>

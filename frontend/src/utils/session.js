@@ -90,11 +90,19 @@ async function fetchWithAuth(url, options = {}, accessTokenOverride) {
 }
 
 export function profileToScholarshipProfile(profile = {}) {
+  let existing = DEFAULT_PROFILE;
+  try {
+    const stored = localStorage.getItem(PROFILE_KEY);
+    if (stored) existing = { ...DEFAULT_PROFILE, ...JSON.parse(stored) };
+  } catch {
+    // ignore
+  }
   return {
     ...DEFAULT_PROFILE,
-    degree_type: profile.degree_type || DEFAULT_PROFILE.degree_type,
-    citizenship: profile.citizenship_status || DEFAULT_PROFILE.citizenship,
-    campus: profile.campus || DEFAULT_PROFILE.campus,
+    ...existing,
+    degree_type: profile.degree_type || existing.degree_type || DEFAULT_PROFILE.degree_type,
+    citizenship: profile.citizenship_status || existing.citizenship || DEFAULT_PROFILE.citizenship,
+    campus: profile.campus || existing.campus || DEFAULT_PROFILE.campus,
   };
 }
 

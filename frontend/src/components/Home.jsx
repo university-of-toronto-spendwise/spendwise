@@ -657,7 +657,7 @@ export default function Dashboard() {
   }, [reloadKey]);
 
   useEffect(() => {
-    fetchWithAuth(`${API}/me/`).then((res) => {
+    fetchWithAuth(`${API}/profile/`).then((res) => {
       if (res.ok) res.json().then((data) => setFirstName(data?.first_name || ""));
     });
   }, []);
