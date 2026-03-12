@@ -7,290 +7,6 @@ import UpcomingDeadlines from "./UpcomingDeadlines";
 
 const MONTH_OPTIONS = ["This Month", "Last Month", "3 Months", "Past Year"];
 
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  :root {
-    --uoft-blue: #002A5C;
-    --uoft-mid: #0047A0;
-    --uoft-accent: #E8B53E;
-
-    --off-white: #F4F7FB;
-    --white: #FFFFFF;
-    --border: #D0DBE8;
-    --border-2: #C7D4E6;
-    --text-muted: #6B7A90;
-
-    --success: #18A574;
-    --danger: #C0392B;
-
-    --shadow: 0 4px 16px rgba(0,42,92,0.08);
-  }
-
-  body { font-family: inherit; }
-
-  .db-page { min-height: 100vh; background: var(--off-white); font-family: inherit; }
-  .db-body { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-
-  .db-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;
-  }
-
-  .db-header h1 { font-size: 1.9rem; font-weight: 800; color: var(--uoft-blue); margin: 0 0 0.25rem 0; }
-  .db-header p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
-
-  .db-header-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-left:auto; justify-content:flex-end; }
-
-  .pill {
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 999px;
-    padding: 0.55rem 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    color: var(--uoft-blue);
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-  }
-
-  .pill:focus-within, .pill:hover { border-color: var(--border-2); }
-  .pill .chev { margin-left: 0.15rem; opacity: 0.75; font-size: 0.7em; }
-  .db-period-pill { min-width: 200px; }
-  .db-period-label { color: var(--text-muted); font-weight: 600; font-size: 0.88rem; }
-  .db-period-value { font-weight: 800; color: var(--uoft-blue); }
-
-  .menu {
-    position: absolute;
-    top: calc(100% + 10px);
-    left: 0;
-    width: 220px;
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    box-shadow: var(--shadow);
-    padding: 0.35rem;
-    z-index: 50;
-  }
-
-  .menuItem { padding: 0.6rem 0.7rem; border-radius: 10px; font-weight: 700; color: var(--uoft-blue); cursor: pointer; }
-  .menuItem:hover { background: #EAF0FF; }
-  .menuItem.active { background: var(--uoft-blue); color: white; }
-
-  .menuItem:hover { background: #EAF0FF; }
-  .menuItem.active { background: #3B6BE3; color: white; }
-
-  .pillToggle { gap: 0.65rem; padding: 0.55rem 1rem; }
-  .dot { width: 14px; height: 14px; border-radius: 999px; border: 2px solid var(--border); background: #fff; }
-  .dot.on { background: #B9C7E6; border-color: #B9C7E6; }
-
-  .bank-cta {
-    background: var(--uoft-blue);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 800;
-    padding: 0.65rem 1rem;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 42, 92, 0.25);
-  }
-  .bank-cta:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-
-  .bank-status {
-    margin-bottom: 1rem;
-    border-radius: 12px;
-    border: 2px solid #cbe6dc;
-    background: #effaf5;
-    color: #155d41;
-    padding: 0.75rem 0.95rem;
-    font-weight: 600;
-  }
-
-  .bank-status.error { border-color: #f2c7c3; background: #fff4f3; color: #8a2e25; }
-  .bank-tabs {
-    display: flex;
-    gap: 0.55rem;
-    flex-wrap: wrap;
-    margin: 0 0 0.9rem;
-  }
-  .bank-tab { max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    border: 2px solid var(--border);
-    background: #fff;
-    color: var(--uoft-blue);
-    font-weight: 700;
-    border-radius: 999px;
-    padding: 0.45rem 0.9rem;
-    cursor: pointer;
-  }
-  .bank-tab:hover { border-color: var(--uoft-mid); color: var(--uoft-mid); }
-  .bank-tab.active {
-    background: var(--uoft-blue);
-    border-color: var(--uoft-blue);
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 42, 92, 0.2);
-  }
-  .mini-grid {
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:0.7rem;
-  }
-  .mini-card {
-    background:#f7faff;
-    border:2px solid rgba(208,219,232,0.75);
-    border-radius:14px;
-    padding:0.7rem 0.8rem;
-  }
-  .mini-title { color:var(--text-muted); font-size:0.8rem; font-weight:700; margin:0 0 0.2rem; }
-  .mini-value { color:var(--uoft-blue); font-size:1.05rem; font-weight:900; margin:0; }
-  .mini-value.neg { color: var(--danger); }
-  .mini-value.pos { color: var(--success); }
-
-  .db-grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; align-items: start; }
-  .db-main, .db-side { min-width: 0; }
-
-  .card { background: var(--white); border: 2px solid var(--border); border-radius: 18px; padding: 1.25rem 1.5rem; }
-  .card-title { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.85rem; }
-  .card-title h2 { margin: 0; font-size: 1.02rem; font-weight: 900; color: var(--uoft-blue); }
-  .link { color: var(--uoft-mid); font-weight: 800; font-size: 0.92rem; cursor: pointer; user-select: none; }
-
-  .hero { background: linear-gradient(135deg, var(--uoft-blue), var(--uoft-mid)); color: white; border: none; box-shadow: var(--shadow); }
-  .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.9rem; }
-  .hero-label { font-size: 0.85rem; opacity: 0.92; margin: 0 0 0.25rem 0; }
-  .hero-amount { font-size: 1.9rem; font-weight: 900; margin: 0; letter-spacing: -0.02em; }
-  .hero-change {
-    background: rgba(255,255,255,0.14);
-    border: 1px solid rgba(255,255,255,0.25);
-    padding: 0.35rem 0.65rem;
-    border-radius: 999px;
-    font-weight: 900;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
-  .hero-change.good { background: rgba(24,165,116,0.2); border-color: rgba(24,165,116,0.45); }
-  .hero-change.bad { background: rgba(192,57,43,0.2); border-color: rgba(192,57,43,0.45); }
-  .hero-change.neutral { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.35); }
-  .hero-meta { display: flex; justify-content: space-between; opacity: 0.92; font-size: 0.88rem; margin-top: 0.6rem; }
-  .progress { height: 8px; background: rgba(255,255,255,0.18); border-radius: 999px; overflow: hidden; margin-top: 0.7rem; }
-  .progress > span { display: block; height: 100%; width: var(--pct, 60%); background: rgba(255,255,255,0.88); border-radius: 999px; }
-
-  .actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; margin-top: 1.25rem; margin-bottom: 1.25rem; }
-  .tile {
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 18px;
-    padding: 1.15rem 1.2rem;
-    cursor: pointer;
-    transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
-    display: flex;
-    align-items: center;
-    gap: 0.95rem;
-    min-width: 0;
-  }
-  .tile:hover { border-color: var(--border-2); box-shadow: 0 6px 18px rgba(0,42,92,0.08); transform: translateY(-1px); }
-  .tileIconWrap {
-    width: 54px;
-    height: 54px;
-    border-radius: 16px;
-    border: 2px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    background: #fff;
-  }
-  .tScholar { background: #FFF6E0; border-color: rgba(232,181,62,0.5); }
-  .tBills { background: #EAF0FF; border-color: rgba(0,71,160,0.18); }
-  .tCodes { background: #ECFDF5; border-color: rgba(24,165,116,0.18); }
-  .tileTitle { font-weight: 900; color: var(--uoft-blue); font-size: 1.05rem; margin: 0 0 0.1rem 0; }
-  .tileSub { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
-
-  .insightCardSpacing { margin-bottom: 1.25rem; }
-  .insight { display: flex; gap: 0.85rem; align-items: flex-start; }
-  .insightIcon {
-    width: 54px;
-    height: 54px;
-    border-radius: 16px;
-    background: #FFF6E0;
-    border: 2px solid rgba(232,181,62,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 1.15rem;
-  }
-  .insight strong { display: block; color: var(--uoft-blue); font-weight: 900; font-size: 1.05rem; margin-bottom: 0.2rem; }
-  .insight p { margin: 0; color: var(--text-muted); font-size: 1rem; line-height: 1.45; }
-
-  .list { display: flex; flex-direction: column; gap: 0.95rem; }
-  .row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.9rem;
-    padding: 1rem;
-    border-radius: 16px;
-    background: #F7FAFF;
-    border: 2px solid rgba(208,219,232,0.75);
-  }
-  .row-left { display: flex; gap: 0.9rem; align-items: center; min-width: 0; }
-  .row-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    background: #fff;
-    border: 2px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 1.2rem;
-  }
-  .row-title { font-weight: 900; color: var(--uoft-blue); font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .row-sub { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .amt { font-weight: 900; font-size: 1.05rem; white-space: nowrap; }
-  .amt.negative { color: var(--danger); }
-  .amt.positive { color: var(--success); }
-  .empty { color: var(--text-muted); font-size: 0.95rem; text-align: center; padding: 1.25rem 0; }
-
-  .deadlineBadge {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    flex-shrink: 0;
-    border: 2px solid var(--border);
-    background: #fff;
-  }
-  .d-red { background: #FDECEC; color: var(--danger); border-color: rgba(192,57,43,0.25); }
-  .d-yellow { background: #FFF6E0; color: #8A5A00; border-color: rgba(232,181,62,0.45); }
-  .d-blue { background: #EAF0FF; color: var(--uoft-mid); border-color: rgba(0,71,160,0.25); }
-
-  @media (max-width: 980px) {
-    .db-grid { grid-template-columns: 1fr; }
-    .db-side { order: 2; }
-    .mini-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  }
-
-  @media (max-width: 720px) {
-    .db-body { padding: 1.25rem 1rem; }
-    .actions { grid-template-columns: 1fr; }
-    .pill { width: 100%; justify-content: space-between; }
-    .db-header { align-items: flex-start; }
-    .menu { width: 100%; }
-  }
-`;
 
 const API = "/api";
 const token = () => sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
@@ -441,6 +157,35 @@ function shortAccountLabel(label) {
   return `${text.slice(0, 12)}...`;
 }
 
+const ScholarshipIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+    <path d="M12 14l6.16-3.422a12 12 0 0 1.665 6.479A11.96 11.96 0 0 0 12 20.055a11.96 11.96 0 0 0-7.825-2.998 12 12 0 0 1 .665-6.479L12 14z"/>
+  </svg>
+);
+const BillsIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <path d="M14 2v6h6"/>
+    <path d="M16 13H8"/>
+    <path d="M16 17H8"/>
+    <path d="M10 9H8"/>
+  </svg>
+);
+const StudentCodesIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+    <line x1="7" y1="7" x2="7.01" y2="7"/>
+  </svg>
+);
+const InsightIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 18h6"/>
+    <path d="M10 22h4"/>
+    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+  </svg>
+);
+
 function QuickTile({ icon, title, subtitle, toneClass, onClick }) {
   return (
     <div className="tile" onClick={onClick} role="button" tabIndex={0}>
@@ -478,7 +223,7 @@ function InsightCard({ title, message }) {
   return (
     <div className="card">
       <div className="insight">
-        <div className="insightIcon">AI</div>
+        <div className="insightIcon"><InsightIcon /></div>
         <div>
           <strong>{title}</strong>
           <p>{message}</p>
@@ -776,7 +521,6 @@ export default function Dashboard() {
 
   return (
     <div className="db-page">
-      <style>{styles}</style>
       <Navbar />
 
       <div className="db-body">
@@ -877,21 +621,21 @@ export default function Dashboard() {
 
             <div className="actions">
               <QuickTile
-                icon="SC"
+                icon={<ScholarshipIcon />}
                 title="Scholarships"
                 subtitle="Explore matched awards"
                 toneClass="tScholar"
                 onClick={() => navigate("/scholarships")}
               />
               <QuickTile
-                icon="BL"
+                icon={<BillsIcon />}
                 title="Bills"
                 subtitle="View upcoming bills"
                 toneClass="tBills"
                 onClick={() => navigate("/bills")}
               />
               <QuickTile
-                icon="CD"
+                icon={<StudentCodesIcon />}
                 title="Student Codes"
                 subtitle="Apply a discount code"
                 toneClass="tCodes"

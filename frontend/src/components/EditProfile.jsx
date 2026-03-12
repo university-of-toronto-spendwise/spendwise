@@ -19,89 +19,6 @@ function loadScholarshipProfile() {
   }
 }
 
-const styles = `
-  .ep-form {
-    background: white;
-    border: 1.5px solid #D0DBE8;
-    border-radius: 14px;
-    padding: 2rem;
-    max-width: 560px;
-  }
-
-  .ep-form h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #002A5C;
-    margin-bottom: 1.5rem;
-  }
-
-  .ep-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .ep-field label {
-    display: block;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #002A5C;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-
-  .ep-field input,
-  .ep-field select {
-    width: 100%;
-    height: 42px;
-    border: 1.5px solid #D0DBE8;
-    border-radius: 8px;
-    padding: 0 0.75rem;
-    font-family: inherit;
-    font-size: 0.88rem;
-    color: #002A5C;
-    outline: none;
-    background: white;
-    transition: border-color 0.15s;
-  }
-
-  .ep-field input:focus,
-  .ep-field select:focus {
-    border-color: #0047A0;
-    box-shadow: 0 0 0 3px rgba(0,71,160,0.1);
-  }
-
-  .ep-actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
-  }
-
-  .ep-save {
-    padding: 0.6rem 1.4rem;
-    border-radius: 8px;
-    border: none;
-    background: #002A5C;
-    color: white;
-    font-family: inherit;
-    font-size: 0.88rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-
-  .ep-save:hover {
-    background: #0047A0;
-  }
-
-  .ep-save:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-
 export function loadProfileForEdit() {
   return loadScholarshipProfile();
 }
@@ -161,10 +78,9 @@ export default function EditProfile({ profile: initialProfile, apiProfile, onSav
 
   return (
     <>
-      <style>{styles}</style>
       <div className="ep-form">
         <h2>✏️ Edit Your Profile</h2>
-        {error && <p style={{ color: "#C0392B", marginBottom: "1rem", fontSize: "0.9rem" }}>{error}</p>}
+        {error && <p style={{ color: "var(--sw-error)", marginBottom: "1rem", fontSize: "0.95rem" }}>{error}</p>}
         <div className="ep-grid">
           <div className="ep-field">
             <label>First Name</label>

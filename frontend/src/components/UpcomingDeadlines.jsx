@@ -34,18 +34,6 @@ const fetchWithAuth = async (url) => {
   return res;
 };
 
-const udStyles = `
-  .ud-card { background: var(--white, #fff); border: 2px solid var(--border, #D0DBE8); border-radius: 18px; padding: 1.25rem 1.5rem; }
-  .ud-card-title { font-size: 1.02rem; font-weight: 900; color: var(--uoft-blue, #002A5C); margin: 0 0 0.85rem 0; }
-  .ud-list { display: flex; flex-direction: column; gap: 0.95rem; }
-  .ud-row { display: flex; align-items: center; justify-content: space-between; gap: 0.9rem; padding: 1rem; border-radius: 16px; background: #F7FAFF; border: 2px solid rgba(208,219,232,0.75); }
-  .ud-row-left { display: flex; gap: 0.9rem; align-items: center; min-width: 0; }
-  .ud-badge { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0; border: 2px solid var(--border); background: #EAF0FF; color: var(--uoft-mid, #0047A0); font-size: 1rem; }
-  .ud-row-title { font-weight: 900; color: var(--uoft-blue); font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ud-row-sub { color: var(--text-muted, #6B7A90); font-size: 0.95rem; margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ud-empty { color: var(--text-muted); font-size: 0.95rem; text-align: center; padding: 1.25rem 0; }
-`;
-
 function formatDeadline(dateStr) {
   if (!dateStr) return null;
   return new Date(dateStr).toLocaleDateString("en-CA", {
@@ -133,7 +121,6 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 5 }) {
   if (loading && withDeadlines.length === 0) {
     return (
       <>
-        <style>{udStyles}</style>
         <div className="ud-card">
           <h2 className="ud-card-title">Upcoming Deadlines</h2>
           <div className="ud-empty">Loading…</div>
@@ -145,10 +132,9 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 5 }) {
   if (error) {
     return (
       <>
-        <style>{udStyles}</style>
         <div className="ud-card">
           <h2 className="ud-card-title">Upcoming Deadlines</h2>
-          <div className="ud-empty" style={{ color: "#C0392B" }}>{error}</div>
+          <div className="ud-empty" style={{ color: "var(--sw-error)" }}>{error}</div>
         </div>
       </>
     );
@@ -156,7 +142,6 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 5 }) {
 
   return (
     <>
-      <style>{udStyles}</style>
       <div className="ud-card">
         <h2 className="ud-card-title">Upcoming Deadlines</h2>
         {withDeadlines.length === 0 ? (
@@ -182,7 +167,7 @@ export default function UpcomingDeadlines({ items: itemsProp, maxItems = 5 }) {
                       <div className="ud-row-sub">{meta}</div>
                     </div>
                   </div>
-                  <div style={{ color: "var(--text-muted)", fontWeight: 900 }}>›</div>
+                  <div style={{ color: "var(--sw-text-muted)", fontWeight: 600 }}>›</div>
                 </div>
               );
             })}

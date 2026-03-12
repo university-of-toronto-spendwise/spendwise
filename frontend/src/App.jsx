@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom"
+import { ThemeProvider } from "./context/ThemeContext"
 import Registration from "./components/Registration"
 import Login from "./components/Login"
 import Home from "./components/Home"
@@ -29,6 +30,7 @@ const PublicRoute = ({ children }) => {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<PublicRoute><Registration /></PublicRoute>} />
@@ -44,5 +46,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
   )
 }

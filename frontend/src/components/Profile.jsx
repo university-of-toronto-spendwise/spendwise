@@ -23,9 +23,9 @@ export default function Profile() {
   return (
     <>
       <Navbar />
-      <div style={{ padding: "2rem", maxWidth: 800, margin: "0 auto" }}>
-        <h1 style={{ fontFamily: "inherit", color: "#002A5C", marginBottom: "0.5rem" }}>Profile</h1>
-        <p style={{ color: "#6B7A90", marginBottom: "1.5rem" }}>Manage your profile and account settings. Your faculty, major, and year are used for scholarship matching.</p>
+      <div style={{ padding: "2rem", maxWidth: 800, margin: "0 auto", background: "var(--sw-bg)", minHeight: "100vh" }}>
+        <h1 className="sw-font-1" style={{ marginBottom: "0.5rem" }}>Profile</h1>
+        <p className="sw-font-2" style={{ marginBottom: "1.5rem" }}>Manage your profile and account settings. Your faculty, major, and year are used for scholarship matching.</p>
         <EditProfile profile={profile} apiProfile={apiProfile} onSave={handleSave} />
       </div>
     </>

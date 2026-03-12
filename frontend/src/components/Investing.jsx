@@ -55,315 +55,6 @@ const PORTFOLIOS = [
   },
 ];
 
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  :root {
-    --uoft-blue: #002A5C;
-    --uoft-mid: #0047A0;
-    --uoft-accent: #E8B53E;
-    --off-white: #F4F7FB;
-    --white: #FFFFFF;
-    --border: #D0DBE8;
-    --border-2: #C7D4E6;
-    --text-muted: #6B7A90;
-    --success: #18A574;
-    --danger: #C0392B;
-    --shadow: 0 4px 16px rgba(0,42,92,0.08);
-  }
-
-  body { font-family: 'Source Sans 3', sans-serif; }
-
-  .page {
-    min-height: 100vh;
-    background: var(--off-white);
-  }
-
-  .body {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .header {
-    margin-bottom: 1.25rem;
-  }
-
-  .header h1 {
-    font-size: 1.9rem;
-    font-weight: 600;
-    color: var(--uoft-blue);
-    margin: 0 0 0.25rem 0;
-  }
-
-  .header p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 1.5rem;
-    align-items: start;
-  }
-
-  .card {
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 18px;
-    padding: 1.25rem 1.5rem;
-  }
-
-  .card + .card {
-    margin-top: 1.25rem;
-  }
-
-  .hero {
-    background: linear-gradient(135deg, var(--uoft-blue), var(--uoft-mid));
-    color: white;
-    border: none;
-    box-shadow: var(--shadow);
-  }
-
-  .hero h2 {
-    margin: 0 0 0.35rem 0;
-    font-size: 1.9rem;
-    font-weight: 700;
-  }
-
-  .hero p {
-    margin: 0.2rem 0;
-    opacity: 0.92;
-  }
-
-  .heroMeta {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 0.9rem;
-    flex-wrap: wrap;
-    font-size: 0.9rem;
-  }
-
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-    margin-top: 1.25rem;
-  }
-
-  .stat {
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 18px;
-    padding: 1rem 1.1rem;
-  }
-
-  .statValue {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--uoft-blue);
-  }
-
-  .statValue.positive { color: var(--success); }
-  .statValue.negative { color: var(--danger); }
-
-  .statLabel {
-    color: var(--text-muted);
-    font-size: 0.92rem;
-    margin-top: 0.2rem;
-  }
-
-  .sectionTitle {
-    margin: 0 0 0.9rem 0;
-    font-size: 1.02rem;
-    font-weight: 700;
-    color: var(--uoft-blue);
-  }
-
-  .sectionSub {
-    color: var(--text-muted);
-    font-size: 0.92rem;
-    margin: -0.45rem 0 1rem 0;
-  }
-
-  .formGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .field.full {
-    grid-column: 1 / -1;
-  }
-
-  .label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--uoft-blue);
-  }
-
-  .input, .select {
-    width: 100%;
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    padding: 0.85rem 0.95rem;
-    font-size: 0.96rem;
-    color: var(--uoft-blue);
-    background: #fff;
-    outline: none;
-  }
-
-  .input:focus, .select:focus {
-    border-color: var(--border-2);
-  }
-
-  .hint {
-    color: var(--text-muted);
-    font-size: 0.84rem;
-  }
-
-  .hint.error { color: var(--danger); }
-  .hint.success { color: var(--success); }
-
-  .portfolioGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .portfolioCard {
-    border: 2px solid var(--border);
-    border-radius: 18px;
-    padding: 1rem;
-    background: #fff;
-    cursor: pointer;
-  }
-
-  .portfolioCard.active {
-    background: #F7FAFF;
-    border-color: rgba(0,71,160,0.35);
-  }
-
-  .portfolioTop {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .portfolioName {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--uoft-blue);
-  }
-
-  .portfolioSub {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-top: 0.15rem;
-  }
-
-  .tag {
-    background: #EAF0FF;
-    color: var(--uoft-mid);
-    border-radius: 999px;
-    padding: 0.3rem 0.6rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
-
-  .miniRow {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-top: 0.35rem;
-  }
-
-  .miniRow strong {
-    color: var(--uoft-blue);
-  }
-
-  .compareGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
-  .compareBox {
-    padding: 1rem;
-    border-radius: 16px;
-    background: #F7FAFF;
-    border: 2px solid rgba(208,219,232,0.75);
-  }
-
-  .compareLabel {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 0.2rem;
-  }
-
-  .compareValue {
-    color: var(--uoft-blue);
-    font-size: 1.3rem;
-    font-weight: 700;
-  }
-
-  .compareValue.positive { color: var(--success); }
-
-  .rowTitle {
-    font-weight: 700;
-    color: var(--uoft-blue);
-  }
-
-  .rowSub {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-  }
-
-  .rowAmt {
-    font-weight: 700;
-    color: var(--uoft-blue);
-  }
-
-  .button {
-    background: linear-gradient(135deg, var(--uoft-blue), var(--uoft-mid));
-    color: white;
-    border: none;
-    border-radius: 999px;
-    padding: 0.75rem 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .button:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 980px) {
-    .grid { grid-template-columns: 1fr; }
-    .portfolioGrid { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 720px) {
-    .body { padding: 1.25rem 1rem; }
-    .stats, .formGrid, .compareGrid { grid-template-columns: 1fr; }
-  }
-`;
-
 function getAuthHeaders() {
   const token = sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
   return {
@@ -563,105 +254,104 @@ export default function Investing() {
   const goalBar = Math.max(12, (targetAmount / maxBar) * 170);
 
   return (
-    <div className="page">
-      <style>{styles}</style>
+    <div className="inv-page">
       <Navbar />
 
-      <div className="body">
-        <div className="header">
+      <div className="inv-body">
+        <div className="inv-header">
           <h1>Investment Guidance</h1>
           <p>Use your savings baseline to explore practice portfolios and compare outcomes against a financial goal.</p>
         </div>
 
-        <div className="grid">
+        <div className="inv-grid">
           <div>
-            <div className="card hero" style={{ ["--pct"]: `${heroProgress}%` }}>
+            <div className="inv-card inv-hero" style={{ ["--pct"]: `${heroProgress}%` }}>
               <h2>${money(investingValue)}</h2>
               <p>Projected value with your selected practice portfolio.</p>
-              <div className="heroMeta">
+              <div className="inv-heroMeta">
                 <span>{selectedPortfolio.name}</span>
                 <span>{monthsLeft} month{monthsLeft === 1 ? "" : "s"} to goal</span>
                 <span>+{selectedPortfolio.expectedReturn}% expected</span>
               </div>
             </div>
 
-            <div className="stats">
-              <div className="stat">
-                <div className="statValue">
+            <div className="inv-stats">
+              <div className="inv-stat">
+                <div className="inv-statValue">
                   {loadingSavings ? "..." : `$${money(monthlyContribution)}`}
                 </div>
-                <div className="statLabel">Estimated Monthly Savings</div>
+                <div className="inv-statLabel">Estimated Monthly Savings</div>
               </div>
 
-              <div className="stat">
-                <div className="statValue">${money(targetAmount)}</div>
-                <div className="statLabel">Goal Target</div>
+              <div className="inv-stat">
+                <div className="inv-statValue">${money(targetAmount)}</div>
+                <div className="inv-statLabel">Goal Target</div>
               </div>
 
-              <div className="stat">
-                <div className={`statValue ${investingEdge >= 0 ? "positive" : "negative"}`}>
+              <div className="inv-stat">
+                <div className={`inv-statValue ${investingEdge >= 0 ? "positive" : "negative"}`}>
                   {investingEdge >= 0 ? "+" : "-"}${money(Math.abs(investingEdge))}
                 </div>
-                <div className="statLabel">Edge vs Saving Only</div>
+                <div className="inv-statLabel">Edge vs Saving Only</div>
               </div>
             </div>
 
-            <div className="card">
-              <h2 className="sectionTitle">1. Savings Snapshot</h2>
-              <p className="sectionSub">We use the savings estimate from your spending feature as a starting point.</p>
+            <div className="inv-card">
+              <h2 className="inv-sectionTitle">1. Savings Snapshot</h2>
+              <p className="inv-sectionSub">We use the savings estimate from your spending feature as a starting point.</p>
 
-              <div className="formGrid">
-                <div className="field">
-                  <label className="label">Monthly Contribution</label>
+              <div className="inv-formGrid">
+                <div className="inv-field">
+                  <label className="inv-label">Monthly Contribution</label>
                   <input
-                    className="input"
+                    className="inv-input"
                     type="number"
                     min="0"
                     value={monthlyContribution}
                     onChange={(e) => setMonthlyContribution(Number(e.target.value) || 0)}
                   />
                   {loadingSavings ? (
-                    <div className="hint">Loading savings estimate...</div>
+                    <div className="inv-hint">Loading savings estimate...</div>
                   ) : savingsError ? (
-                    <div className="hint error">{savingsError}</div>
+                    <div className="inv-hint error">{savingsError}</div>
                   ) : (
-                    <div className="hint">Prefilled from your spending analysis. You can adjust it.</div>
+                    <div className="inv-hint">Prefilled from your spending analysis. You can adjust it.</div>
                   )}
                 </div>
 
-                <div className="field">
-                  <label className="label">Initial Amount</label>
+                <div className="inv-field">
+                  <label className="inv-label">Initial Amount</label>
                   <input
-                    className="input"
+                    className="inv-input"
                     type="number"
                     min="0"
                     value={initialAmount}
                     onChange={(e) => setInitialAmount(Number(e.target.value) || 0)}
                   />
-                  <div className="hint">Any amount you already have saved.</div>
+                  <div className="inv-hint">Any amount you already have saved.</div>
                 </div>
               </div>
             </div>
 
-            <div className="card">
-              <h2 className="sectionTitle">2. Goal Setup</h2>
-              <p className="sectionSub">Set a target so you can compare savings and investing outcomes.</p>
+            <div className="inv-card">
+              <h2 className="inv-sectionTitle">2. Goal Setup</h2>
+              <p className="inv-sectionSub">Set a target so you can compare savings and investing outcomes.</p>
 
-              <div className="formGrid">
-                <div className="field full">
-                  <label className="label">Goal Name</label>
+              <div className="inv-formGrid">
+                <div className="inv-field full">
+                  <label className="inv-label">Goal Name</label>
                   <input
-                    className="input"
+                    className="inv-input"
                     type="text"
                     value={goalName}
                     onChange={(e) => setGoalName(e.target.value)}
                   />
                 </div>
 
-                <div className="field">
-                  <label className="label">Goal Type</label>
+                <div className="inv-field">
+                  <label className="inv-label">Goal Type</label>
                   <select
-                    className="select"
+                    className="inv-select"
                     value={goalType}
                     onChange={(e) => setGoalType(e.target.value)}
                   >
@@ -673,10 +363,10 @@ export default function Investing() {
                   </select>
                 </div>
 
-                <div className="field">
-                  <label className="label">Risk Preference</label>
+                <div className="inv-field">
+                  <label className="inv-label">Risk Preference</label>
                   <select
-                    className="select"
+                    className="inv-select"
                     value={riskLevel}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -692,10 +382,10 @@ export default function Investing() {
                   </select>
                 </div>
 
-                <div className="field">
-                  <label className="label">Target Amount</label>
+                <div className="inv-field">
+                  <label className="inv-label">Target Amount</label>
                   <input
-                    className="input"
+                    className="inv-input"
                     type="number"
                     min="0"
                     value={targetAmount}
@@ -703,10 +393,10 @@ export default function Investing() {
                   />
                 </div>
 
-                <div className="field">
-                  <label className="label">Target Date</label>
+                <div className="inv-field">
+                  <label className="inv-label">Target Date</label>
                   <input
-                    className="input"
+                    className="inv-input"
                     type="date"
                     value={targetDate}
                     onChange={(e) => setTargetDate(e.target.value)}
@@ -715,39 +405,39 @@ export default function Investing() {
               </div>
             </div>
 
-            <div className="card">
-              <h2 className="sectionTitle">3. Practice Portfolios</h2>
-              <p className="sectionSub">Choose a sample portfolio to compare against saving only.</p>
+            <div className="inv-card">
+              <h2 className="inv-sectionTitle">3. Practice Portfolios</h2>
+              <p className="inv-sectionSub">Choose a sample portfolio to compare against saving only.</p>
 
-              <div className="portfolioGrid">
+              <div className="inv-portfolioGrid">
                 {visiblePortfolios.map((portfolio) => (
                   <div
                     key={portfolio.id}
-                    className={`portfolioCard ${selectedPortfolio.id === portfolio.id ? "active" : ""}`}
+                    className={`inv-portfolioCard ${selectedPortfolio.id === portfolio.id ? "active" : ""}`}
                     onClick={() => setSelectedPortfolioId(portfolio.id)}
                   >
-                    <div className="portfolioTop">
+                    <div className="inv-portfolioTop">
                       <div>
-                        <div className="portfolioName">{portfolio.name}</div>
-                        <div className="portfolioSub">
+                        <div className="inv-portfolioName">{portfolio.name}</div>
+                        <div className="inv-portfolioSub">
                           {portfolio.type === "custom" ? "Custom portfolio" : "System-generated sample"}
                         </div>
                       </div>
-                      <div className="tag">{portfolio.risk}</div>
+                      <div className="inv-tag">{portfolio.risk}</div>
                     </div>
 
-                    <div className="miniRow">
+                    <div className="inv-miniRow">
                       <span>Expected return</span>
                       <strong>+{portfolio.expectedReturn}%</strong>
                     </div>
-                    <div className="miniRow">
+                    <div className="inv-miniRow">
                       <span>Holdings</span>
                       <strong>{portfolio.holdings.length}</strong>
                     </div>
 
                     <div style={{ marginTop: "0.7rem" }}>
                       {portfolio.holdings.map((h) => (
-                        <div className="miniRow" key={`${portfolio.id}-${h.symbol}`}>
+                        <div className="inv-miniRow" key={`${portfolio.id}-${h.symbol}`}>
                           <span><strong>{h.symbol}</strong> · {h.name}</span>
                           <span>{h.allocation}%</span>
                         </div>
@@ -758,84 +448,84 @@ export default function Investing() {
               </div>
             </div>
 
-            <div className="card">
-              <h2 className="sectionTitle">Comparison</h2>
+            <div className="inv-card">
+              <h2 className="inv-sectionTitle">Comparison</h2>
 
-              <div className="compareGrid">
-                <div className="compareBox">
-                  <div className="compareLabel">Savings Only by Target Date</div>
-                  <div className="compareValue">${money(savingsOnlyValue)}</div>
+              <div className="inv-compareGrid">
+                <div className="inv-compareBox">
+                  <div className="inv-compareLabel">Savings Only by Target Date</div>
+                  <div className="inv-compareValue">${money(savingsOnlyValue)}</div>
                 </div>
 
-                <div className="compareBox">
-                  <div className="compareLabel">Selected Portfolio Projection</div>
-                  <div className="compareValue positive">${money(investingValue)}</div>
+                <div className="inv-compareBox">
+                  <div className="inv-compareLabel">Selected Portfolio Projection</div>
+                  <div className="inv-compareValue positive">${money(investingValue)}</div>
                 </div>
               </div>
 
-              <div className="chart">
-                <div className="barWrap">
-                  <div className="barArea">
-                    <div className="bar savings" style={{ height: `${savingsBar}px` }}>
-                      <div className="barValue">${Math.round(savingsOnlyValue).toLocaleString()}</div>
+              <div className="inv-chart">
+                <div className="inv-barWrap">
+                  <div className="inv-barArea">
+                    <div className="inv-bar savings" style={{ height: `${savingsBar}px` }}>
+                      <div className="inv-barValue">${Math.round(savingsOnlyValue).toLocaleString()}</div>
                     </div>
                   </div>
-                  <div className="barLabel">Savings Only</div>
+                  <div className="inv-barLabel">Savings Only</div>
                 </div>
 
-                <div className="barWrap">
-                  <div className="barArea">
-                    <div className="bar investing" style={{ height: `${investingBar}px` }}>
-                      <div className="barValue">${Math.round(investingValue).toLocaleString()}</div>
+                <div className="inv-barWrap">
+                  <div className="inv-barArea">
+                    <div className="inv-bar investing" style={{ height: `${investingBar}px` }}>
+                      <div className="inv-barValue">${Math.round(investingValue).toLocaleString()}</div>
                     </div>
                   </div>
-                  <div className="barLabel">Selected Portfolio</div>
+                  <div className="inv-barLabel">Selected Portfolio</div>
                 </div>
 
-                <div className="barWrap">
-                  <div className="barArea">
-                    <div className="bar goal" style={{ height: `${goalBar}px` }}>
-                      <div className="barValue">${Math.round(targetAmount).toLocaleString()}</div>
+                <div className="inv-barWrap">
+                  <div className="inv-barArea">
+                    <div className="inv-bar goal" style={{ height: `${goalBar}px` }}>
+                      <div className="inv-barValue">${Math.round(targetAmount).toLocaleString()}</div>
                     </div>
                   </div>
-                  <div className="barLabel">Goal Target</div>
+                  <div className="inv-barLabel">Goal Target</div>
                 </div>
               </div>
             </div>
 
-            <div className="card">
-              <h2 className="sectionTitle">Guidance</h2>
-              <div className="hint">{insight} This simulator uses hypothetical returns and is not investment advice.</div>
+            <div className="inv-card">
+              <h2 className="inv-sectionTitle">Guidance</h2>
+              <div className="inv-hint">{insight} This simulator uses hypothetical returns and is not investment advice.</div>
             </div>
           </div>
 
           <div>
-            <div className="card">
-              <h2 className="sectionTitle">Goal Snapshot</h2>
+            <div className="inv-card">
+              <h2 className="inv-sectionTitle">Goal Snapshot</h2>
 
-              <div className="compareBox" style={{ marginBottom: "0.85rem" }}>
-                <div className="compareLabel">Current Goal</div>
-                <div className="compareValue">{goalName || "Untitled Goal"}</div>
+              <div className="inv-compareBox" style={{ marginBottom: "0.85rem" }}>
+                <div className="inv-compareLabel">Current Goal</div>
+                <div className="inv-compareValue">{goalName || "Untitled Goal"}</div>
               </div>
 
-              <div className="compareBox" style={{ marginBottom: "0.85rem" }}>
-                <div className="compareLabel">Timeline</div>
-                <div className="compareValue">{monthsLeft} month{monthsLeft === 1 ? "" : "s"}</div>
+              <div className="inv-compareBox" style={{ marginBottom: "0.85rem" }}>
+                <div className="inv-compareLabel">Timeline</div>
+                <div className="inv-compareValue">{monthsLeft} month{monthsLeft === 1 ? "" : "s"}</div>
               </div>
 
-              <div className="compareBox">
-                <div className="compareLabel">Selected Portfolio</div>
-                <div className="compareValue">{selectedPortfolio.name}</div>
+              <div className="inv-compareBox">
+                <div className="inv-compareLabel">Selected Portfolio</div>
+                <div className="inv-compareValue">{selectedPortfolio.name}</div>
               </div>
             </div>
 
-            <div className="card">
-              <h2 className="sectionTitle">Selected Holdings</h2>
-              <div className="list">
+            <div className="inv-card">
+              <h2 className="inv-sectionTitle">Selected Holdings</h2>
+              <div className="inv-list">
                 {selectedPortfolio.holdings.map((holding) => (
-                  <div className="row" key={`${selectedPortfolio.id}-${holding.symbol}`}>
-                    <div className="rowLeft">
-                      <div className="rowIcon">
+                  <div className="inv-row" key={`${selectedPortfolio.id}-${holding.symbol}`}>
+                    <div className="inv-rowLeft">
+                      <div className="inv-rowIcon">
                         {holding.type === "stock"
                           ? "📈"
                           : holding.type === "bond"
@@ -845,24 +535,24 @@ export default function Investing() {
                           : "📊"}
                       </div>
                       <div>
-                        <div className="rowTitle">{holding.symbol}</div>
-                        <div className="rowSub">{holding.name}</div>
+                        <div className="inv-rowTitle">{holding.symbol}</div>
+                        <div className="inv-rowSub">{holding.name}</div>
                       </div>
                     </div>
-                    <div className="rowAmt">{holding.allocation}%</div>
+                    <div className="inv-rowAmt">{holding.allocation}%</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="card">
-              <h2 className="sectionTitle">Save This Plan</h2>
+            <div className="inv-card">
+              <h2 className="inv-sectionTitle">Save This Plan</h2>
 
-              {saveMessage ? <div className="hint success">{saveMessage}</div> : null}
-              {saveError ? <div className="hint error">{saveError}</div> : null}
+              {saveMessage ? <div className="inv-hint success">{saveMessage}</div> : null}
+              {saveError ? <div className="inv-hint error">{saveError}</div> : null}
 
               <div style={{ marginTop: "1rem" }}>
-                <button className="button" onClick={handleGeneratePortfolio} disabled={saving}>
+                <button className="inv-button" onClick={handleGeneratePortfolio} disabled={saving}>
                   {saving ? "Saving..." : "Generate Portfolio"}
                 </button>
               </div>

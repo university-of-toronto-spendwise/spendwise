@@ -9,186 +9,6 @@ const STATUSES = [
   { key: "submitted", label: "Submitted" },
 ];
 
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
-
-  :root {
-    --uoft-blue: #002A5C;
-    --uoft-mid: #0047A0;
-    --uoft-accent: #E8B53E;
-    --off-white: #F4F7FB;
-    --text-muted: #6B7A90;
-    --border: #D0DBE8;
-    --error: #C0392B;
-  }
-
-  .ms-page {
-    min-height: 100vh;
-    background: var(--off-white);
-    font-family: inherit;
-  }
-
-  .ms-body {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .ms-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .ms-header h1 {
-    font-size: 1.9rem;
-    font-weight: 700;
-    color: var(--uoft-blue);
-    margin-bottom: 0.25rem;
-  }
-
-  .ms-header p {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-  }
-
-  .ms-kanban {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-    align-items: start;
-  }
-
-  .ms-column {
-    background: white;
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-    transition: background 0.2s, border-color 0.2s;
-  }
-
-  .ms-column.drag-over {
-    background: #EEF3FB;
-    border-color: var(--uoft-mid);
-  }
-
-  .ms-column.saved { border-top: 4px solid #B91C1C; }
-  .ms-column.saved .ms-column-header { background: #FEE2E2; color: #B91C1C; border-color: #FECACA; }
-  .ms-column.saved .ms-column-count { background: #FECACA; color: #B91C1C; }
-
-  .ms-column.in_progress { border-top: 4px solid #92400E; }
-  .ms-column.in_progress .ms-column-header { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
-  .ms-column.in_progress .ms-column-count { background: #FDE68A; color: #92400E; }
-
-  .ms-column.submitted { border-top: 4px solid #047857; }
-  .ms-column.submitted .ms-column-header { background: #D1FAE5; color: #047857; border-color: #A7F3D0; }
-  .ms-column.submitted .ms-column-count { background: #A7F3D0; color: #047857; }
-
-  .ms-column-header {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--uoft-blue);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-radius: 14px 14px 0 0;
-  }
-
-  .ms-column-count {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-  }
-
-  .ms-column-cards {
-    flex: 1;
-    padding: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .ms-card {
-    background: white;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    cursor: grab;
-    transition: box-shadow 0.15s;
-  }
-
-  .ms-card:hover {
-    box-shadow: 0 4px 12px rgba(0,42,92,0.08);
-  }
-
-  .ms-card:active {
-    cursor: grabbing;
-  }
-
-  .ms-card.dragging {
-    opacity: 0.6;
-    cursor: grabbing;
-  }
-
-  .ms-card-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--uoft-blue);
-    margin-bottom: 0.35rem;
-    line-height: 1.3;
-  }
-
-  .ms-card-amount {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--uoft-mid);
-    margin-bottom: 0.4rem;
-  }
-
-  .ms-card-deadline {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-  }
-
-  .ms-card-deadline.urgent {
-    color: var(--error);
-    font-weight: 600;
-  }
-
-  .ms-empty {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-muted);
-  }
-
-  .ms-empty-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .ms-loading {
-    display: flex;
-    justify-content: center;
-    padding: 3rem;
-  }
-
-  .ms-spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #E8EDF5;
-    border-top-color: var(--uoft-mid);
-    border-radius: 50%;
-    animation: ms-spin 0.7s linear infinite;
-  }
-
-  @keyframes ms-spin {
-    to { transform: rotate(360deg); }
-  }
-`;
 
 // ── Shared auth helpers ───────────────────────────────────────────────────────
 const getAccessToken = () =>
@@ -342,7 +162,6 @@ export default function MyScholarships() {
 
   return (
     <>
-      <style>{styles}</style>
       <div className="ms-page">
         <Navbar />
         <div className="ms-body">
@@ -364,7 +183,7 @@ export default function MyScholarships() {
                   type="button"
                   onClick={() => navigate("/scholarships")}
                   style={{
-                    background: "var(--uoft-blue)",
+                    background: "var(--sw-primary)",
                     color: "white",
                     border: "none",
                     padding: "0.5rem 1rem",

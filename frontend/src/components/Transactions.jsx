@@ -392,71 +392,11 @@ export default function Transactions() {
 
   const selectedLabel = accountId ? formatAccountLabel(accountId) : "All Accounts";
 
-  const CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
-
-    .tx-page{background:#f4f7fb;min-height:100vh;font-family:'Source Sans 3',sans-serif}
-    .tx-body{max-width:1180px;margin:0 auto;padding:30px 20px 70px}
-    .tx-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
-    .tx-title{margin:0;font-size:40px;letter-spacing:-0.02em;color:#002a5c;line-height:1.05;font-weight:800}
-    .tx-subtitle{margin:8px 0 0;color:#6b7a90;font-size:18px}
-    .tx-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:2px solid #d0dbe8;background:#fff;color:#002a5c;font-size:13px;font-weight:700}
-    .tx-sync-btn{border:none;border-radius:12px;padding:11px 16px;background:#002a5c;color:#fff;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(0,42,92,0.25)}
-    .tx-sync-btn:hover:not(:disabled){background:#0047a0}
-    .tx-sync-btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
-
-    .tx-account-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
-    .tx-account-tab{max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:2px solid #d0dbe8;background:#fff;color:#002a5c;border-radius:999px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer}
-    .tx-account-tab.active{background:#002a5c;border-color:#002a5c;color:#fff;box-shadow:0 2px 8px rgba(0,42,92,0.2)}
-
-    .tx-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin:0 0 16px}
-    .tx-card{background:#fff;border:2px solid #d0dbe8;border-radius:18px;box-shadow:0 4px 14px rgba(0,42,92,.06)}
-    .tx-card-h{padding:14px 16px;border-bottom:2px solid #eef2f8;display:flex;align-items:center;justify-content:space-between}
-    .tx-card-h h3{margin:0;font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:#002a5c}
-    .tx-card-b{padding:16px}
-
-    .tx-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .tx-stat{padding:14px;border-radius:14px;background:linear-gradient(180deg,#fff,#f8fbff);border:2px solid #e1e9f4}
-    .tx-stat p{margin:0;color:#6b7a90;font-size:12px;font-weight:600}
-    .tx-stat h2{margin:7px 0 0;font-size:30px;color:#002a5c;line-height:1;font-weight:800}
-
-    .tx-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
-    .tx-select{width:100%;padding:10px 12px;border-radius:12px;border:2px solid #d0dbe8;background:#fff;color:#002a5c;font-weight:600;outline:none;min-height:44px}
-    .tx-select:focus{border-color:#0047a0}
-
-    .tx-tips{display:flex;flex-direction:column;gap:10px}
-    .tx-tip{padding:12px;border:2px dashed #c9dbf6;background:#edf4ff;border-radius:12px;color:#002a5c}
-    .tx-tip strong{color:#002a5c}
-
-    .tx-table-wrap{overflow:auto}
-    .tx-table{width:100%;border-collapse:separate;border-spacing:0}
-    .tx-table th{position:sticky;top:0;background:#f7faff;border-bottom:2px solid #dce7f4;color:#002a5c;font-size:12px;text-transform:uppercase;letter-spacing:.09em;padding:12px;text-align:left}
-    .tx-table td{padding:13px 12px;border-bottom:1px solid #edf2f8;color:#1e2f45;font-size:15px}
-    .tx-table tr:hover td{background:#f8fbff}
-
-    .tx-cat{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;border:1px solid #d0dbe8;background:#fff;color:#0047a0;font-size:12px;font-weight:700}
-    .tx-amount{font-variant-numeric:tabular-nums;font-weight:900;text-align:right}
-    .tx-amount.in{color:#14805e}
-    .tx-amount.out{color:#c0392b}
-
-    .tx-empty{padding:18px;color:#6b7a90;font-size:15px}
-    .tx-note{margin:0 0 12px;padding:11px 14px;border-radius:12px;background:#eef4fb;border:2px solid #d5e0ee;color:#334860;font-size:14px}
-    .tx-error{margin:0 0 12px;padding:11px 14px;border-radius:12px;border:2px solid #f3c3bf;background:#fff4f3;color:#8c2c23}
-
-    @media (max-width:980px){
-      .tx-grid{grid-template-columns:1fr}
-      .tx-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .tx-title{font-size:34px}
-    }
-  `;
-
   return (
     <div className="tx-page">
       <Navbar />
 
       <main className="tx-body">
-        <style>{CSS}</style>
-
         <header className="tx-header">
           <div>
             <h1 className="tx-title">Transactions</h1>

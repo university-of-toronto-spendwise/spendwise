@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { fetchProfile, clearSession, getToken } from "../utils/session";
+import { useTheme } from "../context/ThemeContext";
+import ReportBugModal from "./ReportBugModal";
 
 const PROFILE_KEY = "userProfile";
 const DEFAULT_PROFILE = { faculty: "", major: "", year: 1 };
@@ -12,200 +14,6 @@ function loadScholarshipProfile() {
     return DEFAULT_PROFILE;
   }
 }
-
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
-
-  .sw-nav {
-    height: 64px;
-    background: white;
-    border-bottom: 1.5px solid #D0DBE8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .sw-nav-inner {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    height: 100%;
-  }
-
-  .sw-nav-logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.7rem;
-    text-decoration: none;
-    flex-shrink: 0;
-  }
-
-  .sw-nav-logo-box {
-    background: #002A5C;
-    border-radius: 10px;
-    padding: 0.4rem 0.9rem 0.4rem 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 3px 3px 0px #E8B53E;
-  }
-
-  .sw-nav-logo-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: white;
-    line-height: 1;
-  }
-
-  .sw-nav-badge {
-    background: #E8B53E;
-    color: #002A5C;
-    font-size: 0.55rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 20px;
-    align-self: flex-start;
-    margin-top: 8px;
-  }
-
-  .sw-nav-tabs {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    flex: 1;
-    justify-content: center;
-  }
-
-  .sw-nav-tab {
-    padding: 0.45rem 1.1rem;
-    border-radius: 8px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.92rem;
-    font-weight: 500;
-    color: #6B7A90;
-    cursor: pointer;
-    border: none;
-    background: none;
-    transition: color 0.15s, background 0.15s;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-  }
-
-  .sw-nav-tab:hover {
-    color: #002A5C;
-    background: #F4F7FB;
-  }
-
-  .sw-nav-tab.active {
-    color: #002A5C;
-    background: #EEF3FB;
-    font-weight: 600;
-    border: 1.5px solid #D0DBE8;
-  }
-
-  .sw-nav-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-shrink: 0;
-  }
-
-  .sw-nav-icon-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    border: 1.5px solid #D0DBE8;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #6B7A90;
-    transition: color 0.15s, border-color 0.15s;
-  }
-
-  .sw-nav-icon-btn:hover {
-    color: #002A5C;
-    border-color: #002A5C;
-  }
-
-  .sw-nav-profile-wrap {
-    position: relative;
-  }
-
-  .sw-nav-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    min-width: 260px;
-    background: white;
-    border: 1.5px solid #D0DBE8;
-    border-radius: 12px;
-    box-shadow: 0 12px 32px rgba(0,42,92,0.12);
-    padding: 0.5rem 0;
-    z-index: 200;
-  }
-
-  .sw-nav-dropdown-header {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid #E8EDF5;
-  }
-
-  .sw-nav-dropdown-name {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #002A5C;
-    margin-bottom: 0.25rem;
-  }
-
-  .sw-nav-dropdown-meta {
-    font-size: 0.8rem;
-    color: #6B7A90;
-  }
-
-  .sw-nav-dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    width: 100%;
-    padding: 0.65rem 1.25rem;
-    border: none;
-    background: none;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #002A5C;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.15s;
-  }
-
-  .sw-nav-dropdown-item:hover {
-    background: #F4F7FB;
-  }
-
-  .sw-nav-dropdown-item.logout {
-    color: #C0392B;
-    border-top: 1px solid #E8EDF5;
-    margin-top: 0.25rem;
-    padding-top: 0.85rem;
-  }
-
-  .sw-nav-dropdown-item.logout:hover {
-    background: #FEF0EE;
-  }
-`;
 
 const DollarIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -257,12 +65,24 @@ const TABS = [
   { label: "Investments", path: "/investing" },
 ];
 
+const BugIcon = () => (
+  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <path d="M12 22v-4M12 18a2 2 0 0 1-2-2V8a2 2 0 0 1 4 0v8a2 2 0 0 1-2 2z"/>
+    <path d="M8 12h.01M12 12h.01M16 12h.01"/>
+    <path d="M9 6a3 3 0 0 1 6 0"/>
+  </svg>
+);
+
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [reportBugOpen, setReportBugOpen] = useState(false);
   const [apiProfile, setApiProfile] = useState(null);
   const dropdownRef = useRef(null);
+  const settingsRef = useRef(null);
 
   const scholarshipProfile = loadScholarshipProfile();
   const yearLabel = ["1st", "2nd", "3rd", "4th", "5th"][scholarshipProfile.year - 1] || `${scholarshipProfile.year}th`;
@@ -282,12 +102,15 @@ export default function Navbar() {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
       }
+      if (settingsRef.current && !settingsRef.current.contains(e.target)) {
+        setSettingsOpen(false);
+      }
     };
-    if (dropdownOpen) {
+    if (dropdownOpen || settingsOpen) {
       document.addEventListener("click", handleClickOutside);
     }
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [dropdownOpen]);
+  }, [dropdownOpen, settingsOpen]);
 
   const handleLogout = () => {
     clearSession();
@@ -298,7 +121,6 @@ export default function Navbar() {
 
   return (
     <>
-      <style>{styles}</style>
       <nav className="sw-nav">
         <div className="sw-nav-inner">
           {/* Logo - DO NOT CHANGE */}
@@ -372,12 +194,43 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-            <button type="button" className="sw-nav-icon-btn" title="Settings" aria-label="Settings" onClick={() => navigate("/settings")}>
-              <SettingsIcon />
-            </button>
+            <div className="sw-nav-settings-wrap" ref={settingsRef}>
+              <button
+                type="button"
+                className="sw-nav-icon-btn"
+                title="Settings"
+                aria-label="Settings"
+                aria-expanded={settingsOpen}
+                onClick={() => setSettingsOpen((o) => !o)}
+              >
+                <SettingsIcon />
+              </button>
+              {settingsOpen && (
+                <div className="sw-nav-dropdown" role="menu">
+                  <div className="sw-nav-toggle-row">
+                    <span>Dark mode</span>
+                    <button
+                      type="button"
+                      className={`sw-nav-toggle ${theme === "dark" ? "on" : ""}`}
+                      onClick={toggleTheme}
+                      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="sw-nav-dropdown-item"
+                    role="menuitem"
+                    onClick={() => { setSettingsOpen(false); setReportBugOpen(true); }}
+                  >
+                    <BugIcon /> Report a bug
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </nav>
+      {reportBugOpen && <ReportBugModal onClose={() => setReportBugOpen(false)} />}
     </>
   );
 }

@@ -2,216 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, fetchProfile, setOnboardingComplete, setTokens } from "../utils/session";
 
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --uoft-blue: #002A5C;
-    --uoft-mid: #0047A0;
-    --uoft-accent: #E8B53E;
-    --off-white: #F4F7FB;
-    --text-muted: #6B7A90;
-    --border: #D0DBE8;
-    --error: #C0392B;
-  }
-
-  body { font-family: 'Source Sans 3', sans-serif; }
-
-  .login-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--off-white);
-  }
-
-  .login-card {
-    width: 100%;
-    max-width: 440px;
-    padding: 2rem;
-    animation: fadeUp 0.5s ease both;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .card-subtitle {
-    font-size: 0.92rem;
-    color: var(--text-muted);
-    font-weight: 400;
-    margin-bottom: 2rem;
-    line-height: 1.55;
-  }
-
-  .form-group { margin-bottom: 1.1rem; }
-
-  label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--uoft-blue);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-
-  .input-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-
-  .input-icon {
-    position: absolute;
-    left: 13px;
-    color: var(--text-muted);
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    z-index: 1;
-    transition: color 0.2s;
-  }
-
-  .input-wrap:focus-within .input-icon { color: var(--uoft-mid); }
-
-  .input-wrap input {
-    width: 100%;
-    height: 48px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: white;
-    padding: 0 2.8rem 0 2.6rem;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.92rem;
-    color: var(--uoft-blue);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-  }
-
-  .input-wrap input::placeholder { color: #B0BAC8; font-weight: 300; }
-
-  .input-wrap input:focus {
-    border-color: var(--uoft-mid);
-    box-shadow: 0 0 0 4px rgba(0,71,160,0.1);
-  }
-
-  .input-wrap input:-webkit-autofill,
-  .input-wrap input:-webkit-autofill:hover,
-  .input-wrap input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0px 1000px white inset;
-    -webkit-text-fill-color: var(--uoft-blue);
-    transition: background-color 5000s ease-in-out 0s;
-  }
-
-  .eye-btn {
-    position: absolute;
-    right: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-muted);
-    padding: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    z-index: 3;
-    line-height: 1;
-    transition: color 0.15s;
-  }
-
-  .eye-btn:hover { color: var(--uoft-blue); }
-  .eye-btn:focus { outline: none; }
-
-  .forgot-link {
-    display: block;
-    text-align: right;
-    font-size: 0.8rem;
-    color: var(--uoft-mid);
-    text-decoration: none;
-    font-weight: 500;
-    margin-top: 0.4rem;
-  }
-
-  .forgot-link:hover { text-decoration: underline; }
-
-  .submit-btn {
-    width: 100%;
-    height: 52px;
-    border-radius: 10px;
-    border: none;
-    background: var(--uoft-blue);
-    color: white;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.97rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    margin-top: 0.75rem;
-    transition: background 0.2s, transform 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .submit-btn:hover { background: var(--uoft-mid); transform: translateY(-1px); }
-  .submit-btn:active { transform: translateY(0); }
-  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-  .spinner {
-    width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .success-banner {
-    background: #EAF7EF;
-    border: 1.5px solid #68C98A;
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #1D6A37;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-  }
-
-  .error-banner {
-    background: #FEF0EE;
-    border: 1.5px solid #E8827A;
-    border-radius: 10px;
-    padding: 0.85rem 1.1rem;
-    color: var(--error);
-    font-size: 0.87rem;
-    margin-bottom: 1rem;
-  }
-
-  .signup-prompt {
-    text-align: center;
-    margin-top: 1.4rem;
-    font-size: 0.87rem;
-    color: var(--text-muted);
-  }
-
-  .signup-prompt a {
-    color: var(--uoft-mid);
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .signup-prompt a:hover { text-decoration: underline; }
-`;
 
 const MailIcon = () => (
   <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -290,7 +80,6 @@ export default function Login() {
 
   return (
     <>
-      <style>{styles}</style>
       <div className="login-page">
         <div className="login-card">
 
@@ -298,10 +87,10 @@ export default function Login() {
           <div style={{marginBottom:'1.4rem'}}>
             <div style={{display:'inline-flex', alignItems:'center', gap:'0.7rem'}}>
               <div style={{
-                background:'var(--uoft-blue)', borderRadius:'12px',
+                background:'#002A5C', borderRadius:'12px',
                 padding:'0.55rem 1.2rem 0.55rem 1rem',
                 display:'flex', alignItems:'center', gap:'0.65rem',
-                boxShadow:'4px 4px 0px var(--uoft-accent)',
+                boxShadow:'4px 4px 0px #E8B53E',
               }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -311,7 +100,7 @@ export default function Login() {
                 </span>
               </div>
               <span style={{
-                background:'var(--uoft-accent)', color:'var(--uoft-blue)',
+                background:'#E8B53E', color:'#002A5C',
                 fontSize:'0.62rem', fontWeight:700, letterSpacing:'0.1em',
                 textTransform:'uppercase', padding:'3px 9px', borderRadius:'20px',
                 alignSelf:'flex-start', marginTop:'10px',
