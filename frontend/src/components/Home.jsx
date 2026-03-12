@@ -1,559 +1,142 @@
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { usePlaidLink } from "react-plaid-link";
+import { API_BASE_URL, authHeaders, fetchProfile } from "../utils/session";
 import Navbar from "./Navbar";
+import UpcomingDeadlines from "./UpcomingDeadlines";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const MONTH_OPTIONS = ["This Month", "Last Month", "3 Months", "Past Year"];
 
-function authHeaders() {
-  const token = sessionStorage.getItem("userToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+
+const API = "/api";
+const token = () => sessionStorage.getItem("userAccessToken") || sessionStorage.getItem("userToken");
+const refreshAccessToken = async () => {
+  const refresh = sessionStorage.getItem("userRefreshToken");
+  if (!refresh) return null;
+  const res = await fetch(`${API}/token/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data?.access) return null;
+  sessionStorage.setItem("userToken", data.access);
+  sessionStorage.setItem("userAccessToken", data.access);
+  return data.access;
+};
+const fetchWithAuth = async (url) => {
+  let t = token();
+  if (!t) return { ok: false, status: 401 };
+  let res = await fetch(url, { headers: { ...authHeaders() } });
+  if (res.status === 401) {
+    const newT = await refreshAccessToken();
+    if (newT) res = await fetch(url, { headers: { Authorization: `Bearer ${newT}` } });
+  }
+  return res;
+};
+
+/** Time-based greeting using the user's local timezone. X = first name. */
+function getGreeting(firstName) {
+  const name = (firstName || "").trim() || "there";
+  const hour = new Date().getHours();
+  const morning = ["Good morning", "Rise and shine", "Morning"];
+  const afternoon = ["Good afternoon", "Hey there", "Welcome back"];
+  const evening = ["Good evening", "Welcome back", "Evening"];
+  const night = ["Good night", "Late night vibes", "Burning the midnight oil"];
+  let list;
+  if (hour >= 5 && hour < 12) list = morning;
+  else if (hour >= 12 && hour < 17) list = afternoon;
+  else if (hour >= 17 && hour < 21) list = evening;
+  else list = night;
+  const prefix = list[hour % list.length];
+  if (prefix === "Hey there" || prefix === "Welcome back" || prefix === "Rise and shine") return `${prefix}, ${name}!`;
+  if (prefix === "Morning" || prefix === "Evening") return `${prefix}, ${name}!`;
+  if (prefix === "Late night vibes") return `${prefix}, ${name}!`;
+  if (prefix === "Burning the midnight oil") return `${prefix}, ${name}!`;
+  return `${prefix}, ${name}`;
 }
 
-/* DUMMY DATA (Temporary) -------------------------------- */
-// TODO: Add a more comprehensive list of options (4) and an option to select specific months
-const MONTH_OPTIONS = ["This Month", "Last Month", "2 Months Ago"];
+function toNumber(value) {
+  if (value === null || value === undefined || value === "") return 0;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
-// TODO: Replace TRANSACTIONS with API data once spending endpoint is connected.
-// Should support pagination instead of slice-based preview.
-const TRANSACTIONS = [
-  {
-    id: 1,
-    icon: "☕",
-    name: "Tim Hortons",
-    when: "Today, 2:34 PM",
-    amount: "-$6.45",
-    tone: "negative",
-    important: false,
-  },
-  {
-    id: 2,
-    icon: "📘",
-    name: "UofT Bookstore",
-    when: "Yesterday, 11:20 AM",
-    amount: "-$89.99",
-    tone: "negative",
-    important: true,
-  },
-  {
-    id: 3,
-    icon: "💸",
-    name: "OSAP Deposit",
-    when: "Feb 15, 2026",
-    amount: "+$3,200",
-    tone: "positive",
-    important: true,
-  },
-  {
-    id: 4,
-    icon: "🛒",
-    name: "Amazon.ca",
-    when: "Feb 14, 2026",
-    amount: "-$34.50",
-    tone: "negative",
-    important: false,
-  },
-  {
-    id: 5,
-    icon: "🎵",
-    name: "Spotify",
-    when: "Feb 12, 2026",
-    amount: "-$5.99",
-    tone: "negative",
-    important: false,
-  },
-  {
-    id: 6,
-    icon: "🚇",
-    name: "TTC Presto",
-    when: "Feb 10, 2026",
-    amount: "-$25.00",
-    tone: "negative",
-    important: false,
-  },
-  {
-    id: 7,
-    icon: "🍔",
-    name: "Uber Eats",
-    when: "Feb 09, 2026",
-    amount: "-$18.40",
-    tone: "negative",
-    important: true,
-  },
-  {
-    id: 8,
-    icon: "🧾",
-    name: "Phone Plan",
-    when: "Feb 07, 2026",
-    amount: "-$55.00",
-    tone: "negative",
-    important: true,
-  },
-];
+function formatCurrency(value) {
+  return value.toLocaleString(undefined, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
 
-// Upcoming deadlines are loaded from saved scholarships (see Dashboard below).
+const getPeriodLength = (label) => {
+  if (label === "3 Months") return 3;
+  if (label === "Past Year") return 12;
+  return 1;
+};
 
-/* CSS CODE -------------------------------- */
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  :root {
-    --uoft-blue: #002A5C;
-    --uoft-mid: #0047A0;
-    --uoft-accent: #E8B53E;
-
-    --off-white: #F4F7FB;
-    --white: #FFFFFF;
-    --border: #D0DBE8;
-    --border-2: #C7D4E6;
-    --text-muted: #6B7A90;
-
-    --success: #18A574;
-    --danger: #C0392B;
-
-    --shadow: 0 4px 16px rgba(0,42,92,0.08);
+const monthYearForLabel = (label, windowShift = 0) => {
+  const today = new Date();
+  const baseOffset = label === "Last Month" ? 1 : 0;
+  const totalMonths = getPeriodLength(label);
+  const entries = [];
+  for (let i = 0; i < totalMonths; i += 1) {
+    const d = new Date(today.getFullYear(), today.getMonth() - baseOffset - windowShift - i, 1);
+    entries.push({ month: d.getMonth() + 1, year: d.getFullYear() });
   }
+  return entries;
+};
 
-  body { font-family: 'Source Sans 3', sans-serif; }
+const fmtMoney = (n) =>
+  Number(n || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
-  .db-page {
-    min-height: 100vh;
-    background: var(--off-white);
-    font-family: 'Source Sans 3', sans-serif;;
-  }
+function connectIconForTransaction(category) {
+  const c = String(category || "").toLowerCase();
+  if (c.includes("food") || c.includes("restaurant")) return "FD";
+  if (c.includes("transport") || c.includes("travel") || c.includes("transit")) return "TR";
+  if (c.includes("shop") || c.includes("retail")) return "SH";
+  if (c.includes("income") || c.includes("deposit")) return "IN";
+  return "TX";
+}
 
-  .db-body {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
+function relativeDateLabel(dateText) {
+  if (!dateText) return "Unknown date";
+  const d = new Date(`${dateText}T00:00:00`);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const input = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = Math.round((today - input) / (24 * 60 * 60 * 1000));
 
-  .db-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;
-  }
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
 
-  .db-header h1 {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 1.9rem;
-    font-weight: 800;
-    color: var(--uoft-blue);
-    margin: 0 0 0.25rem 0;
-  }
-
-  .db-header p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-  }
-
-  .db-header-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  /* Dropdown */
-  .pill {
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 999px;
-    padding: 0.55rem 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    color: var(--uoft-blue);
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-  }
-
-  .pill:focus-within,
-  .pill:hover {
-    border-color: var(--border-2);
-  }
-
-  .pill .chev {
-    margin-left: 0.15rem;
-    opacity: 0.75;
-  }
-
-  .menu {
-    position: absolute;
-    top: calc(100% + 10px);
-    left: 0;
-    width: 220px;
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    box-shadow: var(--shadow);
-    padding: 0.35rem;
-    z-index: 50;
-  }
-
-  .menuItem {
-    padding: 0.6rem 0.7rem;
-    border-radius: 10px;
-    font-weight: 700;
-    color: var(--uoft-blue);
-    cursor: pointer;
-  }
-
-  .menuItem:hover { background: #EAF0FF; }
-
-  .menuItem.active {
-    background: #3B6BE3;
-    color: white;
-  }
-
-  /* Important toggle */
-  .pillToggle {
-    gap: 0.65rem;
-    padding: 0.55rem 1rem;
-  }
-
-  .dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 999px;
-    border: 2px solid var(--border);
-    background: #fff;
-  }
-
-  .dot.on {
-    background: #B9C7E6;
-    border-color: #B9C7E6;
-  }
-
-  /* Layout */
-  .db-grid {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 1.5rem;
-    align-items: start;
-  }
-
-  .db-main, .db-side { min-width: 0; }
-
-  /* Cards */
-  .card {
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 18px;
-    padding: 1.25rem 1.5rem;
-  }
-
-  .card-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.85rem;
-  }
-
-  .card-title h2 {
-    margin: 0;
-    font-size: 1.02rem;
-    font-weight: 900;
-    color: var(--uoft-blue);
-  }
-
-  .link {
-    color: var(--uoft-mid);
-    font-weight: 800;
-    font-size: 0.92rem;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  /* Hero */
-  .hero {
-    background: linear-gradient(135deg, var(--uoft-blue), var(--uoft-mid));
-    color: white;
-    border: none;
-    box-shadow: var(--shadow);
-  }
-
-  .hero-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 0.9rem;
-  }
-
-  .hero-label {
-    font-size: 0.85rem;
-    opacity: 0.92;
-    margin: 0 0 0.25rem 0;
-  }
-
-  .hero-amount {
-    font-size: 1.9rem;
-    font-weight: 900;
-    margin: 0;
-    letter-spacing: -0.02em;
-  }
-
-  .hero-change {
-    background: rgba(255,255,255,0.14);
-    border: 1px solid rgba(255,255,255,0.25);
-    padding: 0.35rem 0.65rem;
-    border-radius: 999px;
-    font-weight: 900;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
-
-  .hero-meta {
-    display: flex;
-    justify-content: space-between;
-    opacity: 0.92;
-    font-size: 0.88rem;
-    margin-top: 0.6rem;
-  }
-
-  .progress {
-    height: 8px;
-    background: rgba(255,255,255,0.18);
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 0.7rem;
-  }
-
-  .progress > span {
-    display: block;
-    height: 100%;
-    width: var(--pct, 60%);
-    background: rgba(255,255,255,0.88);
-    border-radius: 999px;
-  }
-
-  /* Tiles */
-  .actions {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.25rem;
-    margin-top: 1.25rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .tile {
-    background: var(--white);
-    border: 2px solid var(--border);
-    border-radius: 18px;
-    padding: 1.15rem 1.2rem;
-    cursor: pointer;
-    transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
-    display: flex;
-    align-items: center;
-    gap: 0.95rem;
-    min-width: 0;
-  }
-
-  .tile:hover {
-    border-color: var(--border-2);
-    box-shadow: 0 6px 18px rgba(0,42,92,0.08);
-    transform: translateY(-1px);
-  }
-
-  .tile:active { transform: translateY(0); }
-
-  .tileIconWrap {
-    width: 54px;
-    height: 54px;
-    border-radius: 16px;
-    border: 2px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    background: #fff;
-  }
-
-  .tScholar { background: #FFF6E0; border-color: rgba(232,181,62,0.5); }
-  .tBills { background: #EAF0FF; border-color: rgba(0,71,160,0.18); }
-  .tCodes { background: #ECFDF5; border-color: rgba(24,165,116,0.18); }
-
-  .tileTitle {
-    font-weight: 900;
-    color: var(--uoft-blue);
-    font-size: 1.05rem;
-    margin: 0 0 0.1rem 0;
-  }
-
-  .tileSub {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-  }
-
-  /* Insight */
-  .insightCardSpacing { margin-bottom: 1.25rem; }
-
-  .insight {
-    display: flex;
-    gap: 0.85rem;
-    align-items: flex-start;
-  }
-
-  .insightIcon {
-    width: 54px;
-    height: 54px;
-    border-radius: 16px;
-    background: #FFF6E0;
-    border: 2px solid rgba(232,181,62,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 1.15rem;
-  }
-
-  .insight strong {
-    display: block;
-    color: var(--uoft-blue);
-    font-weight: 900;
-    font-size: 1.05rem;
-    margin-bottom: 0.2rem;
-  }
-
-  .insight p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 1rem;
-    line-height: 1.45;
-  }
-
-  /* Lists */
-  .list { display: flex; flex-direction: column; gap: 0.95rem; }
-
-  .row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.9rem;
-    padding: 1rem;
-    border-radius: 16px;
-    background: #F7FAFF;
-    border: 2px solid rgba(208,219,232,0.75);
-  }
-
-  .row-left {
-    display: flex;
-    gap: 0.9rem;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .row-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    background: #fff;
-    border: 2px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 1.2rem;
-  }
-
-  .row-title {
-    font-weight: 900;
-    color: var(--uoft-blue);
-    font-size: 1.05rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .row-sub {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    margin-top: 0.15rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .amt {
-    font-weight: 900;
-    font-size: 1.05rem;
-    white-space: nowrap;
-  }
-
-  .amt.negative { color: var(--danger); }
-  .amt.positive { color: var(--success); }
-
-  .empty {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    text-align: center;
-    padding: 1.25rem 0;
-  }
-
-  /* Deadlines */
-  .deadlineBadge {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    flex-shrink: 0;
-    border: 2px solid var(--border);
-    background: #fff;
-  }
-
-  .d-red { background: #FDECEC; color: var(--danger); border-color: rgba(192,57,43,0.25); }
-  .d-yellow { background: #FFF6E0; color: #8A5A00; border-color: rgba(232,181,62,0.45); }
-  .d-blue { background: #EAF0FF; color: var(--uoft-mid); border-color: rgba(0,71,160,0.25); }
-
-  /* Responsive */
-  @media (max-width: 980px) {
-    .db-grid { grid-template-columns: 1fr; }
-    .db-side { order: 2; }
-  }
-
-  @media (max-width: 720px) {
-    .db-body { padding: 1.25rem 1rem; }
-    .actions { grid-template-columns: 1fr; }
-    .pill { width: 100%; justify-content: space-between; }
-    .db-header { align-items: flex-start; }
-    .menu { width: 100%; }
-  }
-`;
-
-/* COMPONENTS --------------------------------*/
 function HeroSpendingCard({ monthLabel, total, budget, deltaPct }) {
-  const pctUsed = Math.min(100, Math.round((total / budget) * 100));
+  const pctUsed = Math.min(100, Math.round((total / (budget || 1)) * 100));
+  const absDelta = Math.abs(deltaPct || 0);
+  const trendClass = deltaPct > 0 ? "bad" : deltaPct < 0 ? "good" : "neutral";
+  const trendText =
+    deltaPct > 0
+      ? `Up ${absDelta}% vs last period`
+      : deltaPct < 0
+        ? `Down ${absDelta}% vs last period`
+        : "No change vs last period";
 
   return (
     <div className="card hero" style={{ ["--pct"]: `${pctUsed}%` }}>
       <div className="hero-top">
         <div>
-          <p className="hero-label">Monthly Spending • {monthLabel}</p>
-          <p className="hero-amount">
-            $
-            {total.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </p>
+          <p className="hero-label">Monthly Spending - {monthLabel}</p>
+          <p className="hero-amount">${fmtMoney(total)}</p>
         </div>
-
-        <div className="hero-change">
-          {deltaPct >= 0 ? `↗ +${deltaPct}%` : `↘ ${deltaPct}%`}
-        </div>
+        <div className={`hero-change ${trendClass}`}>{trendText}</div>
       </div>
 
       <div className="hero-meta">
@@ -567,6 +150,41 @@ function HeroSpendingCard({ monthLabel, total, budget, deltaPct }) {
     </div>
   );
 }
+
+function shortAccountLabel(label) {
+  const text = String(label || "");
+  if (text.length <= 15) return text;
+  return `${text.slice(0, 12)}...`;
+}
+
+const ScholarshipIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+    <path d="M12 14l6.16-3.422a12 12 0 0 1.665 6.479A11.96 11.96 0 0 0 12 20.055a11.96 11.96 0 0 0-7.825-2.998 12 12 0 0 1 .665-6.479L12 14z"/>
+  </svg>
+);
+const BillsIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <path d="M14 2v6h6"/>
+    <path d="M16 13H8"/>
+    <path d="M16 17H8"/>
+    <path d="M10 9H8"/>
+  </svg>
+);
+const StudentCodesIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+    <line x1="7" y1="7" x2="7.01" y2="7"/>
+  </svg>
+);
+const InsightIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 18h6"/>
+    <path d="M10 22h4"/>
+    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+  </svg>
+);
 
 function QuickTile({ icon, title, subtitle, toneClass, onClick }) {
   return (
@@ -605,7 +223,7 @@ function InsightCard({ title, message }) {
   return (
     <div className="card">
       <div className="insight">
-        <div className="insightIcon">💡</div>
+        <div className="insightIcon"><InsightIcon /></div>
         <div>
           <strong>{title}</strong>
           <p>{message}</p>
@@ -615,42 +233,19 @@ function InsightCard({ title, message }) {
   );
 }
 
-// TODO: Close dropdown when clicking outside.
-// Consider extracting this into a reusable Dropdown component for other pages.
 function MonthDropdown({ value, onChange, options }) {
   const [open, setOpen] = useState(false);
 
-  const handleSelect = (opt) => {
-    onChange(opt);
-    setOpen(false);
-  };
-
-  /* HELPERS --------------------------------*/
-  const formatMoney = (n) =>
-  n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const clampPct = (n) => Math.max(0, Math.min(100, n));
-
   return (
-    <div
-      className="pill"
-      onClick={() => setOpen((v) => !v)}
-      role="button"
-      tabIndex={0}
-      aria-label="Select month"
-    >
-      <span>📅</span>
+    <div className="pill" onClick={() => setOpen((v) => !v)} role="button" tabIndex={0} aria-label="Select month">
+      <span>Date</span>
       <span>{value}</span>
-      <span className="chev">▾</span>
+      <span className="chev">v</span>
 
       {open && (
         <div className="menu" onClick={(e) => e.stopPropagation()}>
           {options.map((opt) => (
-            <div
-              key={opt}
-              className={`menuItem ${opt === value ? "active" : ""}`}
-              onClick={() => handleSelect(opt)}
-            >
+            <div key={opt} className={`menuItem ${opt === value ? "active" : ""}`} onClick={() => { onChange(opt); setOpen(false); }}>
               {opt}
             </div>
           ))}
@@ -660,102 +255,306 @@ function MonthDropdown({ value, onChange, options }) {
   );
 }
 
-/* Helpers for deadlines from saved scholarships */
-function formatDeadlineDate(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
+function ConnectBankButton({ onLinked, onError }) {
+  const [linkToken, setLinkToken] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/plaid/link-token/", { method: "POST", headers: { ...authHeaders() } })
+      .then(async (r) => {
+        if (!r.ok) throw new Error("Unable to initialize Plaid Link");
+        return r.json();
+      })
+      .then((data) => setLinkToken(data.link_token))
+      .catch((e) => onError(e.message));
+  }, [onError]);
+
+  const { open, ready } = usePlaidLink({
+    token: linkToken,
+    onSuccess: async (publicToken, metadata) => {
+      setBusy(true);
+      try {
+        const resp = await fetch("/api/plaid/exchange-token/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...authHeaders(),
+          },
+          body: JSON.stringify({
+            public_token: publicToken,
+            institution: metadata?.institution || {},
+          }),
+        });
+
+        const payload = await resp.json();
+        if (!resp.ok) throw new Error(payload?.error || "Failed to connect bank account");
+
+        const itemId = payload.item_id;
+        await Promise.all([
+          fetch(`/api/plaid/items/${itemId}/accounts/`, { headers: { ...authHeaders() } }),
+          fetch(`/api/plaid/items/${itemId}/transactions/?days=180&count=500`, { headers: { ...authHeaders() } }),
+        ]);
+
+        onLinked(payload);
+      } catch (e) {
+        onError(e.message);
+      } finally {
+        setBusy(false);
+      }
+    },
+    onExit: (err) => {
+      if (err) onError(err.display_message || err.error_message || "Plaid connection cancelled");
+    },
+  });
+
+  return (
+    <button className="bank-cta" onClick={() => open()} disabled={!ready || busy}>
+      {busy ? "Connecting..." : "Connect Bank Account"}
+    </button>
+  );
 }
 
-function daysLeft(dateStr) {
-  if (!dateStr) return null;
-  return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
-}
-
-/* DASHBOARD --------------------------------*/
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const [firstName, setFirstName] = useState("");
   const [month, setMonth] = useState("This Month");
+  const [selectedAccountId, setSelectedAccountId] = useState("");
   const [onlyImportant, setOnlyImportant] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [savedScholarships, setSavedScholarships] = useState([]);
+  const [bankCount, setBankCount] = useState(0);
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [statusError, setStatusError] = useState(false);
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [totalSavings, setTotalSavings] = useState(0);
+  const [deltaPct, setDeltaPct] = useState(0);
+  const [monthlyDetail, setMonthlyDetail] = useState({
+    transactions: 0,
+    expenseTx: 0,
+    incomeTx: 0,
+    avgExpense: 0,
+    avgIncome: 0,
+    net: 0,
+    totalIncome: 0,
+    totalExpense: 0,
+    periodMonths: 1,
+  });
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const budget = 2200;
+  const selectedBankName =
+    selectedAccountId && bankAccounts.find((b) => b.id === selectedAccountId)?.name;
+  const selectedBankNameShort = selectedBankName ? shortAccountLabel(selectedBankName) : "";
+
+  const fetchBankAccounts = async () => {
+    const accResp = await fetch("/api/plaid/bank-accounts/", { headers: { ...authHeaders() } });
+    if (!accResp.ok) return [];
+    const payload = await accResp.json();
+    const rows = Array.isArray(payload?.accounts) ? payload.accounts : [];
+    const unique = [];
+    const seen = new Set();
+    for (const row of rows) {
+      const id = row?.account_id;
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      const label =
+        row?.official_name ||
+        row?.name ||
+        `${row?.item__institution_name || "Bank"} ${row?.mask ? `...${row.mask}` : ""}`;
+      unique.push({ id, name: label });
+    }
+    const capped = unique.slice(0, 5);
+    setBankAccounts(capped);
+    return capped;
+  };
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
+    const load = async () => {
       try {
-        const res = await fetch(`${API}/scholarships/saved/`, { headers: authHeaders() });
-        if (res.ok && !cancelled) {
-          const data = await res.json();
-          setSavedScholarships(Array.isArray(data) ? data : []);
+        const itemResp = await fetch("/api/plaid/items/", { headers: { ...authHeaders() } });
+        if (itemResp.ok) {
+          const payload = await itemResp.json();
+          const items = payload?.items || [];
+          setBankCount(items.length);
+
+          if (items.length) {
+            await Promise.all(
+              items.map((it) =>
+                Promise.all([
+                  fetch(`/api/plaid/items/${it.item_id}/accounts/`, { headers: { ...authHeaders() } }),
+                  fetch(`/api/plaid/items/${it.item_id}/transactions/?days=180&count=500`, { headers: { ...authHeaders() } }),
+                ])
+              )
+            );
+          }
+
+          await fetchBankAccounts();
         }
-      } catch (e) {
-        if (!cancelled) console.error(e);
+      } catch {
+        setStatusError(true);
+        setStatusMessage("Could not sync your connected bank data right now.");
       }
-    })();
-    return () => { cancelled = true; };
+    };
+
+    load();
+  }, [reloadKey]);
+
+  useEffect(() => {
+    fetchWithAuth(`${API}/profile/`).then((res) => {
+      if (res.ok) res.json().then((data) => setFirstName(data?.first_name || ""));
+    });
   }, []);
 
-  const deadlines = useMemo(() => {
-    return (savedScholarships || [])
-      .filter((s) => s.deadline)
-      .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-      .slice(0, 8)
-      .map((s) => {
-        const d = new Date(s.deadline);
-        const day = d.getDate().toString().padStart(2, "0");
-        const days = daysLeft(s.deadline);
-        const amountText = s.amount_max
-          ? `$${s.amount_max.toLocaleString()} award`
-          : s.amount_text || "Scholarship";
-        const meta =
-          days !== null && days >= 0
-            ? `Due ${formatDeadlineDate(s.deadline)} — ${days} days left`
-            : `Due ${formatDeadlineDate(s.deadline)} — ${amountText}`;
-        const badgeClass = days !== null && days <= 7 ? "d-red" : days !== null && days <= 14 ? "d-yellow" : "d-blue";
+  useEffect(() => {
+    if (!selectedAccountId) return;
+    if (!bankAccounts.some((acc) => acc.id === selectedAccountId)) {
+      setSelectedAccountId("");
+    }
+  }, [bankAccounts, selectedAccountId]);
+
+  useEffect(() => {
+    const loadMonthData = async () => {
+      const periodMonths = monthYearForLabel(month);
+      const previousPeriodMonths = monthYearForLabel(month, getPeriodLength(month));
+      const accountQuery = selectedAccountId ? `&account_id=${encodeURIComponent(selectedAccountId)}` : "";
+
+      const selectedPeriodFetches = await Promise.all(
+        periodMonths.map(async ({ month: m, year: y }) => {
+          const [txResp, expenseResp, savingResp] = await Promise.all([
+            fetch(`/api/spending/monthly_transactions/?month=${m}&year=${y}${accountQuery}`, { headers: { ...authHeaders() } }),
+            fetch(`/api/spending/total_expenses_amount/?month=${m}&year=${y}${accountQuery}`, { headers: { ...authHeaders() } }),
+            fetch(`/api/spending/monthly_saving_amount/?month=${m}&year=${y}${accountQuery}`, { headers: { ...authHeaders() } }),
+          ]);
+
+          return { txResp, expenseResp, savingResp };
+        })
+      );
+
+      const previousExpenseFetches = await Promise.all(
+        previousPeriodMonths.map(async ({ month: m, year: y }) =>
+          fetch(`/api/spending/total_expenses_amount/?month=${m}&year=${y}${accountQuery}`, { headers: { ...authHeaders() } })
+        )
+      );
+
+      if (
+        selectedPeriodFetches.some((r) => !r.txResp.ok || !r.expenseResp.ok || !r.savingResp.ok) ||
+        previousExpenseFetches.some((r) => !r.ok)
+      ) {
+        setStatusError(true);
+        setStatusMessage("Could not load all dashboard data. Please refresh.");
+        return;
+      }
+
+      const txPayloads = await Promise.all(selectedPeriodFetches.map((r) => r.txResp.json()));
+      const expensePayloads = await Promise.all(selectedPeriodFetches.map((r) => r.expenseResp.json()));
+      const savingPayloads = await Promise.all(selectedPeriodFetches.map((r) => r.savingResp.json()));
+      const prevExpensePayloads = await Promise.all(previousExpenseFetches.map((r) => r.json()));
+
+      const txData = txPayloads.flatMap((rows) => (Array.isArray(rows) ? rows : []));
+      const expenseTotal = expensePayloads.reduce((sum, p) => sum + Number(p?.total_expenses || 0), 0);
+      const savingTotal = savingPayloads.reduce((sum, p) => sum + Number(p?.total_saving || 0), 0);
+      const prevExpenseTotal = prevExpensePayloads.reduce((sum, p) => sum + Number(p?.total_expenses || 0), 0);
+
+      const ordered = [...(Array.isArray(txData) ? txData : [])].sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      );
+
+      const mapped = ordered.map((t) => {
+        const amountNum = Number(t.amount || 0);
         return {
-          id: s.id,
-          day,
-          title: s.title,
-          meta,
-          badgeClass,
+          id: `${t.account_id}-${t.date}-${t.name}-${t.amount}`,
+          icon: connectIconForTransaction(t.category),
+          name: t.merchant_name || t.name || "Transaction",
+          when: relativeDateLabel(t.date),
+          amount: `${amountNum < 0 ? "-" : "+"}$${fmtMoney(Math.abs(amountNum))}`,
+          tone: amountNum < 0 ? "negative" : "positive",
+          important: Math.abs(amountNum) >= 50,
         };
       });
-  }, [savedScholarships]);
+
+      const currentTotal = expenseTotal;
+      const previousTotal = prevExpenseTotal;
+      const monthlyDelta = previousTotal > 0 ? Math.round(((currentTotal - previousTotal) / previousTotal) * 100) : 0;
+      const expenseRows = ordered.filter((tx) => Number(tx.amount) < 0);
+      const incomeRows = ordered.filter((tx) => Number(tx.amount) >= 0);
+      const totalIncome = incomeRows.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+      const totalExpense = Math.abs(expenseRows.reduce((sum, tx) => sum + Number(tx.amount || 0), 0));
+
+      setRecentTransactions(mapped);
+      setTotalExpenses(currentTotal);
+      setTotalSavings(savingTotal);
+      setDeltaPct(monthlyDelta);
+      setMonthlyDetail({
+        transactions: ordered.length,
+        expenseTx: expenseRows.length,
+        incomeTx: incomeRows.length,
+        avgExpense: expenseRows.length ? totalExpense / expenseRows.length : 0,
+        avgIncome: incomeRows.length ? totalIncome / incomeRows.length : 0,
+        net: totalIncome - totalExpense,
+        totalIncome,
+        totalExpense,
+        periodMonths: getPeriodLength(month),
+      });
+    };
+
+    loadMonthData();
+  }, [month, reloadKey, selectedAccountId]);
 
   const spendingSummary = useMemo(() => {
-    if (month === "Last Month") return { total: 1620.3, budget: 2200, deltaPct: -4 };
-    if (month === "2 Months Ago") return { total: 2010.1, budget: 2200, deltaPct: +9 };
-    return { total: 1847.5, budget: 2200, deltaPct: -12 };
-  }, [month]);
+    const periodMonths = Math.max(1, monthlyDetail.periodMonths || 1);
+    const avgMonthlyExpense = (monthlyDetail.totalExpense || totalExpenses || 0) / periodMonths;
+    const avgMonthlyIncome = (monthlyDetail.totalIncome || 0) / periodMonths;
+
+    let recommendedBudget = avgMonthlyIncome > 0 ? avgMonthlyIncome * 0.6 : avgMonthlyExpense * 1.15;
+    if (!Number.isFinite(recommendedBudget) || recommendedBudget <= 0) recommendedBudget = budget;
+    recommendedBudget = Math.max(500, Math.round(recommendedBudget / 50) * 50);
+
+    return { total: totalExpenses, budget: recommendedBudget, deltaPct };
+  }, [monthlyDetail, totalExpenses, deltaPct, budget]);
 
   const visibleTransactions = useMemo(() => {
-    const base = onlyImportant ? TRANSACTIONS.filter((t) => t.important) : TRANSACTIONS;
+    const base = onlyImportant ? recentTransactions.filter((t) => t.important) : recentTransactions;
     return showAll ? base : base.slice(0, 4);
-  }, [onlyImportant, showAll]);
+  }, [onlyImportant, recentTransactions, showAll]);
 
   return (
     <div className="db-page">
-      <style>{styles}</style>
       <Navbar />
 
       <div className="db-body">
+        {statusMessage && (
+          <div className={`bank-status ${statusError ? "error" : ""}`}>{statusMessage}</div>
+        )}
+
         <div className="db-header">
           <div>
-            <h1>Dashboard</h1>
-            <p>Overview of spending, activity, and upcoming deadlines.</p>
+            <h1>{getGreeting(firstName)}</h1>
+            <p>
+              {bankCount > 0
+                ? `Live overview from ${bankCount} connected bank account${bankCount > 1 ? "s" : ""}${selectedBankNameShort ? ` - ${selectedBankNameShort}` : ""}.`
+                : "Connect a bank account to start seeing real transactions."}
+            </p>
           </div>
 
           <div className="db-header-right">
+            <ConnectBankButton
+              onLinked={(payload) => {
+                setStatusError(false);
+                setStatusMessage(payload?.message || "Bank account connected successfully.");
+                setBankCount((n) => n + 1);
+                setReloadKey((k) => k + 1);
+              }}
+              onError={(msg) => {
+                setStatusError(true);
+                setStatusMessage(msg || "Could not connect bank account.");
+              }}
+            />
+
             <MonthDropdown value={month} onChange={setMonth} options={MONTH_OPTIONS} />
 
-            <div
-              className="pill pillToggle"
-              onClick={() => setOnlyImportant((v) => !v)}
-              role="button"
-              tabIndex={0}
-            >
+            <div className="pill pillToggle" onClick={() => setOnlyImportant((v) => !v)} role="button" tabIndex={0}>
               <span className={`dot ${onlyImportant ? "on" : ""}`} />
               <span>Only important</span>
             </div>
@@ -764,6 +563,29 @@ export default function Dashboard() {
 
         <div className="db-grid">
           <div className="db-main">
+            {bankAccounts.length > 0 && (
+              <div className="bank-tabs">
+                <button
+                  type="button"
+                  className={`bank-tab ${selectedAccountId === "" ? "active" : ""}`}
+                  onClick={() => setSelectedAccountId("")}
+                >
+                  All
+                </button>
+                {bankAccounts.map((acc) => (
+                  <button
+                    key={acc.id}
+                    type="button"
+                    className={`bank-tab ${selectedAccountId === acc.id ? "active" : ""}`}
+                    onClick={() => setSelectedAccountId(acc.id)}
+                    title={acc.name}
+                  >
+                    {shortAccountLabel(acc.name)}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <HeroSpendingCard
               monthLabel={month}
               total={spendingSummary.total}
@@ -771,23 +593,49 @@ export default function Dashboard() {
               deltaPct={spendingSummary.deltaPct}
             />
 
+            <div className="card" style={{ marginTop: "0.8rem", marginBottom: "1rem", padding: "0.95rem 1rem" }}>
+              <div className="card-title">
+                <h2>Monthly Spending Details</h2>
+              </div>
+              <div className="mini-grid">
+                <div className="mini-card">
+                  <p className="mini-title">Transactions</p>
+                  <p className="mini-value">{monthlyDetail.transactions}</p>
+                </div>
+                <div className="mini-card">
+                  <p className="mini-title">Avg Expense</p>
+                  <p className="mini-value neg">${fmtMoney(monthlyDetail.avgExpense)}</p>
+                </div>
+                <div className="mini-card">
+                  <p className="mini-title">Avg Income</p>
+                  <p className="mini-value pos">${fmtMoney(monthlyDetail.avgIncome)}</p>
+                </div>
+                <div className="mini-card">
+                  <p className="mini-title">Net Cash Flow</p>
+                  <p className={`mini-value ${monthlyDetail.net >= 0 ? "pos" : "neg"}`}>
+                    {monthlyDetail.net >= 0 ? "+" : "-"}${fmtMoney(Math.abs(monthlyDetail.net))}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="actions">
               <QuickTile
-                icon="🎓"
+                icon={<ScholarshipIcon />}
                 title="Scholarships"
                 subtitle="Explore matched awards"
                 toneClass="tScholar"
                 onClick={() => navigate("/scholarships")}
               />
               <QuickTile
-                icon="💵"
+                icon={<BillsIcon />}
                 title="Bills"
                 subtitle="View upcoming bills"
                 toneClass="tBills"
                 onClick={() => navigate("/bills")}
               />
               <QuickTile
-                icon="🏷️"
+                icon={<StudentCodesIcon />}
                 title="Student Codes"
                 subtitle="Apply a discount code"
                 toneClass="tCodes"
@@ -795,12 +643,10 @@ export default function Dashboard() {
               />
             </div>
 
-             {/* TODO: Replace static insight message with AI-generated spending insight */}
-            {/* once analytics endpoint is available. */}
             <div className="insightCardSpacing">
               <InsightCard
                 title="Smart Insight"
-                message="You spent $120 at Starbucks this week. That’s 3× your usual. Try making coffee at home"
+                message={`You could save about $${fmtMoney(totalSavings)} this month by reducing repeated spending patterns.`}
               />
             </div>
 
@@ -815,39 +661,9 @@ export default function Dashboard() {
               <TransactionList items={visibleTransactions} />
             </div>
           </div>
-
+          
           <div className="db-side">
-            <div className="card">
-              <div className="card-title">
-                <h2>Upcoming Deadlines</h2>
-                <div className="link" onClick={() => navigate("/scholarships/saved")}>
-                  Saved
-                </div>
-              </div>
-              {deadlines.length === 0 ? (
-                <div className="empty">Save scholarships to see upcoming deadlines here.</div>
-              ) : (
-                <div className="list">
-                  {deadlines.map((d) => (
-                    <div className="row" key={d.id}>
-                      <div className="row-left">
-                        <div className={`deadlineBadge ${d.badgeClass}`}>{d.day}</div>
-                        <div style={{ minWidth: 0 }}>
-                          <div className="row-title">{d.title}</div>
-                          <div className="row-sub">{d.meta}</div>
-                        </div>
-                      </div>
-                      <div
-                        style={{ color: "var(--text-muted)", fontWeight: 900, cursor: "pointer" }}
-                        onClick={() => navigate("/scholarships/saved")}
-                      >
-                        ›
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <UpcomingDeadlines />
           </div>
         </div>
       </div>

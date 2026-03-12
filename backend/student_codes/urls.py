@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
+from .views import SPCDealsAPI
 
 urlpatterns = [
-    path("", views.index, name='studentcodes'),
+    path("student-codes/spc/", SPCDealsAPI.as_view(), name="student-codes-spc"),
 ]

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Scholarship
+from .models import Scholarship, SavedScholarship
 
 
 class ScholarshipListSerializer(serializers.ModelSerializer):
@@ -94,3 +94,11 @@ class MatchRequestSerializer(serializers.Serializer):
     degree_type = serializers.CharField(required=False, allow_blank=True)
     citizenship = serializers.CharField(required=False, allow_blank=True)
     campus = serializers.CharField(required=False, allow_blank=True)
+
+
+class SavedScholarshipSerializer(serializers.ModelSerializer):
+    scholarship = ScholarshipListSerializer(read_only=True)
+
+    class Meta:
+        model = SavedScholarship
+        fields = ["id", "scholarship", "status", "saved_at"]

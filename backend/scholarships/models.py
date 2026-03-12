@@ -10,6 +10,12 @@ class AwardType(models.TextChoices):
     GRADUATING = "graduating", "Graduating"
 
 
+class SavedScholarshipStatus(models.TextChoices):
+    SAVED = "saved", "Saved / Planned"
+    IN_PROGRESS = "in_progress", "In Progress"
+    SUBMITTED = "submitted", "Submitted"
+
+
 class Scholarship(models.Model):
     # IDENTITY
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -72,7 +78,7 @@ class Scholarship(models.Model):
 
 
 class SavedScholarship(models.Model):
-    """User's saved/bookmarked scholarships — used for profile list and upcoming deadlines."""
+    """Links a user to a scholarship they saved; used for profile and upcoming deadlines."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -83,11 +89,21 @@ class SavedScholarship(models.Model):
         on_delete=models.CASCADE,
         related_name="saved_by_users",
     )
-    saved_at = models.DateTimeField(auto_now_add=True)
+    saved_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(
+        max_length=20,
+        choices=SavedScholarshipStatus.choices,
+        default=SavedScholarshipStatus.SAVED,
+    )
 
     class Meta:
-        unique_together = [["user", "scholarship"]]
-        ordering = ["-saved_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "scholarship"],
+                name="uniq_user_saved_scholarship",
+            )
+        ]
+        ordering = ["saved_at"]
 
     def __str__(self):
         return f"{self.user_id} saved {self.scholarship_id}"        

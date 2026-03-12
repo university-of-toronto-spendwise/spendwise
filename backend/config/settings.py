@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +28,7 @@ SECRET_KEY = 'django-insecure-+xgw5q*c-*#g&l)06#7gjs^9a%%4xg$cfz#e&^u(e_w-#$1q1g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost', 'backend']
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost', 'backend', '134.122.6.117']
 
 # Application definition
 
@@ -41,8 +42,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'scholarships',
+    'investments.apps.InvestmentsConfig',
     'rest_framework',
+    'spending',
     'corsheaders',
+    'transactions',
 ]
 
 REST_FRAMEWORK = {
@@ -83,8 +87,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database: support DATABASE_URL (deployment/CI) or POSTGRES_* (Docker/local)
-if env("DATABASE_URL", default=None):
+# Database
+# Use an in-memory SQLite database for tests.
+# In CI (e.g. GitHub Actions), use Postgres via POSTGRES_* env (host 127.0.0.1).
+# Otherwise use DATABASE_URL if set (e.g. Docker: db:5432), or POSTGRES_* with default host "db".
+if "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    }
+elif os.environ.get("GITHUB_ACTIONS") or os.environ.get("CI"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "app"),
+            "USER": os.environ.get("POSTGRES_USER", "app"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "app"),
+            "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        }
+    }
+elif env("DATABASE_URL", default=None):
     DATABASES = {"default": env.db("DATABASE_URL")}
 else:
     DATABASES = {
@@ -93,7 +118,7 @@ else:
             "NAME": os.environ.get("POSTGRES_DB", "spendwise"),
             "USER": os.environ.get("POSTGRES_USER", "postgres"),
             "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
-            "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+            "HOST": os.environ.get("POSTGRES_HOST", "db"),
             "PORT": os.environ.get("POSTGRES_PORT", "5432"),
         }
     }
@@ -117,3 +142,6 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID', '')
+PLAID_SECRET = os.environ.get('PLAID_SECRET', '')

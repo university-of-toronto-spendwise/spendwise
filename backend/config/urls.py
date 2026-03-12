@@ -6,4 +6,12 @@ urlpatterns = [
     path('studentcodes/', include('student_codes.urls')),
     path('api/', include('accounts.urls')),
     path('api/', include('scholarships.urls')),
+    path('api/', include('transactions.urls')),
+    # Add student codes path
+    path("api/", include("student_codes.urls")),
+    path('api/', include('spending.urls')),
+    path('api/investments/', include('investments.urls')),  
 ]
+
+
+
