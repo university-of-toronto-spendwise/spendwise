@@ -1,6 +1,9 @@
 from django.urls import path
-from . import views
+from .views import AllCodesAPI, RecommendedCodesAPI, SPCDealsAPI, TrendingCodesAPI
 
 urlpatterns = [
-    path("", views.index, name='studentcodes'),
+    path("student-codes/spc/", SPCDealsAPI.as_view(), name="student-codes-spc"),
+    path("student-codes/all/", AllCodesAPI.as_view(), name="student-codes-all"),
+    path("student-codes/trending/", TrendingCodesAPI.as_view(), name="student-codes-trending"),
+    path("student-codes/recommended/", RecommendedCodesAPI.as_view(), name="student-codes-recommended"),
 ]

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +28,7 @@ SECRET_KEY = 'django-insecure-+xgw5q*c-*#g&l)06#7gjs^9a%%4xg$cfz#e&^u(e_w-#$1q1g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost', 'backend']
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost', 'backend', '134.122.6.117']
 
 # Application definition
 
@@ -41,9 +42,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'scholarships',
+    'investments.apps.InvestmentsConfig',
     'rest_framework',
+    'spending',
     'corsheaders',
+    'transactions',
 ]
+
+# Allow a standalone test-only app to hold integration-style tests.
+if "test" in sys.argv and "project_tests" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("project_tests")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -83,8 +91,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database: support DATABASE_URL (deployment/CI) or POSTGRES_* (Docker/local)
-if env("DATABASE_URL", default=None):
+# Database
+# Use an in-memory SQLite database for tests.
+# In CI (e.g. GitHub Actions), use Postgres via POSTGRES_* env (host 127.0.0.1).
+# Otherwise use DATABASE_URL if set (e.g. Docker: db:5432), or POSTGRES_* with default host "db".
+if "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    }
+elif os.environ.get("GITHUB_ACTIONS") or os.environ.get("CI"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "app"),
+            "USER": os.environ.get("POSTGRES_USER", "app"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "app"),
+            "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        }
+    }
+elif env("DATABASE_URL", default=None):
     DATABASES = {"default": env.db("DATABASE_URL")}
 else:
     DATABASES = {
@@ -93,7 +122,7 @@ else:
             "NAME": os.environ.get("POSTGRES_DB", "spendwise"),
             "USER": os.environ.get("POSTGRES_USER", "postgres"),
             "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
-            "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+            "HOST": os.environ.get("POSTGRES_HOST", "db"),
             "PORT": os.environ.get("POSTGRES_PORT", "5432"),
         }
     }
@@ -117,3 +146,42 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID', '')
+PLAID_SECRET = os.environ.get('PLAID_SECRET', '')
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() == "true"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "noreply@spendwise.local")
+EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "SpendWise")
+EMAIL_VERIFICATION_CODE_TTL_MINUTES = int(os.environ.get("EMAIL_VERIFICATION_CODE_TTL_MINUTES", "10"))
+
+# Scholarships: default assumed probability of receiving saved awards (illustrative deficit math).
+SCHOLARSHIP_ASSUMED_WIN_PROBABILITY = env.float("SCHOLARSHIP_ASSUMED_WIN_PROBABILITY", default=0.8)
+
+# Award Explorer ingest (override per environment without code changes).
+AWARD_EXPLORER_POST_URL = env(
+    "AWARD_EXPLORER_POST_URL",
+    default="https://uoftscholarships.smartsimple.com/ex/ex_openreport.jsp",
+)
+AWARD_EXPLORER_UNDERGRAD_BASE_URL = env(
+    "AWARD_EXPLORER_UNDERGRAD_BASE_URL",
+    default="https://awardexplorer.utoronto.ca/undergrad",
+)
+AWARD_EXPLORER_UNDERGRAD_REPORT_ID = env("AWARD_EXPLORER_UNDERGRAD_REPORT_ID", default="46862")
+AWARD_EXPLORER_UNDERGRAD_REPORT_NAME = env(
+    "AWARD_EXPLORER_UNDERGRAD_REPORT_NAME",
+    default="Award Explorer | Undergraduate | University of Toronto",
+)
+AWARD_EXPLORER_GRAD_BASE_URL = env(
+    "AWARD_EXPLORER_GRAD_BASE_URL",
+    default="https://awardexplorer.utoronto.ca/grad",
+)
+AWARD_EXPLORER_GRAD_REPORT_ID = env("AWARD_EXPLORER_GRAD_REPORT_ID", default="46864")
+AWARD_EXPLORER_GRAD_REPORT_NAME = env(
+    "AWARD_EXPLORER_GRAD_REPORT_NAME",
+    default="Award Explorer | Graduate | University of Toronto",
+)

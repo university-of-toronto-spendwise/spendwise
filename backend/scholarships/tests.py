@@ -61,6 +61,7 @@ class ScholarshipsAPITests(APITestCase):
         self.assertIn("award_type", res.data)
         self.assertIn("citizenship", res.data)
         self.assertIn("nature", res.data)
+        self.assertIn("student_level", res.data)
 
     def test_match(self):
         payload = {
