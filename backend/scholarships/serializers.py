@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Scholarship
+
+from .models import SavedScholarship, Scholarship, StudentLevel
 
 
 class ScholarshipListSerializer(serializers.ModelSerializer):
@@ -12,6 +13,8 @@ class ScholarshipListSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "source",
+            "student_level",
+            "is_active",
             "title",
             "offered_by",
             "url",
@@ -25,6 +28,7 @@ class ScholarshipListSerializer(serializers.ModelSerializer):
             "amount_max",
             "amount",
             "deadline",
+            "deadline_is_estimated",
             "created_at",
             "updated_at",
         ]
@@ -94,3 +98,15 @@ class MatchRequestSerializer(serializers.Serializer):
     degree_type = serializers.CharField(required=False, allow_blank=True)
     citizenship = serializers.CharField(required=False, allow_blank=True)
     campus = serializers.CharField(required=False, allow_blank=True)
+    student_level = serializers.ChoiceField(choices=StudentLevel.choices, required=False)
+    gpa = serializers.FloatField(required=False, min_value=0.0, max_value=4.5)
+    resume_summary = serializers.CharField(required=False, allow_blank=True)
+    financial_need = serializers.BooleanField(required=False)
+
+
+class SavedScholarshipSerializer(serializers.ModelSerializer):
+    scholarship = ScholarshipListSerializer(read_only=True)
+
+    class Meta:
+        model = SavedScholarship
+        fields = ["id", "scholarship", "status", "saved_at"]

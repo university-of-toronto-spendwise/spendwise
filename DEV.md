@@ -1,4 +1,3 @@
-
 ## UofT SpendWise
 ​
 > _Note:_ This document is intended to be relatively short. Be concise and precise. Assume the reader has no prior knowledge of your application and is non-technical. 
@@ -37,232 +36,218 @@ SpendWise is a centralized financial support platform built specifically for Uof
 
 SpendWise empowers students to discover funding, reduce living costs, and manage their finances with clarity and confidence.
 
-## Instructions
+# SpendWise — Local Development Setup
 
+This guide gets a new developer running SpendWise locally in under 10 minutes.
 
-## How to Use the Application
-
-After running the application locally, open:
-
-http://localhost:5174
-
----
-
-## 1. Login / Sign Up
-
-- Log in using the provided credentials, or
-  email: admin5@gmail.com
-  password: SPENDWISE1
-- Create a new account through the registration page.
-- After successful login, you will be redirected to the **Dashboard**.
-
-<img width="674" height="698" alt="image" src="https://github.com/user-attachments/assets/fc5c7404-976e-43c1-bfad-23fa6ebc26dd" />
-
-
-
----
-
-## 2. Dashboard
-
-The Dashboard is the main landing page after login.
-
-Here you can:
-- View an overview of your spending
-- See financial alerts
-- Check upcoming deadlines
-- View a daily financial tip
-
-This page provides a quick summary of your financial status.
-
-<img width="1236" height="839" alt="image" src="https://github.com/user-attachments/assets/01dd8e83-f0e6-4d75-adb8-859a3e6606d0" />
-
-
----
-
-## 3. Scholarship Page
-
-Navigate to the **Scholarship** section from the navigation menu.
-
-On this page, you can:
-- Browse scholarships from all three UofT campuses and colleges
-- Filter scholarships by:
-  - Campus
-  - Year
-  - Faculty
-  - Discipline
-
-This helps students quickly identify funding opportunities that match their profile.
-
-<img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/c451a2e9-0b54-426d-97de-55587136dc83" />
-
-
----
-
-## 4. Spending Page
-
-Navigate to the **Spending** section.
-
-Here you can:
-- View your recent transactions
-- Track your spending activity
-
-Future improvements (planned):
-- Monthly spending breakdown
-- Smart tips when overspending in certain categories
-
-<img width="1073" height="834" alt="image" src="https://github.com/user-attachments/assets/8c80d4ca-dee9-45b6-a3c0-dd27af8f900f" />
-
-
----
-
-## 5. Student Codes (Discounts)
-
-The Student Codes feature allows access to verified student discount codes.
-
-Currently:
-- Backend functionality is implemented.
-- Codes are managed through Django Admin.
-- Four different student categories have been configured.
-
-Discount codes can be accessed via:
-http://localhost:8000/admin
-
-Frontend integration is partially completed.
-
-<img width="909" height="431" alt="image" src="https://github.com/user-attachments/assets/3adccfcc-a0b5-4658-aae7-5f035dfdab1e" />
-
-
----
-
-## Summary
-
-SpendWise centralizes:
-- Financial tracking
-- Scholarship discovery
-- Spending management
-- Student discounts
-
-All in one platform designed to simplify financial decision-making for UofT students.
- 
-# Development Environment Setup
-
-This project uses **Docker Compose** to orchestrate the Django (Backend), React (Frontend), and PostgreSQL (Database) services.
+For the full technical reference (API docs, deployment, CI/CD, maintenance), see [HANDOVER.md](./HANDOVER.md).
 
 ---
 
 ## Prerequisites
 
-Before you begin, ensure you have:
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) v4.x+ (includes Compose V2)
+- Git
 
-- **Docker Desktop** (latest version recommended)
-- **Git**
-- **Python 3.10+** (only if using local virtual environment)
+Python and Node.js do **not** need to be installed locally — everything runs inside Docker containers.
 
 ---
 
-## Working with the `dev` Branch
-
-After cloning the repository, follow these steps to work on the remote `dev` branch.
-
-### 1) Clone the Repository
+## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/redpinecube/spendwise.git
+git clone https://github.com/csc301-2026-s/spendwise.git
 cd spendwise
-git fetch --all
-git checkout -b dev origin/dev
----
-
-### 2)  Create a Local Virtual Environment
-
-> ⚠️ Not required when running everything through Docker.  
-> Useful if you want to run Django commands locally.
-
-Create a virtual environment:
-
-```bash
-python3 -m venv venv
-```
-
-Activate the virtual environment:
-
-```bash
-source venv/bin/activate
-```
-
-Deactivate when done:
-
-```bash
-deactivate
+git checkout dev
 ```
 
 ---
 
-### 4) Start All Containers
-
-Build and start services:
-
-
-
-Run in background:
+## 2. Start the Containers
 
 ```bash
+docker compose up -d --build
+```
+
+This builds and starts four services: `db` (PostgreSQL), `backend` (Django), `frontend` (React/Vite), and `nginx` (reverse proxy).
+
+First build takes a few minutes. Subsequent starts are faster:
+
+```bash
+docker compose up -d
+```
+
+---
+
+## 3. Apply Database Migrations
+
+Run this once after first build, and again whenever you pull changes that include new migrations:
+
+```bash
+docker compose exec backend python manage.py migrate
+```
+
+---
+
+## 4. Seed Initial Data (Recommended)
+
+Populate scholarship listings and student discount codes. Safe to skip if you only need auth/spending features:
+
+```bash
+# UofT undergrad and grad scholarship listings
 docker compose exec backend python manage.py ingest_awardexplorer
+docker compose exec backend python manage.py ingest_awardexplorer --level grad
+
+# Student discount codes (SPC, UNiDAYS, Student Beans)
+docker compose exec backend python manage.py sync_student_codes
 ```
 
-Run scholarship explorer migration:
+These commands are idempotent — safe to re-run at any time.
+
+---
+
+## 5. Open the App
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5174 |
+| Backend API | http://localhost:8000/api/ |
+| Django Admin | http://localhost:8000/admin/ |
+| PostgreSQL | localhost:**5433** |
+
+**Demo login credentials:**
+- Email: `alihassan.shaikh@mail.utoronto.ca`
+- Password: `SPENDWISE`
+
+---
+
+## Day-to-Day Development
+
+### Branch workflow
+
+All work branches off `dev`. Never commit directly to `dev`.
 
 ```bash
-
-
+git checkout dev
+git pull
+git checkout -b feature/<jira-id>-short-description
 ```
 
-Stop containers:
+Open a PR into `dev` when ready. PRs require review from at least two team members before merging.
 
+### Viewing logs
+
+```bash
+docker compose logs -f backend
+docker compose logs -f frontend
+```
+
+### Stopping containers
+
+```bash
+docker compose down          # stops containers, keeps data volumes
+docker compose down -v       # stops containers AND wipes the database (destructive)
+```
+
+### After pulling changes
+
+```bash
+docker compose up -d --build                              # rebuild if dependencies changed
+docker compose exec backend python manage.py migrate      # apply any new migrations
+```
+
+---
+
+## Running Tests
+
+```bash
+# Run all backend tests
+docker compose exec backend python manage.py test project_tests
+
+# Run with coverage report
+docker compose exec backend bash -c "coverage run manage.py test project_tests && coverage report"
+
+# Generate HTML coverage report (open backend/htmlcov/index.html)
+docker compose exec backend bash -c "coverage run manage.py test project_tests && coverage html"
+```
+
+The CI pipeline enforces a minimum of **80% coverage**. Keep this in mind before opening a PR.
+
+```bash
+# Frontend tests
+docker compose exec frontend npm test
+```
+
+---
+
+## Adding Dependencies
+
+**Python:** Add the package to `backend/requirements.txt`, then rebuild:
+
+```bash
+docker compose up -d --build
+```
+
+**Node:** Add the package to `frontend/package.json`, then rebuild, or install directly into the running container:
+
+```bash
+docker compose exec frontend npm install <package-name>
+docker compose up -d --build
+```
+
+---
+
+## Useful Commands
+
+```bash
+# Open a Django shell
+docker compose exec backend python manage.py shell
+
+# Create a superuser for Django Admin
+docker compose exec backend python manage.py createsuperuser
+
+# Generate new migrations after changing a model
+docker compose exec backend python manage.py makemigrations <app_name>
+
+# Check for Django configuration errors
+docker compose exec backend python manage.py check
+```
+
+---
+
+## Environment Variables
+
+The backend reads from `backend/.env`. For local development, the defaults in `docker-compose.yml` are already set — no `.env` file is required to get started.
+
+If you need to override a value (e.g., a real Plaid key), create `backend/.env`:
+
+```env
+PLAID_CLIENT_ID=your-client-id
+PLAID_SECRET=your-secret
+```
+
+See [HANDOVER.md § Environment Configuration](./HANDOVER.md#4-environment-configuration) for the full list of variables.
+
+---
+
+## Troubleshooting
+
+**Containers won't start:**
 ```bash
 docker compose down
+docker compose up -d --build
 ```
 
----
+**`relation does not exist` errors:** Migrations haven't been applied — run `docker compose exec backend python manage.py migrate`.
+
+**Frontend shows blank page / network errors:** Check that the backend container is healthy with `docker compose ps` and inspect logs with `docker compose logs backend`.
+
+**Port 5433 already in use:** Stop any local PostgreSQL instance, or change the host port in `docker-compose.yml`.
+
+**`node_modules` issues after pulling:** Rebuild the frontend container with `docker compose up -d --build frontend`.
 
 
-## Service Access / Traffic Flow
-
-| Service   | Host URL                  | Docker Alias     | Purpose                    |
-|------------|--------------------------|------------------|----------------------------|
-| Frontend   | http://localhost:5174    | frontend:5174    | React/Vite Dev Server      |
-| Backend    | http://localhost:8000    | backend:8000     | Django REST API            |
-| Database   | localhost:5432           | db:5432          | PostgreSQL Instance        |
-
----
-
-## Dependency Changes
-
-If you add or modify dependencies:
-
-- Python → `requirements.txt`
-- Node → `package.json`
-
-Rebuild containers:
-
-```bash
-docker compose up --build
-```
-
----
-
-## Notes
-
-- Data is persisted via Docker volumes.
-- Avoid running `docker compose down -v` unless you want to wipe the database.
-- If containers fail to start, try:
-
-```bash
-docker compose down
-docker compose up --build
-```
- 
- ## Deployment and GitHub Workflow
+ ## Local Deployment and GitHub Workflow
 
 ### Git/GitHub Workflow
 
@@ -287,7 +272,7 @@ This structure ensures accountability through Jira tracking, improves collaborat
 
 ---
 
-### Deployment
+### Local Deployment
 
 - For local deployment, each team member must clone the repository and follow the Development Environment Setup instructions.
 - Ensure all prerequisites are installed (Docker, Git, Python if using a local virtual environment).

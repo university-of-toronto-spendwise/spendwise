@@ -1,4 +1,6 @@
-from django.db.models import Q, Value                  # ✅ added Value import
+import re
+
+from django.db.models import Count, Q, Value
 from django.db.models.functions import Coalesce
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -6,11 +8,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Scholarship, SavedScholarship
+from .models import SavedScholarship, SavedScholarshipStatus, Scholarship, StudentLevel
 from .serializers import (
-    ScholarshipListSerializer,
-    ScholarshipDetailSerializer,
     MatchRequestSerializer,
+    SavedScholarshipSerializer,
+    ScholarshipDetailSerializer,
+    ScholarshipListSerializer,
 )
 
 NATURE_FIELD_MAP = {
@@ -48,6 +51,16 @@ class ScholarshipsListAPI(APIView):
 
     def get(self, request):
         qs = Scholarship.objects.all()
+
+        include_inactive = _parse_bool(request.query_params.get("include_inactive"))
+        if include_inactive is not True:
+            qs = qs.filter(is_active=True)
+
+        student_level = request.query_params.get("student_level")
+        if student_level:
+            sl = student_level.strip().lower()
+            if sl in (StudentLevel.UNDERGRAD, StudentLevel.GRAD):
+                qs = qs.filter(student_level=sl)
 
         # ---- search (q) ----
         q = request.query_params.get("q")
@@ -110,19 +123,23 @@ class ScholarshipsListAPI(APIView):
             except ValueError:
                 pass
 
-        # ---- sorting ----
+        # ---- sorting (default: alphabetical by title) ----
         sort = request.query_params.get("sort")
         if sort:
             s = sort.strip()
-            if "amount" in s:
+            if s == "title" or s == "-title":
+                qs = qs.order_by(("-" if s.startswith("-") else "") + "title", "id")
+            elif "amount" in s:
                 qs = qs.annotate(
-                    _amount_sort=Coalesce("amount_max", "amount_min", Value(0))  # ✅ fixed Value(0)
+                    _amount_sort=Coalesce("amount_max", "amount_min", Value(0))
                 )
-                qs = qs.order_by(("-" if s.startswith("-") else "") + "_amount_sort", "-created_at")
+                qs = qs.order_by(("-" if s.startswith("-") else "") + "_amount_sort", "title")
             elif "deadline" in s:
-                qs = qs.order_by(("-" if s.startswith("-") else "") + "deadline", "-created_at")
+                qs = qs.order_by(("-" if s.startswith("-") else "") + "deadline", "title")
+            else:
+                qs = qs.order_by("title", "id")
         else:
-            qs = qs.order_by("-created_at")
+            qs = qs.order_by("title", "id")
 
         # ---- pagination ----
         paginator = StandardResultsSetPagination()
@@ -177,6 +194,31 @@ class ScholarshipsMetaAPI(APIView):
         )
 
 
+def _infer_student_level(p) -> str | None:
+    if p.get("student_level"):
+        return p["student_level"]
+    dt = (p.get("degree_type") or "").strip().lower()
+    if "undergrad" in dt:
+        return StudentLevel.UNDERGRAD
+    if "postgrad" in dt or dt in ("graduate", "masters", "phd"):
+        return StudentLevel.GRAD
+    if "post" in dt:
+        return StudentLevel.GRAD
+    if "grad" in dt and "under" not in dt:
+        return StudentLevel.GRAD
+    return None
+
+
+def _resume_overlap(resume: str, blob: str) -> float:
+    if not resume or not resume.strip():
+        return 0.0
+    words = {w for w in re.findall(r"[a-z0-9]{3,}", resume.lower()) if len(w) > 2}
+    if not words:
+        return 0.0
+    hits = sum(1 for w in words if w in blob)
+    return min(1.0, hits / max(3, len(words)))
+
+
 class ScholarshipsMatchAPI(APIView):
     permission_classes = [AllowAny]
 
@@ -191,8 +233,15 @@ class ScholarshipsMatchAPI(APIView):
         citizenship = (p.get("citizenship") or "").strip()
         campus = (p.get("campus") or "").strip()
         year = p.get("year", None)
+        gpa = p.get("gpa")
+        resume_summary = (p.get("resume_summary") or "").strip()
+        financial_need = bool(p.get("financial_need"))
 
-        qs = Scholarship.objects.all()
+        level_filter = _infer_student_level(p)
+
+        qs = Scholarship.objects.filter(is_active=True)
+        if level_filter:
+            qs = qs.filter(student_level=level_filter)
 
         if citizenship:
             c = citizenship.lower()
@@ -208,6 +257,14 @@ class ScholarshipsMatchAPI(APIView):
             total = 0.0
 
             blob = f"{s.title}\n{s.offered_by or ''}\n{s.description or ''}".lower()
+
+            level_ok = (level_filter is None) or (s.student_level == level_filter)
+            citizen_ok = True
+            if citizenship:
+                c = citizenship.lower()
+                citizen_ok = (c == "domestic" and s.open_to_domestic) or (
+                    c == "international" and s.open_to_international
+                )
 
             # citizenship (0.30)
             if citizenship:
@@ -238,7 +295,7 @@ class ScholarshipsMatchAPI(APIView):
                 ok = False
                 if "under" in degree_type:
                     ok = "undergraduate" in blob or "in-course" in blob or "admissions" in blob
-                elif "grad" in degree_type:
+                elif "grad" in degree_type or "post" in degree_type:
                     ok = "graduate" in blob or "master" in blob or "phd" in blob
                 if ok:
                     score += 0.10
@@ -258,13 +315,37 @@ class ScholarshipsMatchAPI(APIView):
                     score += 0.05
                     reasons.append(f"Campus keyword match: {campus}")
 
+            # GPA + academic merit (0.08)
+            if gpa is not None and s.nature_academic_merit and gpa >= 3.0:
+                total += 0.08
+                score += 0.08
+                reasons.append("Strong GPA aligns with academic merit award")
+
+            # Resume / description overlap (up to 0.10)
+            if resume_summary:
+                total += 0.10
+                overlap = _resume_overlap(resume_summary, blob)
+                add = 0.10 * overlap
+                score += add
+                if add > 0.02:
+                    reasons.append("Resume keywords overlap with award text")
+
+            # Financial need bump (0.12)
+            if financial_need and s.nature_financial_need:
+                total += 0.12
+                score += 0.12
+                reasons.append("Financial need aligns with this award")
+
             final = (score / total) if total > 0 else 0.0
+
+            eligible = bool(level_ok and citizen_ok and (total == 0 or final >= 0.12))
 
             results.append(
                 {
                     "scholarship": ScholarshipListSerializer(s).data,
                     "score": round(final, 3),
                     "reasons": reasons,
+                    "eligible": eligible,
                 }
             )
 
@@ -276,22 +357,45 @@ class ScholarshipsMatchAPI(APIView):
         return Response(results)
 
 
-# ── Saved scholarships (authenticated) ──
-
-
-class SavedScholarshipListAPI(APIView):
-    """GET list of saved scholarships for the current user (used for saved list + upcoming deadlines)."""
+class SavedScholarshipsListAPI(APIView):
+    """List all saved scholarships with status for the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = SavedScholarship.objects.filter(user=request.user).select_related("scholarship")
-        scholarships = [ss.scholarship for ss in qs]
-        data = ScholarshipListSerializer(scholarships, many=True).data
+        saved = SavedScholarship.objects.filter(user=request.user).select_related("scholarship").order_by("-saved_at")
+        data = SavedScholarshipSerializer(saved, many=True).data
         return Response(data)
 
 
-class SaveScholarshipAPI(APIView):
-    """POST to save a scholarship for the current user."""
+class SavedScholarshipStatsAPI(APIView):
+    """Summary counts for the authenticated user's scholarship pipeline (acceptance rate, etc.)."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = SavedScholarship.objects.filter(user=request.user)
+        by_status = dict(
+            qs.values("status")
+            .annotate(c=Count("id"))
+            .values_list("status", "c")
+        )
+        total = qs.count()
+        awarded = by_status.get(SavedScholarshipStatus.AWARDED.value, 0)
+        not_awarded = by_status.get(SavedScholarshipStatus.NOT_AWARDED.value, 0)
+        decided = awarded + not_awarded
+        acceptance_rate = round(awarded / decided, 3) if decided else None
+        return Response(
+            {
+                "total_saved": total,
+                "by_status": by_status,
+                "awarded": awarded,
+                "not_awarded": not_awarded,
+                "acceptance_rate": acceptance_rate,
+            }
+        )
+
+
+class SaveUnsaveScholarshipAPI(APIView):
+    """POST: save scholarship for the user. DELETE: unsave."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -308,17 +412,32 @@ class SaveScholarshipAPI(APIView):
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
 
-
-class UnsaveScholarshipAPI(APIView):
-    """DELETE to remove a saved scholarship for the current user."""
-    permission_classes = [IsAuthenticated]
-
     def delete(self, request, pk):
         deleted, _ = SavedScholarship.objects.filter(
             user=request.user,
             scholarship_id=pk,
         ).delete()
-        return Response(
-            {"saved": False, "removed": deleted > 0},
-            status=status.HTTP_200_OK,
-        )
+        if not deleted:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SavedScholarshipStatusAPI(APIView):
+    """PATCH: update status of a saved scholarship (saved, in_progress, submitted)."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            saved = SavedScholarship.objects.get(pk=pk, user=request.user)
+        except SavedScholarship.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        new_status = request.data.get("status")
+        allowed = {s.value for s in SavedScholarshipStatus}
+        if new_status not in allowed:
+            return Response(
+                {"detail": f"Invalid status. Use one of: {', '.join(sorted(allowed))}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        saved.status = new_status
+        saved.save()
+        return Response(SavedScholarshipSerializer(saved).data)

@@ -1,7 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
+/* ── Theme variables (light & dark) ── */
+:root,
+[data-theme="light"] {
+  --sw-bg: #F4F7FB;
+  --sw-bg-card: #FFFFFF;
+  --sw-primary: #002A5C;
+  --sw-primary-hover: #0047A0;
+  --sw-accent: #2563eb;
+  --sw-accent-bg: rgba(37, 99, 235, 0.08);
+  --sw-text: #002A5C;
+  --sw-text-muted: #6B7A90;
+  --sw-border: #D0DBE8;
+  --sw-border-light: #E8EDF5;
+  --sw-error: #C0392B;
+  --sw-error-bg: rgba(192, 57, 43, 0.08);
+  --sw-success: #1D6A37;
+  --sw-success-bg: rgba(29, 106, 55, 0.1);
+  /* Status badges: red -> orange -> green */
+  --sw-status-saved-bg: #FEE2E2;
+  --sw-status-saved-text: #B91C1C;
+  --sw-status-saved-border: #FECACA;
+  --sw-status-progress-bg: #FEF3C7;
+  --sw-status-progress-text: #92400E;
+  --sw-status-progress-border: #FDE68A;
+  --sw-status-submitted-bg: #D1FAE5;
+  --sw-status-submitted-text: #047857;
+  --sw-status-submitted-border: #A7F3D0;
+}
+
+[data-theme="dark"] {
+  --sw-bg: #1a1f2e;
+  --sw-bg-card: #252b3b;
+  --sw-primary: #5b8def;
+  --sw-primary-hover: #7ba3f5;
+  --sw-accent: #60a5fa;
+  --sw-accent-bg: rgba(96, 165, 250, 0.12);
+  --sw-text: #e8ecf4;
+  --sw-text-muted: #9ca3b8;
+  --sw-border: #3d4556;
+  --sw-border-light: #2d3548;
+  --sw-error: #ef4444;
+  --sw-error-bg: rgba(239, 68, 68, 0.15);
+  --sw-success: #22c55e;
+  --sw-success-bg: rgba(34, 197, 94, 0.15);
+  /* Status badges: red -> orange -> green */
+  --sw-status-saved-bg: rgba(239, 68, 68, 0.25);
+  --sw-status-saved-text: #fca5a5;
+  --sw-status-saved-border: rgba(239, 68, 68, 0.4);
+  --sw-status-progress-bg: rgba(251, 191, 36, 0.25);
+  --sw-status-progress-text: #fcd34d;
+  --sw-status-progress-border: rgba(251, 191, 36, 0.4);
+  --sw-status-submitted-bg: rgba(34, 197, 94, 0.25);
+  --sw-status-submitted-text: #86efac;
+  --sw-status-submitted-border: rgba(34, 197, 94, 0.4);
+}
+
+/* ── 3 font styles (consistent across all pages) ── */
+.sw-font-1 {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--sw-text);
+  line-height: 1.2;
+}
+
+.sw-font-2 {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--sw-text-muted);
+  line-height: 1.4;
+}
+
+.sw-font-3 {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--sw-text);
+  line-height: 1.3;
+}
+
+/* Smaller heading variant */
+.sw-font-1-sm {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--sw-text);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+/* ── Status badges (red -> orange -> green) ── */
+.sw-status-badge {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+.sw-status-badge.saved {
+  background: var(--sw-status-saved-bg);
+  color: var(--sw-status-saved-text);
+  border: 1px solid var(--sw-status-saved-border);
+}
+.sw-status-badge.in_progress {
+  background: var(--sw-status-progress-bg);
+  color: var(--sw-status-progress-text);
+  border: 1px solid var(--sw-status-progress-border);
+}
+.sw-status-badge.submitted {
+  background: var(--sw-status-submitted-bg);
+  color: var(--sw-status-submitted-text);
+  border: 1px solid var(--sw-status-submitted-border);
+}
+
 html, body, #root {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
-  background: #F4F7FB;
+  background: var(--sw-bg);
+  font-family: 'Source Sans 3', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
